@@ -1,0 +1,43 @@
+# [MVP] one-command single-node deployment
+version: "3.9"
+
+services:
+  gateway:
+    build: .
+    command: uvicorn services.gateway.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+
+  control:
+    build: .
+    command: uvicorn services.control.main:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    build: .
+    command: celery -A services.worker.celery_app worker --loglevel=info
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: custos
+      POSTGRES_USER: custos
+      POSTGRES_PASSWORD: custos
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+

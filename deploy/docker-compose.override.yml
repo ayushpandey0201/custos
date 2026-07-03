@@ -1,0 +1,14 @@
+# Local overrides: dev ports, volume mounts
+services:
+  gateway:
+    volumes:
+      - ../:/app
+    environment:
+      - ENV=dev
+
+  control:
+    volumes:
+      - ../:/app
+    environment:
+      - ENV=dev
+

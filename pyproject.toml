@@ -1,0 +1,21 @@
+[project]
+name = "custos"
+version = "0.1.0"
+description = "Runtime trust layer for AI agents & models"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic>=2",
+    "sqlalchemy>=2",
+    "alembic",
+    "celery",
+    "redis",
+    "psycopg[binary]",
+    "numpy",
+    "scipy",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
