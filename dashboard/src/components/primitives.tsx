@@ -4,6 +4,7 @@
 // badge that is amber in one view and grey in another quietly teaches an
 // operator to distrust the whole screen.
 
+import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import type { DecisionValue, DriftBand } from "../api/client";
 
@@ -78,4 +79,47 @@ export function relativeTime(iso: string | null): string {
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
   return `${Math.floor(seconds / 86400)}d ago`;
+}
+
+
+/* ------------------------------------------------------------------ explain
+ * The dashboard is shown to people who did not build it — evaluators, a guide,
+ * an operator on their first day. Explain mode turns every panel into a short
+ * plain-English description of what it shows and why it matters, and turns
+ * jargon into a term with its definition attached.
+ *
+ * It is a mode rather than permanent copy because the same screen has two
+ * audiences: someone being introduced to the system, and someone using it who
+ * would find the explanations noise.
+ */
+
+export const ExplainContext = createContext(false);
+
+export function useExplain(): boolean {
+  return useContext(ExplainContext);
+}
+
+export function Explain({ what, why }: { what: string; why: string }) {
+  if (!useExplain()) return null;
+  return (
+    <div className="explain">
+      <p>
+        <strong>What this shows.</strong> {what}
+      </p>
+      <p>
+        <strong>Why it matters.</strong> {why}
+      </p>
+    </div>
+  );
+}
+
+/** A jargon term. In explain mode its definition is shown inline. */
+export function Term({ word, means }: { word: string; means: string }) {
+  const explaining = useExplain();
+  return (
+    <span className={explaining ? "term term-open" : "term"} title={means}>
+      {word}
+      {explaining && <span className="term-means">{means}</span>}
+    </span>
+  );
 }

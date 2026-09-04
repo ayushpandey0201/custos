@@ -115,5 +115,6 @@ production service; every dependency it carries is a version conflict it can for
 | `docs/architecture.md` | **canonical design doc — source of truth** |
 | `docs/adr/` | one file per irreversible decision |
 
-See [`docs/architecture.md`](docs/architecture.md) for the full design and
+See [`docs/DATASET.md`](docs/DATASET.md) for how the drift engine is validated and why,
+[`docs/architecture.md`](docs/architecture.md) for the full design, and
 [`docs/adr/`](docs/adr/) for the reasoning behind the decisions that will be questioned later.
