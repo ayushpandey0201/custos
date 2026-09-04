@@ -1,0 +1,328 @@
+/* Dark operator console.
+   One accent per decision class, used consistently everywhere a decision
+   appears — the colour is the fastest thing an operator reads. */
+
+:root {
+  --bg: #0d1117;
+  --panel: #151b23;
+  --border: #262d38;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --allow: #3fb950;
+  --review: #d29922;
+  --block: #f85149;
+  --accent: #58a6ff;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 14px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--muted);
+}
+.small {
+  font-size: 12px;
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.numeric {
+  font-family: var(--mono);
+  text-align: right;
+}
+
+/* --- layout --- */
+
+.app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+main {
+  display: grid;
+  gap: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.note {
+  margin: 12px 0 0;
+  font-size: 12px;
+}
+
+.empty {
+  margin: 8px 0;
+}
+
+/* --- gate --- */
+
+.gate {
+  max-width: 380px;
+  margin: 15vh auto;
+  text-align: center;
+}
+
+.gate form {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0 12px;
+}
+
+input,
+select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font: inherit;
+  flex: 1;
+}
+
+button,
+.button {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+button:hover:not(:disabled),
+.button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* --- tables --- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.row-clickable {
+  cursor: pointer;
+}
+.row-clickable:hover td,
+.row-selected td {
+  background: #1c232c;
+}
+
+.reason {
+  max-width: 340px;
+  font-size: 12px;
+}
+
+.payload {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 0;
+  overflow-x: auto;
+  color: var(--muted);
+}
+
+/* --- badges --- */
+
+.badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid;
+}
+
+.badge-allow,
+.badge-stable {
+  color: var(--allow);
+  border-color: color-mix(in srgb, var(--allow) 40%, transparent);
+  background: color-mix(in srgb, var(--allow) 12%, transparent);
+}
+
+.badge-review,
+.badge-moderate {
+  color: var(--review);
+  border-color: color-mix(in srgb, var(--review) 40%, transparent);
+  background: color-mix(in srgb, var(--review) 12%, transparent);
+}
+
+.badge-block,
+.badge-significant {
+  color: var(--block);
+  border-color: color-mix(in srgb, var(--block) 40%, transparent);
+  background: color-mix(in srgb, var(--block) 12%, transparent);
+}
+
+/* --- stats and charts --- */
+
+.drift-summary,
+.counts {
+  display: flex;
+  gap: 32px;
+  padding-bottom: 16px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat-value {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.bar-cell {
+  width: 180px;
+}
+
+.bar {
+  height: 6px;
+  background: var(--bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+.bar-stable {
+  background: var(--allow);
+}
+.bar-moderate {
+  background: var(--review);
+}
+.bar-significant {
+  background: var(--block);
+}
+
+.sparkline .guide {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.sparkline .spark-line {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+/* --- verdict banner --- */
+
+.verdict {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  border: 1px solid;
+}
+
+.verdict-ok {
+  color: var(--allow);
+  border-color: color-mix(in srgb, var(--allow) 35%, transparent);
+  background: color-mix(in srgb, var(--allow) 10%, transparent);
+}
+
+.verdict-bad {
+  color: var(--block);
+  border-color: color-mix(in srgb, var(--block) 35%, transparent);
+  background: color-mix(in srgb, var(--block) 10%, transparent);
+}
