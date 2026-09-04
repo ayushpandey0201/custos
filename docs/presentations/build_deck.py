@@ -214,8 +214,8 @@ def fill_all() -> None:
             bullet("Literature Survey, research gap and mapping to objectives", 1700),
             bullet("Requirement Analysis and Specification", 1700),
             bullet(
-                "System Design — architecture, request lifecycle, all modules, decision logic, "
-                "data model, key decisions",
+                "System Design — architecture, request flow, all modules, drift pipeline, "
+                "decision cascade, data model, key decisions",
                 1700,
             ),
             bullet("Implementation — module status, API surface, engine internals", 1700),
@@ -476,6 +476,19 @@ def fill_all() -> None:
     )
 
     write_slide(
+        "slide29.xml",
+        [heading("System Design — Request Flow")],
+        [
+            plain(
+                "One /v1/evaluate call, in the order it actually happens. Steps 2, 3 and 5 are "
+                "cached reads; step 7 is pure computation; only steps 8 and 10 touch the database, "
+                "and step 10 runs after the caller already has its answer.",
+                1350, space_before=0,
+            ),
+        ],
+    )
+
+    write_slide(
         "slide15.xml",
         [heading("System Design — Request Lifecycle")],
         [
@@ -525,6 +538,19 @@ def fill_all() -> None:
     )
 
     write_slide(
+        "slide30.xml",
+        [heading("System Design — Drift Pipeline")],
+        [
+            plain(
+                "Where the statistics run, and where they do not. Everything expensive happens "
+                "below the boundary on a schedule; the request path above it only ever reads a "
+                "number the worker has already computed.",
+                1350, space_before=0,
+            ),
+        ],
+    )
+
+    write_slide(
         "slide19.xml",
         [heading("System Design — Decision Logic")],
         [
@@ -532,6 +558,18 @@ def fill_all() -> None:
                 "Signals fuse as a weighted mean over non-degraded engines (policy 0.3, drift 0.5, "
                 "risk 0.2), renormalised. A veto clamps the score to 0.0. The matrix below is then "
                 "evaluated as an ordered cascade — the order is the specification.",
+                1350, space_before=0,
+            ),
+        ],
+    )
+
+    write_slide(
+        "slide31.xml",
+        [heading("System Design — Decision Cascade")],
+        [
+            plain(
+                "The same matrix as a flow. Each condition is tested in turn; the first one that "
+                "holds decides, and falling off the end is the only route to ALLOW.",
                 1350, space_before=0,
             ),
         ],
@@ -782,9 +820,15 @@ TABLE_SLIDES = {
 
 FIGURE_SLIDES = {
     "slide7.xml": ("architecture.png", 3.0, 11.0),
+    # Narrower, because the sequence diagram is the tallest figure in the deck
+    # and scaling the width down is what keeps its foot clear of the footer.
+    "slide29.xml": ("request_flow.png", 2.50, 10.6),
+    "slide30.xml": ("drift_pipeline.png", 3.05, 11.0),
+    "slide31.xml": ("decision_flow.png", 3.10, 11.0),
     "slide26.xml": ("drift_attribution.png", 3.0, 11.0),
 }
 
+SLIDE_WIDTH_IN = 13.333
 TABLE_LEFT_IN = 1.05
 TABLE_WIDTH_IN = 11.2
 HEADER_FILL = "1F5CA8"
@@ -896,8 +940,9 @@ def finish(path: Path) -> None:
 
     # -- figures, centred horizontally: (13.333 - 11.0) / 2 --
     for slide_file, (name, top_in, width_in) in FIGURE_SLIDES.items():
+        left_in = (SLIDE_WIDTH_IN - width_in) / 2
         prs.slides[ORDER.index(slide_file)].shapes.add_picture(
-            str(FIGURES / name), Inches(1.17), Inches(top_in), width=Inches(width_in)
+            str(FIGURES / name), Inches(left_in), Inches(top_in), width=Inches(width_in)
         )
 
     prs.save(str(path))
@@ -918,12 +963,15 @@ ORDER = [
     "slide6.xml",   # 10 requirements — functional
     "slide14.xml",  # 11 requirements — non-functional and environment
     "slide7.xml",   # 12 design — architecture               [figure]
-    "slide15.xml",  # 13 design — request lifecycle          [table]
+    "slide29.xml",  # 13 design — request flow               [figure]
+    "slide15.xml",  # 14 design — request lifecycle          [table]
     "slide16.xml",  # 14 design — modules: contract + seam   [table]
     "slide17.xml",  # 15 design — modules: engines           [table]
-    "slide18.xml",  # 16 design — modules: services and SDK  [table]
-    "slide19.xml",  # 17 design — decision logic             [table]
-    "slide20.xml",  # 18 design — data model                 [table]
+    "slide18.xml",  # 17 design — modules: services and SDK  [table]
+    "slide30.xml",  # 18 design — drift pipeline             [figure]
+    "slide19.xml",  # 19 design — decision logic             [table]
+    "slide31.xml",  # 20 design — decision cascade           [figure]
+    "slide20.xml",  # 21 design — data model                 [table]
     "slide21.xml",  # 19 design — key decisions (ADRs)       [table]
     "slide8.xml",   # 20 implementation — module status      [table]
     "slide22.xml",  # 21 implementation — API surface        [table]
