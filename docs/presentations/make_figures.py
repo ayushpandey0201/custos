@@ -492,9 +492,289 @@ def drift_pipeline(width_in: float = 11.0, height_in: float = 2.8) -> Path:
     return path
 
 
+# ------------------------------------------------------------ problem framing
+
+
+def dashed_h(draw, y, x0, x1, colour=LINE, width=3, dash=22, gap=16):
+    """Horizontal dashed line — PIL has no dash support."""
+    x = x0
+    while x < x1:
+        draw.line([(x, y), (min(x + dash, x1), y)], fill=colour, width=width)
+        x += dash + gap
+
+
+def problem_timeline(width_in: float = 11.0, height_in: float = 2.75) -> Path:
+    """The timing gap, drawn to scale.
+
+    The single most important picture in the deck: monitoring is periodic,
+    damage is continuous, and the span between the two is the problem this
+    project exists to close. The red bar is that span — so the number lives
+    inside it rather than floating in the margin.
+    """
+    W, H = int(width_in * SCALE), int(height_in * SCALE)
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+
+    f_lane = font(28, bold=True)
+    f_ev = font(25, bold=True)
+    f_note = font(23)
+    f_big = font(42, bold=True)
+
+    x0, x1 = 500, 3080
+    shift_x = x0 + int((x1 - x0) * 0.18)
+
+    # --- lane 1: what the monitoring stack sees --------------------------
+    y = 130
+    d.text((70, y - 42), "MONITORING", font=f_lane, fill=MUTED)
+    d.text((70, y + 4), "quarterly", font=f_note, fill=MUTED)
+    dashed_h(d, y, x0, x1, LINE, 4)
+    for x in (x0, x1):
+        d.ellipse([(x - 16, y - 16), (x + 16, y + 16)], fill=ACCENT)
+        centred(d, "PSI report", x, y - 52, f_ev, ACCENT)
+    centred(d, "no signal in between", (x0 + x1) // 2, y - 52, f_note, MUTED)
+
+    # --- lane 2: what actually happens -----------------------------------
+    y = 360
+    d.text((70, y - 42), "REALITY", font=f_lane, fill=INK)
+    d.text((70, y + 4), "continuous", font=f_note, fill=MUTED)
+    d.line([(x0, y), (x1, y)], fill=LINE, width=4)
+    d.ellipse([(shift_x - 18, y - 18), (shift_x + 18, y + 18)], fill=BLOCK)
+    centred(d, "population shifts", shift_x, y - 52, f_ev, BLOCK)
+
+    # The drop line ties the shift to the exposure window it opens.
+    d.line([(shift_x, y + 24), (shift_x, 530)], fill=BLOCK, width=2)
+
+    # --- lane 3: the exposure window, carrying its own number ------------
+    y0, y1 = 540, 700
+    d.text((70, y0 + 40), "EXPOSURE", font=f_lane, fill=BLOCK)
+    d.rounded_rectangle([(shift_x, y0), (x1, y1)], radius=12, fill=(253, 236, 234))
+    d.rounded_rectangle([(shift_x, y0), (x1, y1)], radius=12, outline=BLOCK, width=3)
+    cx = (shift_x + x1) // 2
+    centred(d, "~11 weeks", cx, y0 + 52, f_big, BLOCK)
+    centred(
+        d,
+        "every automated decision here is made by a model nobody knows has drifted",
+        cx,
+        y0 + 116,
+        f_note,
+        BLOCK,
+    )
+
+    centred(
+        d,
+        'Practitioner interview: "you need some leading indicators — you cannot wait three months"',
+        W // 2,
+        H - 55,
+        f_note,
+        MUTED,
+    )
+
+    path = OUT / "problem_timeline.png"
+    img.save(path, dpi=(SCALE, SCALE))
+    return path
+
+
+def on_path(width_in: float = 11.0, height_in: float = 3.28) -> Path:
+    """Why existing tooling does not close the gap: it is not on the path.
+
+    Drawn as a before/after of the *same* request path, because the difference
+    is not what these tools measure — it is where they sit. Monitoring observes
+    from above and reports afterwards; Custos sits in the path and answers
+    before the action happens.
+    """
+    W, H = int(width_in * SCALE), int(height_in * SCALE)
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+
+    f_h = font(27, bold=True)
+    f_box = font(29, bold=True)
+    f_small = font(24, bold=True)
+    f_note = font(23)
+    f_v = font(25, bold=True)
+
+    agent = (70, 620)
+    money = (2680, 3230)
+
+    # --- band 1: today ----------------------------------------------------
+    d.text((70, 40), "TODAY", font=f_h, fill=MUTED)
+    for label, x in (("Evidently", 900), ("WhyLabs", 1500), ("MLflow", 2100)):
+        box(d, (x, 95, x + 480, 215), fill=PANEL)
+        centred(d, label, x + 240, 155, f_small, MUTED)
+        dashed_v(d, x + 240, 225, 320, LINE, 3)
+
+    y = 380
+    box(d, (agent[0], y - 60, agent[1], y + 60), fill=PANEL)
+    centred(d, "Agent", (agent[0] + agent[1]) // 2, y, f_box)
+    box(d, (money[0], y - 60, money[1], y + 60), fill=PANEL)
+    centred(d, "money moves", (money[0] + money[1]) // 2, y, f_box)
+    arrow(d, (agent[1] + 20, y), (money[0] - 20, y), MUTED, width=5)
+    centred(d, "nothing stands between the two", 1650, y + 46, f_note, MUTED)
+    centred(d, "observes  ·  reports later  ·  cannot intervene", 1650, 340, f_note, MUTED)
+
+    dashed_h(d, 530, 70, W - 70, LINE, 2)
+
+    # --- band 2: with custos ---------------------------------------------
+    d.text((70, 590), "CUSTOS", font=f_h, fill=ACCENT)
+    y = 790
+    box(d, (agent[0], y - 60, agent[1], y + 60), fill=PANEL)
+    centred(d, "Agent", (agent[0] + agent[1]) // 2, y, f_box)
+
+    gx0, gx1 = 1180, 2120
+    box(d, (gx0, y - 92, gx1, y + 92), fill=WHITE, outline=ACCENT, width=5)
+    centred(d, "CUSTOS", (gx0 + gx1) // 2, y - 42, f_box, ACCENT)
+    for label, colour, x in (
+        ("ALLOW", ALLOW, 1360),
+        ("REVIEW", REVIEW, 1650),
+        ("BLOCK", BLOCK, 1940),
+    ):
+        centred(d, label, x, y + 42, f_v, colour)
+
+    box(d, (money[0], y - 60, money[1], y + 60), fill=PANEL)
+    centred(d, "money moves", (money[0] + money[1]) // 2, y, f_box)
+
+    arrow(d, (agent[1] + 20, y), (gx0 - 20, y), ACCENT, width=5)
+    arrow(d, (gx1 + 20, y), (money[0] - 20, y), ACCENT, width=5)
+    centred(d, "the verdict happens before the action, not after it", 1650, y + 138, f_note, ACCENT)
+
+    path = OUT / "on_path.png"
+    img.save(path, dpi=(SCALE, SCALE))
+    return path
+
+
+def gap_map(width_in: float = 11.0, height_in: float = 3.2) -> Path:
+    """Research gaps mapped to the objectives that answer them."""
+    W, H = int(width_in * SCALE), int(height_in * SCALE)
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+
+    f_h = font(28, bold=True)
+    f_tag = font(27, bold=True)
+    f_txt = font(24)
+
+    rows = [
+        (
+            "G1",
+            "drift never reaches the request path",
+            "O1 · O3",
+            "fused signal inside a 50 ms budget",
+        ),
+        ("G2", "one number, no per-feature attribution", "O2", "PSI + KS per feature, ranked"),
+        (
+            "G3",
+            "policy and reliability never combine",
+            "O1 · O5",
+            "one engine interface, weighted fusion",
+        ),
+        ("G4", "decision logs are mutable", "O4", "SHA-256 hash chain, verifiable"),
+    ]
+
+    d.text((90, 60), "RESEARCH GAP", font=f_h, fill=BLOCK)
+    d.text((1900, 60), "OBJECTIVE", font=f_h, fill=ALLOW)
+
+    y = 200
+    for tag, gap, obj, how in rows:
+        box(d, (90, y, 1560, y + 150), fill=PANEL, outline=BLOCK, width=3)
+        centred(d, tag, 190, y + 75, f_tag, BLOCK)
+        d.text((290, y + 58), gap, font=f_txt, fill=INK)
+
+        arrow(d, (1590, y + 75), (1860, y + 75), MUTED, width=4)
+
+        box(d, (1900, y, 3230, y + 150), fill=WHITE, outline=ALLOW, width=3)
+        centred(d, obj, 2030, y + 75, f_tag, ALLOW)
+        d.text((2170, y + 58), how, font=f_txt, fill=INK)
+        y += 190
+
+    path = OUT / "gap_map.png"
+    img.save(path, dpi=(SCALE, SCALE))
+    return path
+
+
+def demo_trajectory(width_in: float = 11.0, height_in: float = 3.4) -> Path:
+    """The five demo acts as a trust trajectory.
+
+    The point of the demo in one picture: the model and the code never change,
+    and the verdict changes anyway.
+    """
+    W, H = int(width_in * SCALE), int(height_in * SCALE)
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+
+    f_act = font(25, bold=True)
+    f_v = font(27, bold=True)
+    f_note = font(23)
+    f_score = font(30, bold=True)
+
+    acts = [
+        ("Act 1", "unregistered", 1.00, "REVIEW", REVIEW),
+        ("Act 2", "healthy traffic", 0.99, "ALLOW", ALLOW),
+        ("Act 3", "population shifts", None, "drift 0.02 -> 0.83", BLOCK),
+        ("Act 4", "same input, same code", 0.48, "REVIEW", REVIEW),
+        ("Act 5", "policy veto", 0.00, "BLOCK", BLOCK),
+    ]
+
+    x0, step = 260, 700
+    base, top = 760, 220  # trust 0.0 and 1.0 on the y axis
+
+    def y_of(score):
+        return base - score * (base - top)
+
+    # axis
+    d.line([(150, base), (W - 90, base)], fill=LINE, width=3)
+    d.line([(150, top - 40), (150, base)], fill=LINE, width=3)
+    for score in (0.0, 0.6, 1.0):
+        y = y_of(score)
+        dashed_h(d, y, 160, W - 90, LINE, 2)
+        centred(d, f"{score:.1f}", 100, y, f_note, MUTED)
+    centred(d, "review", 100, y_of(0.6) - 34, f_note, REVIEW)
+    centred(d, "trust", 100, top - 70, f_note, MUTED)
+
+    pts = [(x0 + i * step, y_of(s)) for i, (_, _, s, _, _) in enumerate(acts) if s is not None]
+    # Pairwise walk: the two sequences differ in length by one by design.
+    for a, b in zip(pts, pts[1:], strict=False):
+        d.line([a, b], fill=MUTED, width=4)
+
+    for i, (act, sub, score, verdict, colour) in enumerate(acts):
+        x = x0 + i * step
+        centred(d, act, x, base + 62, f_act, INK)
+        centred(d, sub, x, base + 106, f_note, MUTED)
+
+        if score is None:
+            # Act 3 is an event, not a verdict. It still gets a chip so the
+            # bottom row keeps its rhythm — filled rather than outlined, so it
+            # reads as "something happened here", not "this was the answer".
+            centred(d, verdict, x, y_of(0.52), f_v, colour)
+            centred(d, "no code or config change", x, y_of(0.52) + 44, f_note, MUTED)
+            d.rounded_rectangle(
+                [(x - 150, base + 150), (x + 150, base + 226)], radius=14, fill=colour
+            )
+            centred(d, "DRIFT DETECTED", x, base + 188, f_note, WHITE)
+            continue
+
+        y = y_of(score)
+        d.ellipse([(x - 15, y - 15), (x + 15, y + 15)], fill=colour)
+        centred(d, f"{score:.2f}", x, y - 52, f_score, colour)
+        box(d, (x - 130, base + 150, x + 130, base + 226), fill=WHITE, outline=colour, width=4)
+        centred(d, verdict, x, base + 188, f_v, colour)
+
+    path = OUT / "demo_trajectory.png"
+    img.save(path, dpi=(SCALE, SCALE))
+    return path
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    for path in (architecture(), request_flow(), decision_flow(), drift_pipeline(), drift_chart()):
+    figures = (
+        problem_timeline(),
+        on_path(),
+        gap_map(),
+        architecture(),
+        request_flow(),
+        drift_pipeline(),
+        decision_flow(),
+        demo_trajectory(),
+        drift_chart(),
+    )
+    for path in figures:
         print(f"wrote {path.relative_to(Path.cwd()) if path.is_absolute() else path}")
 
 
