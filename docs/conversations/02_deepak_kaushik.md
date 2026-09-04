@@ -1,0 +1,1149 @@
+# Complete Clarified Audio Conversation Context
+
+**Audio file:** `02_deepak_kaushik.m4a`  
+**Duration:** approximately 57 minutes  
+**Language detected:** English
+
+## Editorial note
+
+This document preserves the complete transcribed conversation in chronological order. Wording has been lightly normalized for readability, including punctuation, spacing, and obvious speech-to-text stutters. No substantive idea, example, question, response, agreement, interruption, or closing remark has been intentionally omitted. Timestamps are retained so the recording can be checked against every passage. Where the automatic transcription was uncertain, the original wording is retained rather than guessed. Speaker identities are not assigned because the transcription output did not reliably identify speakers.
+
+> **Important:** This is a clarity-edited transcript, not a summary. The full conversational sequence is preserved below.
+
+- **[00:00.1 - 00:09.9]** See itself went through a price shock because of the fact that supply got, uh, constrained, demand got excessive in a short period of time.
+- **[00:09.9 - 00:13.4]** Now, that happened due to a secondary cause of a war.
+- **[00:13.4 - 00:14.7]** Yeah.
+- **[00:14.7 - 00:24.2]** Unless your algorithm can connect the two dots and say that means this means this, there is no way to know that your model was actually doing right or wrong.
+- **[00:24.2 - 00:24.9]** Okay?
+- **[00:24.9 - 00:26.2]** So let's clarify that.
+- **[00:26.2 - 00:28.6]** So leave alone those one-off incidents.
+- **[00:28.6 - 00:29.8]** You cannot solve for that.
+- **[00:29.8 - 00:38.5]** You will have to solve for-- Like, when you talk about drift, drift is about yesterday my model had some market intuition.
+- **[00:38.5 - 00:39.2]** Yeah.
+- **[00:39.2 - 00:43.0]** Let us say, uh, uh, let me solve a problem in a slightly different way.
+- **[00:43.0 - 00:45.7]** Let us say I'm doing, uh, bidding.
+- **[00:45.7 - 00:48.4]** I'm bidding on things on eBags.
+- **[00:48.4 - 00:49.0]** Auction.
+- **[00:49.0 - 00:52.3]** Like, let us say I'm, I'm bidding on an auction.
+- **[00:52.3 - 00:54.5]** You understand that, right?
+- **[00:54.5 - 00:55.4]** Yes, sir.
+- **[00:55.4 - 01:02.7]** Let us say I have an algorithmic bidding method where if I want to buy something, I have a target price at what I want to buy.
+- **[01:02.7 - 01:05.8]** I have a target price for many items I want to buy.
+- **[01:05.8 - 01:08.4]** I have to now-- And I have a one price pool.
+- **[01:08.4 - 01:09.3]** Okay?
+- **[01:09.3 - 01:16.3]** I need to figure out exactly how to maximize the, the items I'm bidding for the price pool.
+- **[01:16.3 - 01:19.6]** Does that problem make sense?
+- **[01:19.6 - 01:21.3]** Um, yes, sir.
+- **[01:21.3 - 01:23.5]** It's a travel problem.
+- **[01:23.5 - 01:26.2]** It's called a, it's called a bidding problem.
+- **[01:26.2 - 01:30.9]** So what you're saying is you have one, one set of assets with you.
+- **[01:30.9 - 01:33.0]** You can auction.
+- **[01:33.0 - 01:39.3]** You can basically keep bidding on different things, because every time you bid, you are also bidding higher.
+- **[01:39.3 - 01:43.8]** And if you don't, uh, acquire that item, that money doesn't go anywhere.
+- **[01:43.8 - 01:49.9]** But if you acquire an item at a higher price than usual, you basically lose out on liquidity to buy other things.
+- **[01:49.9 - 01:50.5]** Okay?
+- **[01:50.5 - 01:52.6]** That's the, this one.
+- **[01:52.6 - 01:57.3]** And you're trying to get the maximum number of items in your list using a bidding algorithm.
+- **[01:57.3 - 01:57.9]** Yeah.
+- **[01:57.9 - 01:58.5]** Actually, yeah.
+- **[01:58.5 - 01:59.3]** Let us say you are doing this.
+- **[01:59.3 - 02:09.6]** Le-let us say your ML model was basically predicting the, it, it, it is basically predicting which item, how much to bid, so that with the guarantee that it will buy
+- **[02:09.6 - 02:11.8]** the maximum number of items in the list.
+- **[02:11.8 - 02:14.3]** Okay, let us say it was doing that.
+- **[02:14.3 - 02:21.8]** Now, this model originally was trained with some information in there, saying that you should bid this much for this.
+- **[02:21.8 - 02:31.1]** Now, as the market conditions shift, let us say the bidding model changes, or things are differently priced.
+- **[02:31.1 - 02:33.1]** Like take into pers-- uh, this one.
+- **[02:33.1 - 02:40.7]** Some petroleum product which was a byproduct of that was, uh, was being bid upon before.
+- **[02:40.7 - 02:42.3]** It was probably lower in price.
+- **[02:42.3 - 02:45.8]** Now, because of supply scarcity, suddenly it is higher in price.
+- **[02:45.8 - 02:55.8]** So what that means is the underlying market has shifted to a new set of conditions which your original algorithm never ha-had an
+- **[02:55.8 - 02:56.9]** understanding of.
+- **[02:56.9 - 02:57.5]** Yeah, yeah.
+- **[02:57.5 - 03:01.7]** Now on, this is gonna be the future, like at least for the near future.
+- **[03:01.7 - 03:05.3]** It is a adjustment you have to do to the algorithm.
+- **[03:05.3 - 03:09.6]** So that is the step jump you have to look at when you talk about drift.
+- **[03:09.6 - 03:11.7]** So drift is basically you keep predicting.
+- **[03:11.7 - 03:17.8]** You basically sample the predictions and say how many, how much is the precision, how much is the recall?
+- **[03:17.8 - 03:22.5]** Am I still getting the original clarity I was getting with the model?
+- **[03:22.5 - 03:30.8]** And when it hits below a trigger and says, "Okay, it is doing more than ten percent mistakes," it might have to be retrained again.
+- **[03:30.8 - 03:33.6]** That's how drift works.
+- **[03:33.6 - 03:41.2]** Like you kind of-- It's a more a statistical determination rather than a, um, I would say incidental determination.
+- **[03:41.2 - 03:42.3]** Mm-hmm.
+- **[03:42.3 - 03:44.7]** There's no way for me to know what caused it.
+- **[03:44.7 - 03:47.0]** I'm not trying to solve that problem either.
+- **[03:47.0 - 03:52.5]** I am just trying to understand, okay, let us say this model was working.
+- **[03:52.5 - 04:02.5]** I keep sampling its outcomes and seeing is it working at the same efficiency as the original model when I launched it into
+- **[04:02.5 - 04:02.9]** production.
+- **[04:02.9 - 04:13.1]** If it is below, like that efficiency, and if it says it is like ten percent below or twenty percent below, and it triggers my alerts, then I have to go
+- **[04:13.1 - 04:14.0]** do, do two things.
+- **[04:14.0 - 04:20.0]** One, because I've already built an observability pipeline, because without that I couldn't have observed this event also.
+- **[04:20.0 - 04:29.6]** I have to now gather more data to, uh, now try and understand what would be the causation, which would be the whole problem of explainability.
+- **[04:29.6 - 04:38.9]** Like if, um, there was a real shift, I need to then understand, can the model explain why the decisions it took?
+- **[04:38.9 - 04:42.1]** And then there is the loop of retraining.
+- **[04:42.1 - 04:48.8]** It is likely that your model has drifted so far away that the new market conditions have shifted.
+- **[04:48.8 - 04:58.9]** So that means there is no-- Like, so when you do it to real market prices, there are underlying conditions which shift the market itself, which your
+- **[04:58.9 - 05:02.1]** model doesn't know, and it can only learn and readapt.
+- **[05:02.1 - 05:05.0]** Yeah.
+- **[05:05.0 - 05:06.3]** Like getting it, so yeah, like- Does that make sense?
+- **[05:06.3 - 05:09.1]** So typically, that is the way I-- we look at this one.
+- **[05:09.1 - 05:10.9]** See, because when you talk about ML Op
+- **[05:11.0 - 05:21.5]** So it develops a huge area from everything from data pipelines to ML flow and TensorFlow, which is the training pipelines and evaluation pipelines, hyperparameter tuning pipelines,
+- **[05:21.5 - 05:23.9]** which kind of do work this one.
+- **[05:23.9 - 05:28.3]** After that, there is MLOps for scaling.
+- **[05:28.3 - 05:36.4]** That means I know a production wo-- a model works, how do I scale it into production, into containers, into Kubernetes?
+- **[05:36.4 - 05:38.7]** Basically, those scaling concepts.
+- **[05:38.7 - 05:48.4]** And then it comes, post-scaling comes these observability, drift monitoring, retraining pipelines, and then putting the model.
+- **[05:48.4 - 05:50.7]** Or even, uh, it's what is...
+- **[05:50.7 - 05:53.0]** We used to call it model lifecycle management.
+- **[05:53.0 - 06:01.6]** Because what would happen is sometimes it is retraining, sometimes it is replacement of the model, and basically say, "This model is too old.
+- **[06:01.6 - 06:08.9]** I have a newer version of the model, either a newer open source model or a new, newer version of an ML model, which works much, much better.
+- **[06:08.9 - 06:19.2]** An architecture approach works much better." So what I'll do is, instead of AB testing the model against itself, I'm gonna AB test the model against the new model,
+- **[06:19.2 - 06:21.8]** and if it beats the AB test, I'm gonna just replace the model.
+- **[06:21.8 - 06:25.2]** So the drift will cause two things.
+- **[06:25.2 - 06:30.3]** Like, drift is an initial indication to me that something, the model is not working to its efficiency.
+- **[06:30.3 - 06:33.2]** Now it's a question of, like, do I retrain the model?
+- **[06:33.2 - 06:34.6]** Do I replace the model?
+- **[06:34.6 - 06:36.3]** Okay.
+- **[06:36.3 - 06:37.9]** And I have to kind of complete that loop.
+- **[06:37.9 - 06:39.5]** Yeah.
+- **[06:39.5 - 06:49.5]** So, like, uh, uh, this was, like, our understanding, but now I think the observability part is actually the, uh, thing which we will have- No, but
+- **[06:49.5 - 06:50.4]** you have to build it.
+- **[06:50.4 - 06:53.9]** That, that I agree, but observability cannot be without a goal.
+- **[06:53.9 - 06:55.4]** What are you observing?
+- **[06:55.4 - 06:58.4]** Observability is a tool.
+- **[06:58.4 - 07:00.9]** It, it's a method to look at something.
+- **[07:00.9 - 07:05.4]** But your goals have to be very clear of what do you want, what you're, what are you trying to look at.
+- **[07:05.4 - 07:09.8]** Yeah, that's what, like, uh, we still are, uh, not so clear, sir.
+- **[07:09.8 - 07:12.3]** Like, that's the, that was the reason, like, we- Okay.
+- **[07:12.3 - 07:13.4]** Then you have to take...
+- **[07:13.4 - 07:15.4]** You see, you can't build a generic thing now.
+- **[07:15.4 - 07:16.0]** Yeah.
+- **[07:16.0 - 07:17.6]** Because it's not easy to...
+- **[07:17.6 - 07:19.2]** Like, you have to build something specific.
+- **[07:19.2 - 07:20.1]** Right.
+- **[07:20.1 - 07:23.4]** So take some models or some this one which have...
+- **[07:23.4 - 07:27.7]** Or circumstances in which models decay performance.
+- **[07:27.7 - 07:37.7]** One natural circumstance is if you use it on any real market data, be it share market, be it, uh, bidding market, ad market, whatever.
+- **[07:37.7 - 07:43.0]** Wherever there is price being determined more dynamically, uh, they...
+- **[07:43.0 - 07:49.0]** And any news that affects the price will also affect the outcome of the model.
+- **[07:49.0 - 07:52.8]** Uh- So that is one kind of scenario.
+- **[07:52.8 - 07:55.4]** The, uh, but that you...
+- **[07:55.4 - 07:56.9]** It's very hard to get data for that.
+- **[07:56.9 - 07:58.1]** Yeah, actually.
+- **[07:58.1 - 08:00.3]** Real world data is not easy to get.
+- **[08:00.3 - 08:00.6]** Yeah.
+- **[08:00.6 - 08:10.7]** The other option is to look at, uh, drift from a point of view of, um, how would I put
+- **[08:10.7 - 08:10.9]** it?
+- **[08:10.9 - 08:13.3]** Okay, you, I don't know how you'll get that.
+- **[08:13.3 - 08:15.2]** Do you have access to behavior data?
+- **[08:15.2 - 08:15.9]** Mm.
+- **[08:15.9 - 08:16.9]** User click streams?
+- **[08:16.9 - 08:19.7]** Behavior- Like what user clicked on and things like that?
+- **[08:19.7 - 08:21.9]** Um, not yet, like, sir, no.
+- **[08:21.9 - 08:22.2]** Uh...
+- **[08:22.2 - 08:32.2]** Uh, that, if you have that, then the other option is looking at personalization-based algorithms and how they drift with user behavior drift.
+- **[08:32.2 - 08:37.2]** As behavior shifts, users do different things on your app.
+- **[08:37.2 - 08:46.4]** Uh, the algorithms which does the personalization for them have to also kind of modify themselves.
+- **[08:46.4 - 08:47.0]** Yeah.
+- **[08:47.0 - 08:48.8]** It's- But okay, uh, let's come back to it.
+
+## Defining the Project Goal and the Scope of MLOps
+
+- **[08:48.8 - 08:52.6]** What is the original goal you want, you are setting up for your final year project?
+- **[08:52.6 - 08:54.3]** Because you have to define them.
+- **[08:54.3 - 08:58.7]** What you have, what you have described in the document is some implementation detail of something specific.
+- **[08:58.7 - 08:59.8]** But that's okay.
+- **[08:59.8 - 09:01.3]** That is less optimized one.
+- **[09:01.3 - 09:04.2]** Like, first you have to define a high-level goal.
+- **[09:04.2 - 09:05.6]** What is that you're trying to achieve?
+- **[09:05.6 - 09:09.1]** Uh, sir, like- Are you just trying to do a system simulation or setup?
+- **[09:09.1 - 09:11.2]** Are you trying to solve a problem?
+- **[09:11.2 - 09:21.3]** Uh, sir, like, our main thing was, uh, uh, what we do in college, like, uh, since you also visit regularly, you might know, sir, like,
+- **[09:21.3 - 09:31.3]** uh, for our labs, lab exams, like, uh, deep learning lab, machine learning lab, we just build models on Colab and just leave it, uh, there itself, like, and then
+- **[09:31.3 - 09:32.5]** the next day it gets deleted.
+- **[09:32.5 - 09:33.0]** Mm-hmm.
+- **[09:33.0 - 09:37.4]** So our main, uh, thing was like, uh, we-- how does this model gets deployed?
+- **[09:37.4 - 09:42.0]** How this actually runs on real-time data, the production thing.
+- **[09:42.0 - 09:43.6]** Ah, so that is a separate problem.
+- **[09:43.6 - 09:46.6]** You are talking about model deployment and scaling lifecycle.
+- **[09:46.6 - 09:46.9]** Yeah.
+- **[09:46.9 - 09:48.9]** So that was the MLOps.
+- **[09:48.9 - 09:50.5]** That is a separate problem versus, uh, um...
+- **[09:50.5 - 09:52.5]** Ah, so no, MLOps is everything.
+- **[09:52.5 - 09:53.1]** Yeah.
+- **[09:53.1 - 09:59.5]** MLOps is everything from how the model is trained, how the model is configured, how it is scaled, deployed at scale.
+- **[09:59.5 - 09:59.9]** Yeah.
+- **[09:59.9 - 10:02.8]** How it is monitored, how it is, uh, this one.
+- **[10:02.8 - 10:04.8]** So it's an entire thing.
+- **[10:04.8 - 10:05.5]** So you can't...
+- **[10:05.5 - 10:08.9]** Like, if you try to do the entire thing, it'll be quite hard.
+- **[10:08.9 - 10:11.2]** Uh, let me say example this way.
+- **[10:11.2 - 10:13.0]** I built an ML platform for Mintra.
+- **[10:13.0 - 10:16.8]** It took me over two years with an engineering team of about nineteen people.
+- **[10:16.8 - 10:17.4]** Okay.
+- **[10:17.4 - 10:18.5]** It's not easy to do it.
+- **[10:18.5 - 10:21.7]** Like, in the sense of even we went with specific-
+- **[10:21.9 - 10:25.6]** Problems first, solve one problem at a time and build the entire platform.
+- **[10:25.6 - 10:26.5]** Uh.
+- **[10:26.5 - 10:34.0]** It is a lot of work, and, and okay, we were also in an environment in which we had thousands of models to play with.
+- **[10:34.0 - 10:34.2]** Yeah.
+- **[10:34.2 - 10:35.4]** Because they were all in production.
+- **[10:35.4 - 10:36.1]** Yes, sir.
+- **[10:36.1 - 10:45.0]** Like, so, like, you can imagine, like, an engineering team in that kind of a production, this one is taking that much time to set things up.
+- **[10:45.0 - 10:45.7]** Yeah.
+- **[10:45.7 - 10:51.7]** So you're-- What I'm telling you is, if you're just going after this thing as MLOps end-to-end- Mm-hmm ...
+- **[10:51.7 - 10:54.1]** it is quite difficult to build in the timeframe you have.
+- **[10:54.1 - 11:00.9]** You will have to adapt it for one or two examples where you're solving a specific use case.
+- **[11:00.9 - 11:11.0]** If your use case is what you described to me, which is not observability or, or, uh, this one, model ex-expliability, it is more on you are saying,
+- **[11:11.0 - 11:21.1]** "I need a permanent place for everybody to do training architectures very keenly, have model versioning, CI/CD, continuous integration, continuous
+- **[11:21.1 - 11:21.8]** deployment- Mm-hmm ...
+- **[11:21.8 - 11:24.9]** kind of a situation, including scaling in production." Okay?
+- **[11:24.9 - 11:28.1]** If that is your problem, that's a different architecture altogether.
+- **[11:28.1 - 11:29.5]** That's a different part of the life flow.
+- **[11:29.5 - 11:30.0]** Yes, sir.
+- **[11:30.0 - 11:33.8]** So for that, I would suggest to first, uh, read up on MLflow.
+- **[11:33.8 - 11:35.8]** Have you read through MLflow?
+- **[11:35.8 - 11:36.6]** Uh, yes, sir.
+- **[11:36.6 - 11:37.6]** Like, I have an idea.
+- **[11:37.6 - 11:39.3]** MLflow or TensorFlow, they call it.
+- **[11:39.3 - 11:39.9]** Yes, sir.
+- **[11:39.9 - 11:40.3]** Yeah.
+- **[11:40.3 - 11:41.0]** Yeah, I have read it.
+- **[11:41.0 - 11:41.4]** And, uh, yeah.
+- **[11:41.4 - 11:43.1]** So that's your first piece around this one.
+- **[11:43.1 - 11:43.5]** Yes, sir.
+- **[11:43.5 - 11:50.0]** First one, because that is your training architecture, and that is how, uh, somebody should be training their, this one in a logical way.
+- **[11:50.0 - 11:51.0]** Today, what is...
+- **[11:51.0 - 12:00.1]** The reason they all have problems with training is they write arbitrary Python scripts to train something, and then they train it, then, then they delete the model.
+- **[12:00.1 - 12:01.3]** Yeah.
+- **[12:01.3 - 12:03.6]** They're not managing the models.
+- **[12:03.6 - 12:07.6]** So if you train it using MLflow- Yeah ...
+- **[12:07.6 - 12:18.0]** uh, into the, this one, in, in the TensorFlow architecture, along with the fact that you're connected to the right data pipelines through, um, Spark or other real-time processing engines,
+- **[12:18.0 - 12:25.0]** that is the setup which will allow you to first kind of make the model training sustainable.
+- **[12:25.0 - 12:33.5]** That means that-- But that, that also means that everybody else who's doing this also has to adopt your platform, right?
+- **[12:33.5 - 12:33.8]** Right, sir.
+- **[12:33.8 - 12:35.2]** Like, we just wanted- So you want to create- ...
+- **[12:35.2 - 12:43.7]** to build something, uh, plugin platform, like, uh, they just, uh, easily, uh, what you call, uh, onboard with, uh, something.
+- **[12:43.7 - 12:44.6]** Yeah.
+- **[12:44.6 - 12:45.4]** Correct.
+- **[12:45.4 - 12:46.8]** So that's what you're doing, right?
+- **[12:46.8 - 12:49.7]** That, that is one part of the problem.
+- **[12:49.7 - 12:52.8]** Second is scaling, uh, deployment and scaling.
+- **[12:52.8 - 12:54.9]** Uh, have you used Docker before?
+- **[12:54.9 - 12:55.5]** Sorry, sir.
+- **[12:55.5 - 12:56.9]** Docker, Kubernetes, have you- Yes, sir.
+- **[12:56.9 - 12:57.3]** Like- ...
+- **[12:57.3 - 12:57.3]** have an understanding?
+- **[12:57.3 - 12:57.3]** ...
+- **[12:57.3 - 12:58.7]** we have that understanding.
+- **[12:58.7 - 12:59.8]** We have been, um...
+- **[12:59.8 - 13:01.6]** Like, our hands are dirty with that.
+- **[13:01.6 - 13:03.5]** Okay.
+- **[13:03.5 - 13:06.7]** So that is the packaging mechanism to deliver.
+- **[13:06.7 - 13:07.2]** Yes, sir.
+- **[13:07.2 - 13:10.6]** So after you do the training pipelines, you basically have to containerize it.
+- **[13:10.6 - 13:18.0]** You will basically run it, you, you manage compute through Kubernetes, and you're basically deploying with a Docker image- Mm-hmm ...
+- **[13:18.0 - 13:20.2]** on a Kubernetes cluster.
+- **[13:20.2 - 13:23.8]** So that would be the way to deploy and scale the model.
+- **[13:23.8 - 13:24.9]** Yeah.
+- **[13:24.9 - 13:28.2]** I don't know if you have read through, uh, the blue-green development.
+- **[13:28.2 - 13:30.4]** How to do pods on Kubernetes.
+- **[13:30.4 - 13:31.8]** Have you played with that idea?
+- **[13:31.8 - 13:34.4]** Uh, like, uh- So that's the scaling idea.
+- **[13:34.4 - 13:34.9]** Yeah.
+- **[13:34.9 - 13:35.5]** Okay, sir.
+- **[13:35.5 - 13:40.2]** So the idea is like, if you have a Docker image- Yeah ...
+- **[13:40.2 - 13:44.2]** I can run one for one piece of that image, right?
+- **[13:44.2 - 13:45.4]** Yes, sir.
+- **[13:45.4 - 13:48.2]** On, on a server, like, on a VM, basically, somewhere.
+- **[13:48.2 - 13:49.5]** Yeah.
+- **[13:49.5 - 13:55.7]** Now, the way I would do that in production when, when I have to scale it is I'm not gonna run one version of it, I'm gonna run N copies of it.
+- **[13:55.7 - 13:57.3]** Right.
+- **[13:57.3 - 13:57.6]** Okay.
+- **[13:57.6 - 14:00.9]** It is as if the model is running N times over and over.
+- **[14:00.9 - 14:07.6]** And I have a load balancer which takes the incoming request and balances it with these different copies.
+- **[14:07.6 - 14:17.0]** So that means if one of my production model runs goes down, I'm gonna immediately have the load balancer switch over the traffic.
+- **[14:17.0 - 14:19.7]** That means I, I get graceful degradation.
+- **[14:19.7 - 14:21.4]** I don't get failures.
+- **[14:21.4 - 14:23.4]** Yes, sir.
+- **[14:23.4 - 14:23.9]** You get the point?
+- **[14:23.9 - 14:24.6]** Yes.
+- **[14:24.6 - 14:27.0]** Like, I basically assign them to different, different pods.
+- **[14:27.0 - 14:31.7]** Now, let us say I have ten pods running, all running the same model, same this one.
+- **[14:31.7 - 14:36.0]** If I need more traffic, if more traffic is coming in, I just spawn new pods.
+- **[14:36.0 - 14:42.3]** I generate new pods and copies of my model so that they can load balance- Yeah ...
+- **[14:42.3 - 14:43.2]** on new compute.
+- **[14:43.2 - 14:44.0]** Yeah, right, sir.
+- **[14:44.0 - 14:45.1]** That is one option.
+- **[14:45.1 - 14:55.2]** And then if, let us say one of my pods starts to go down, or degrade, or the, the API is not responding properly,
+- **[14:55.2 - 14:57.8]** you would basically then build in a failsafe.
+- **[14:57.8 - 15:05.6]** You, you say spawn a new pod, uh, install the Docker image, keep it, keep it ready and running.
+
+## Choosing a Specific Use Case and Understanding the Data
+
+- **[15:05.6 - 15:06.3]** Yeah.
+- **[15:06.3 - 15:09.4]** And as soon as this happens, shut down the...
+- **[15:09.4 - 15:13.6]** whichever pod is failing, you-you'll see that in the observability platform in your monitoring.
+- **[15:13.6 - 15:22.8]** Immediately, the script itself will automatically shut down that pod, ask the load balancer to rebalance everything to a new pod.
+- **[15:22.8 - 15:23.6]** Yeah, right.
+- **[15:23.6 - 15:23.9]** Yeah.
+- **[15:23.9 - 15:28.1]** So it's an automatic scaling and automatic balancing mechanism.
+- **[15:28.1 - 15:32.0]** Uh, we call it self-healing because it's a self-healing mechanism.
+- **[15:32.0 - 15:32.7]** Yeah, correct sir.
+- **[15:32.7 - 15:32.8]** Like-
+- **[15:32.9 - 15:34.7]** It automatically knows what the load is.
+- **[15:34.7 - 15:35.3]** Yeah.
+- **[15:35.3 - 15:36.4]** It, it, it heals itself.
+- **[15:36.4 - 15:36.7]** Yeah.
+- **[15:36.7 - 15:39.1]** Basically, if it's damaged also, it knows how to heal it.
+- **[15:39.1 - 15:39.7]** Yeah.
+- **[15:39.7 - 15:42.0]** That is what, sir, like the drift- And the third thing- Yeah.
+- **[15:42.0 - 15:43.1]** Uh, continue, sir.
+- **[15:43.1 - 15:43.7]** Yeah.
+- **[15:43.7 - 15:46.2]** And the third thing we do is what we call blue-green deployment.
+- **[15:46.2 - 15:49.7]** That means, let us say I have a version one of the model ready.
+- **[15:49.7 - 15:50.7]** Yeah.
+- **[15:50.7 - 15:56.9]** I want to do-- deploy version two, but I don't wanna replace version one with version two- Mm-hmm ...
+- **[15:56.9 - 15:58.1]** because version two might fail.
+- **[15:58.1 - 15:59.0]** Mm-hmm.
+- **[15:59.0 - 15:59.7]** I don't know that.
+- **[15:59.7 - 16:02.2]** Even if it fails, I have to roll back, big problem.
+- **[16:02.2 - 16:13.3]** So in this what we do is we give the version two to a new pod, other than this one, and then ask the load balancer to shift one percent of the traffic to the new and
+- **[16:13.3 - 16:14.0]** see how it works.
+- **[16:14.0 - 16:22.8]** If it works, I'll make more pods and, and scale up the load on the new version.
+- **[16:22.8 - 16:23.8]** Okay.
+- **[16:23.8 - 16:26.4]** And take away the load of the older versions.
+- **[16:26.4 - 16:27.2]** You get the point?
+- **[16:27.2 - 16:27.7]** Yes, sir.
+- **[16:27.7 - 16:33.5]** If it doesn't, anyway, the load balancer automatically knows that only a small percentage of the traffic is going to the new.
+- **[16:33.5 - 16:37.9]** It'll just redirect the traffic back to the old and, and stop this one.
+- **[16:37.9 - 16:43.7]** So this way you get, we call it blue-green deployment because it-- this is continuous deployment.
+- **[16:43.7 - 16:45.8]** That means I'm never...
+- **[16:45.8 - 16:55.9]** When I switch from version one to version two, it automatically switches because we-- all I'm doing is everything, version one, version two, version three, all
+- **[16:55.9 - 16:57.2]** versions are running simultaneously.
+- **[16:57.2 - 17:03.7]** In the load balancer I'm defining how much of the load I want to shift to which version.
+- **[17:03.7 - 17:14.2]** And as I, as my latest version starts to show tests, I will shift more of the traffic towards that, create more pods of that, and kill the older versions, because
+- **[17:14.2 - 17:16.8]** they're not required anymore.
+- **[17:16.8 - 17:17.4]** Yes, sir.
+- **[17:17.4 - 17:18.9]** Understood.
+- **[17:18.9 - 17:19.1]** Okay.
+- **[17:19.1 - 17:28.3]** See, I can help you coordinate this because I've done this before, but bigger point is you will have to first refine your problem of what you're exactly trying to solve.
+- **[17:28.3 - 17:33.0]** Like define a scope for your problem, because what you're asking to do is very, very large.
+- **[17:33.0 - 17:42.7]** I can give you one-- an hour refresher sometime on what MLOps looks like, what are the various components, what are the architectures, what are the softwares involved.
+- **[17:42.7 - 17:47.3]** Uh, and I've done this on AWS, GCP, Azure, all three of them.
+- **[17:47.3 - 17:50.8]** So I can tell you each of them have a different stack and they work the same way.
+- **[17:50.8 - 17:51.2]** Yeah.
+- **[17:51.2 - 17:51.6]** Yes, sir.
+- **[17:51.6 - 17:55.1]** That will be actually- You can do it on any, any underlying substrate, it doesn't matter.
+- **[17:55.1 - 17:55.5]** Yeah.
+- **[17:55.5 - 18:00.6]** Bigger point is you have to look at MLOps as a solution to a problem.
+- **[18:00.6 - 18:01.5]** Yeah, right.
+- **[18:01.5 - 18:11.8]** So either you're training, automatic training and data management is a problem that you're solving or you're doing version control and, and testing
+- **[18:11.8 - 18:16.2]** of new models and automatic deployment of new models which we talked about in Kubernetes.
+- **[18:16.2 - 18:18.0]** That's another problem to solve.
+- **[18:18.0 - 18:22.8]** Uh, the third, uh, that includes scaling and, and model and schedule management.
+- **[18:22.8 - 18:30.8]** And third is around observability and understanding where the models are drifting, which models to retrain, which models to replace.
+- **[18:30.8 - 18:32.8]** That's the third piece of the puzzle.
+- **[18:32.8 - 18:39.5]** First, figure out what you are trying to do and how can you get...
+- **[18:39.5 - 18:42.7]** Like, not just do it, but a concrete case out of it.
+- **[18:42.7 - 18:44.3]** Yeah.
+- **[18:44.3 - 18:48.7]** Like, let us say you take the first one, which is you make a model training, is somebody has to use your platform.
+- **[18:48.7 - 18:52.4]** You cannot just say, "My model training is easier." Who has used it?
+- **[18:52.4 - 18:53.7]** What's the comparison?
+- **[18:53.7 - 19:02.5]** If hundred people use it, then they'll be like, "Okay." They'll come and give feedback saying, "Okay, this made my job easier." Okay.
+- **[19:02.5 - 19:03.5]** So you have to figure that out.
+- **[19:03.5 - 19:07.6]** In most case-- You're not doing the final year project in any company or any institute?
+- **[19:07.6 - 19:08.3]** Like how is it?
+- **[19:08.3 - 19:09.7]** Or you're, you're doing it on your own?
+- **[19:09.7 - 19:12.3]** Uh, it's on our, uh, on our own, sir.
+- **[19:12.3 - 19:14.7]** On your own, okay.
+- **[19:14.7 - 19:21.2]** Because generally, see, all of these problems we solve for a company or an institute when you work on a final year project.
+- **[19:21.2 - 19:21.2]** Yeah.
+- **[19:21.2 - 19:21.8]** Actually, yes, sir.
+- **[19:21.8 - 19:25.1]** And what that does is it gives a, it gives a goal to the project.
+- **[19:25.1 - 19:32.4]** It says, "Oh, here is a problem I wanna solve." I will go figure out a technique and methods to solve it, and then apply it to that problem.
+- **[19:32.4 - 19:32.9]** Yeah.
+- **[19:32.9 - 19:34.7]** Actually, we, we- But here you're trying to...
+- **[19:34.7 - 19:36.7]** having to figure your problem, whole problem out.
+- **[19:36.7 - 19:37.1]** Yeah.
+- **[19:37.1 - 19:45.9]** So that, that's wha- that was the things like, um, the day I messaged you also, like the same day I messaged to like some, uh, few startups, sir.
+- **[19:45.9 - 19:47.5]** Like I, uh, we- Yeah ...
+- **[19:47.5 - 19:52.7]** till now spoke to a single startup, which was Freo, uh, the like le-lending company, sir.
+- **[19:52.7 - 19:54.8]** So they use ML thing there.
+- **[19:54.8 - 20:04.8]** So when we discussed with them about like, uh, the dri-drift thing and the problem they have, so they mentioned like the very big problem they have is the data set.
+- **[20:04.8 - 20:07.3]** Like a clean data set is luxury for them.
+- **[20:07.3 - 20:09.3]** So that was one thing we identified.
+- **[20:09.3 - 20:10.5]** No, that's a separate problem, sir.
+- **[20:10.5 - 20:11.3]** That's not even an MLOps problem.
+- **[20:11.3 - 20:11.6]** Yeah.
+- **[20:11.6 - 20:12.2]** That's what, sir.
+- **[20:12.2 - 20:20.0]** Like- Data cleaning, data, this one, harnessing, uh, outlier detection, all of that is prior to even training.
+- **[20:20.0 - 20:20.3]** Yeah.
+- **[20:20.3 - 20:21.0]** That's what, sir.
+- **[20:21.0 - 20:21.4]** Yeah.
+- **[20:21.4 - 20:24.7]** So- So like, uh- That is not even this realm ...
+- **[20:24.7 - 20:26.8]** it doesn't even comes under MLOps, sir.
+- **[20:26.8 - 20:27.1]** Yeah.
+- **[20:27.1 - 20:27.9]** Maybe.
+- **[20:27.9 - 20:28.9]** Not yet.
+- **[20:28.9 - 20:35.8]** In the sense of it, it is improving an ML result, but your techniques are more statistical techniques for data pruning- Mm-hmm ...
+- **[20:35.8 - 20:39.2]** and understanding of the domain of the data to know how to prune.
+- **[20:39.2 - 20:40.0]** Yeah.
+- **[20:40.0 - 20:40.2]** Right.
+- **[20:40.2 - 20:40.5]** Correct.
+- **[20:40.5 - 20:43.7]** Like you can just run a direct, uh, like a random ou-outlier
+- **[20:43.9 - 20:45.9]** Detection program and then chop off the outliers.
+- **[20:45.9 - 20:46.4]** Yeah.
+- **[20:46.4 - 20:49.9]** But if you know certain domains, you will go in there.
+- **[20:49.9 - 20:51.4]** Okay, uh, I'll give you an example.
+- **[20:51.4 - 20:57.2]** Um, take a graph, uh, histogram of all the house prices.
+- **[20:57.2 - 20:57.7]** Yeah.
+- **[20:57.7 - 21:00.1]** How do you think that histogram will look?
+- **[21:00.1 - 21:02.8]** Um, like within a locale.
+- **[21:02.8 - 21:05.0]** That depends on locality and everything.
+- **[21:05.0 - 21:05.8]** Yeah, fine.
+- **[21:05.8 - 21:08.1]** Uh, in general locality or a city or something.
+- **[21:08.1 - 21:11.1]** If I give you that histogram, how will it look?
+- **[21:11.1 - 21:13.8]** Um, almost identical, sir.
+- **[21:13.8 - 21:15.6]** Like- What are the characteristics of the histogram?
+- **[21:15.6 - 21:16.5]** Yeah.
+- **[21:16.5 - 21:22.6]** So like, uh, almost similar, sir.
+- **[21:22.6 - 21:24.9]** Like, uh, with time it grows.
+- **[21:24.9 - 21:28.7]** With time it grows.
+- **[21:28.7 - 21:28.9]** Meaning...
+- **[21:28.9 - 21:29.4]** See, no, no.
+- **[21:29.4 - 21:34.5]** I, I'm talking about histogram of, like, house prices.
+- **[21:34.5 - 21:38.4]** So that means it has a median and a mean in the middle.
+- **[21:38.4 - 21:39.1]** Okay.
+- **[21:39.1 - 21:39.4]** Okay.
+- **[21:39.4 - 21:45.0]** If you take a histogram of all the values- Yeah ...
+- **[21:45.0 - 21:50.9]** that histogram should look like there should be a lot of values on the low side because low income housing.
+- **[21:50.9 - 21:51.4]** Yeah.
+- **[21:51.4 - 21:54.5]** There'll be very few on the high side.
+- **[21:54.5 - 22:05.6]** Uh- But the mean, mean will be shifted quite a bit towards the high side because, a, a house which costs like fifty million will be
+- **[22:05.6 - 22:13.9]** skipping the average scale quite a bit because of the low income housing doesn't cost that much.
+- **[22:13.9 - 22:14.2]** Okay.
+- **[22:14.2 - 22:15.5]** Yeah, I can remember- You get the point.
+- **[22:15.5 - 22:15.8]** Yes, sir.
+- **[22:15.8 - 22:16.2]** Yes, sir.
+- **[22:16.2 - 22:19.3]** Uh, because there are a few houses which are very expensive.
+- **[22:19.3 - 22:21.9]** There are many houses which are cheap.
+- **[22:21.9 - 22:24.1]** So if you see the curve, how it look.
+- **[22:24.1 - 22:27.8]** Now, if you put this through a standard outlier filter- Yeah ...
+- **[22:27.8 - 22:28.4]** what will it do?
+- **[22:28.4 - 22:31.2]** It will chop off the highest prices and the lowest prices.
+- **[22:31.2 - 22:33.8]** Which was majority of your housing market?
+- **[22:33.8 - 22:35.6]** The lower price.
+- **[22:35.6 - 22:37.2]** The median.
+- **[22:37.2 - 22:37.7]** No.
+- **[22:37.7 - 22:39.8]** Either it is low price or very high price.
+- **[22:39.8 - 22:40.8]** There is no middle price.
+- **[22:40.8 - 22:40.9]** No.
+- **[22:40.9 - 22:41.4]** Yeah.
+- **[22:41.4 - 22:42.0]** No, sir.
+- **[22:42.0 - 22:42.2]** Yeah.
+- **[22:42.2 - 22:43.8]** Yeah.
+- **[22:43.8 - 22:46.6]** As I said, the middle of a housing market is very small.
+- **[22:46.6 - 22:47.7]** Actually, yeah.
+- **[22:47.7 - 22:57.7]** The things which define the characteristic of housing market is either because there is the number of low housing, this one and how low they are, and how many exorbitant
+- **[22:57.7 - 22:59.0]** priced homes were sold.
+- **[22:59.0 - 23:01.6]** That pushes up the average.
+- **[23:01.6 - 23:06.6]** But you'll realize that the median now shifts closer to the lower side.
+- **[23:06.6 - 23:10.1]** Mean shifts closer to the higher side because of these outliers.
+- **[23:10.1 - 23:10.6]** Correct.
+- **[23:10.6 - 23:11.0]** Yes, sir.
+- **[23:11.0 - 23:11.4]** Yes, sir.
+- **[23:11.4 - 23:12.7]** Yeah.
+- **[23:12.7 - 23:14.3]** So mean and median is separate.
+- **[23:14.3 - 23:14.6]** Yeah.
+- **[23:14.6 - 23:17.6]** That means it is not a unimodal curve.
+- **[23:17.6 - 23:19.8]** It is a bimodal curve, to be more precise.
+- **[23:19.8 - 23:21.3]** Mm-hmm.
+- **[23:21.3 - 23:21.5]** Mm-hmm.
+- **[23:21.5 - 23:22.9]** You'll start to see...
+- **[23:22.9 - 23:26.0]** In fact, if you see the histogram, it should be two hills, not one.
+- **[23:26.0 - 23:26.5]** Yeah.
+- **[23:26.5 - 23:29.8]** But okay, it's not relevant that it is always there in every histogram.
+- **[23:29.8 - 23:33.2]** But all that means is your mean and medians are quite shifted.
+- **[23:33.2 - 23:43.4]** Now, that means average house price, if you look at your-- somebody's capacity to buy a house, is correlated with their median income
+- **[23:43.4 - 23:45.3]** and median home price- Mm-hmm ...
+- **[23:45.3 - 23:47.5]** which is on the lower end.
+- **[23:47.5 - 23:57.8]** But if you look at mean in house price in a given area, that will always be tilted towards this one because there will be some people who would have bought houses for exorbitant
+- **[23:57.8 - 23:58.2]** price.
+- **[23:58.2 - 23:58.5]** Yeah.
+- **[23:58.5 - 24:01.6]** So like- And they will be ten times over.
+
+## Data Cleaning, Outliers, and Domain Knowledge
+
+- **[24:01.6 - 24:03.7]** So outlier effects it.
+- **[24:03.7 - 24:04.2]** Yes, sir.
+- **[24:04.2 - 24:06.2]** Yeah, that outlier effect.
+- **[24:06.2 - 24:08.7]** So now, if let us have cleaning of this data.
+- **[24:08.7 - 24:10.2]** I knew nothing about this data.
+- **[24:10.2 - 24:14.4]** If I go directly chop off the outliers from both sides- Yeah ...
+- **[24:14.4 - 24:15.8]** basically the data is meaningless.
+- **[24:15.8 - 24:16.7]** Yes.
+- **[24:16.7 - 24:19.9]** So this is the problem.
+- **[24:19.9 - 24:23.8]** So when you do data cleaning, data cleaning requires two pro things.
+- **[24:23.8 - 24:26.1]** One, you need to know the statistical technique for data cleaning.
+- **[24:26.1 - 24:32.7]** Second, you need to know the, the context, the domain context of the data.
+- **[24:32.7 - 24:35.9]** Here, I knew something about the housing market.
+- **[24:35.9 - 24:37.9]** What were, what were my insights?
+- **[24:37.9 - 24:41.4]** I knew that there are some houses which were going for exorbitant prices.
+- **[24:41.4 - 24:43.1]** They were called, uh, creating the outliers.
+- **[24:43.1 - 24:53.3]** I also knew that the mean and median were shifted from each other because the median was closer to, uh, median house prices, what people can afford,
+- **[24:53.3 - 24:56.7]** not what one exorbitant, uh, millionaire paid for it.
+- **[24:56.7 - 24:59.4]** Those are fewer cases.
+- **[24:59.4 - 25:03.5]** There are more cases of people buying a house for, like, one crore.
+- **[25:03.5 - 25:04.4]** Yeah.
+- **[25:04.4 - 25:07.0]** There are few cases of, uh, somebody buying a house for twenty crores.
+- **[25:07.0 - 25:08.0]** Oh, yeah.
+- **[25:08.0 - 25:08.7]** Actually, yes.
+- **[25:08.7 - 25:09.3]** You get the point.
+- **[25:09.3 - 25:09.6]** Yes, sir.
+- **[25:09.6 - 25:10.1]** Getting it.
+- **[25:10.1 - 25:10.3]** Yeah.
+- **[25:10.3 - 25:11.1]** It is, it is...
+- **[25:11.1 - 25:12.5]** That's the natural, this one, right?
+- **[25:12.5 - 25:14.8]** You should see that in your statistical curve.
+- **[25:14.8 - 25:18.6]** So if you even chop off low prices- Yeah ...
+- **[25:18.6 - 25:20.1]** then your median goes up.
+- **[25:20.1 - 25:20.5]** Yeah.
+- **[25:20.5 - 25:21.9]** But that is also wrong.
+- **[25:21.9 - 25:22.6]** Yeah.
+- **[25:22.6 - 25:29.4]** You can afford a house in Bangalore for one crore, though you will say an average house is worth five crores.
+- **[25:29.4 - 25:30.1]** Okay.
+- **[25:30.1 - 25:30.8]** Yes, sir.
+- **[25:30.8 - 25:34.9]** The mean is higher, but the median is closer to one.
+- **[25:34.9 - 25:41.6]** The mean got higher because of these one-off, uh, apartments which sold for, like, fifty crores.
+- **[25:41.6 - 25:42.4]** Correct.
+- **[25:42.4 - 25:43.3]** Yeah.
+- **[25:43.3 - 25:48.7]** But the median didn't go up because most people can afford the house at this one.
+- **[25:48.7 - 25:53.3]** And the second thing you'll see in that curve, okay, if you see the real curve, it will not start from zero.
+- **[25:53.3 - 25:54.6]** You-
+- **[25:54.8 - 25:56.4]** You have to have some income to buy a house.
+- **[25:56.4 - 25:57.5]** Yeah.
+- **[25:57.5 - 26:02.9]** That means it's also biased towards a market of people who have money.
+- **[26:02.9 - 26:04.2]** Yeah.
+- **[26:04.2 - 26:05.3]** If you have no money...
+- **[26:05.3 - 26:10.9]** So that means a housing market is not representative of everybody in the market.
+- **[26:10.9 - 26:11.8]** Yeah.
+- **[26:11.8 - 26:16.3]** It is only representative of people who are putting down money for the house.
+- **[26:16.3 - 26:17.6]** Yeah.
+- **[26:17.6 - 26:18.0]** Yeah.
+- **[26:18.0 - 26:18.3]** Yes, sir.
+- **[26:18.3 - 26:23.3]** And it is not surprising that people who are putting no money for the house have money or have income.
+- **[26:23.3 - 26:25.2]** Hmm.
+- **[26:25.2 - 26:26.9]** Yeah.
+- **[26:26.9 - 26:32.6]** It is a rare case that you're sitting on that kind of money without income or without having a response.
+- **[26:32.6 - 26:43.1]** Yeah, like directly supporting- So if you're building a credit model-- Yeah, so if you're building a credit model for whom to give a loan to buy a house and who not to, that model has to take this into consideration,
+- **[26:43.1 - 26:43.3]** right?
+- **[26:43.3 - 26:43.9]** Yes.
+- **[26:43.9 - 26:44.0]** Yes.
+- **[26:44.0 - 26:49.9]** It can't randomly say, "I'll give this person a loan because of this one." On what basis?
+- **[26:49.9 - 26:51.9]** Yeah.
+- **[26:51.9 - 27:01.0]** So the data itself is telling me something about the data, and my intuition about the market is telling me an explanation for that data.
+- **[27:01.0 - 27:07.2]** Now, when I clean up this data, I'll be a lot more careful about what to keep as outlier and what to keep inside the data.
+- **[27:07.2 - 27:14.2]** The reason being, I know something about the market or how the people think about the market or some domain knowledge.
+- **[27:14.2 - 27:15.8]** This is what experience does, right?
+- **[27:15.8 - 27:16.2]** Yeah.
+- **[27:16.2 - 27:18.2]** Somebody in the housing market knows this.
+- **[27:18.2 - 27:20.3]** Other people don't.
+- **[27:20.3 - 27:21.3]** Yeah.
+- **[27:21.3 - 27:21.7]** Right.
+- **[27:21.7 - 27:28.5]** So typically, data scientists work with, uh, expert in that domain- Okay ...
+- **[27:28.5 - 27:38.0]** to say, okay, even if, let us say, your job is to clean the data for them, you need some help on-- Like, you have to first understand what is the goal of cleaning this data.
+- **[27:38.0 - 27:45.1]** Like, what do we mutually agree as if we do this right, what should we see as metrics or results?
+- **[27:45.1 - 27:47.8]** Will your model accuracy go up?
+- **[27:47.8 - 27:52.5]** Will your result-- Like, what is that-- Like, you have to agree on some initial goal.
+- **[27:52.5 - 27:54.2]** Uh, like the impact it brings.
+- **[27:54.2 - 27:56.6]** And secondly-- Yeah.
+- **[27:56.6 - 27:57.5]** No, not impact.
+- **[27:57.5 - 27:58.5]** Leave a high level.
+- **[27:58.5 - 28:00.3]** Be very specific.
+- **[28:00.3 - 28:01.6]** Yeah.
+- **[28:01.6 - 28:01.9]** Okay.
+- **[28:01.9 - 28:03.1]** I clean up the data.
+- **[28:03.1 - 28:05.3]** Let us say I eliminate ninety percent of your data.
+- **[28:05.3 - 28:05.5]** Yeah.
+- **[28:05.5 - 28:07.7]** That's not solving your problem, right?
+- **[28:07.7 - 28:09.0]** Hmm.
+- **[28:09.0 - 28:09.5]** Yes, sir.
+- **[28:09.5 - 28:12.7]** Then you have to figure out, like, what is the goal then?
+- **[28:12.7 - 28:16.4]** Are you saying I want cleaner data because I want better model outcome?
+- **[28:16.4 - 28:19.3]** Then it must-- That means what is better model outcome?
+- **[28:19.3 - 28:23.3]** Higher accuracy, lower predi-precision, higher recall.
+- **[28:23.3 - 28:24.4]** What is that you want?
+- **[28:24.4 - 28:24.9]** Okay.
+- **[28:24.9 - 28:25.4]** In that way.
+- **[28:25.4 - 28:25.7]** Yes, sir.
+- **[28:25.7 - 28:27.3]** First, align up that thought process.
+- **[28:27.3 - 28:27.6]** Okay.
+- **[28:27.6 - 28:28.1]** Understood.
+- **[28:28.1 - 28:28.1]** Yes.
+- **[28:28.1 - 28:32.5]** Second is-- And, and second is to understand who you are doing it for.
+- **[28:32.5 - 28:33.2]** So the domain.
+- **[28:33.2 - 28:39.5]** There will be ins-interesting insights about the domain you will need for-- to clean the data.
+- **[28:39.5 - 28:42.4]** It won't happen randomly.
+- **[28:42.4 - 28:47.2]** Maybe there was something about that data, that marketplace, that this one, to try.
+- **[28:47.2 - 28:53.7]** Like, first you can do statistical analysis on the data and do outlier detection, all the standard data cleaning processes.
+- **[28:53.7 - 29:01.0]** But before you execute each process, you can-- you have to understand what is being filtered out and what is being filtered in, what is being changed.
+- **[29:01.0 - 29:06.0]** And is your domain knowledge agreeing with that change?
+- **[29:06.0 - 29:16.1]** Like to the original example of the house thing, if we were to just do outlier detection and chop off the outliers, I know that if you chop a hundred million dollar house,
+- **[29:16.1 - 29:18.5]** the whole market will shift in one direction.
+- **[29:18.5 - 29:19.9]** That is wrong.
+- **[29:19.9 - 29:22.8]** You cannot-- Like, it is an outlier.
+- **[29:22.8 - 29:23.3]** I agree.
+- **[29:23.3 - 29:25.3]** Nobody wants to pay a hundred million for a house.
+- **[29:25.3 - 29:29.0]** But that one hundred million is what is keeping the whole market alive.
+- **[29:29.0 - 29:36.4]** My means and medians make only sense if that data point is in the data set and not in-- that be eliminated in the data set.
+- **[29:36.4 - 29:36.8]** Correct?
+- **[29:36.8 - 29:39.9]** Hmm.
+- **[29:39.9 - 29:40.5]** Yes, sir.
+- **[29:40.5 - 29:41.5]** Does it make sense?
+- **[29:41.5 - 29:41.9]** Yeah.
+- **[29:41.9 - 29:42.5]** It's making sense.
+- **[29:42.5 - 29:52.5]** Sometimes the data is like, so that context has to be there for you to understand what to keep and what to remove in the data, and what to change, what to
+- **[29:52.5 - 29:53.0]** upgrade.
+- **[29:53.0 - 29:56.0]** And sometimes you'll also have to do enhancements.
+- **[29:56.0 - 30:02.2]** You basically combine one or two features and bring out a third feature when you are doing the clean on the data.
+- **[30:02.2 - 30:02.9]** Yeah.
+- **[30:02.9 - 30:13.1]** Because you'll basically see that when you put it through the training pipeline, sometimes combination of different features tend to work better than
+- **[30:13.1 - 30:14.5]** individual features themselves.
+- **[30:14.5 - 30:24.7]** All you're doing is you're introducing a few new features by extending or extrapolating from the existing dataset, and you are making
+- **[30:24.7 - 30:31.0]** the training process, whatever feature selection process, automatically select out the features which influence the outcome.
+- **[30:31.0 - 30:41.7]** And with the hope that if some of these combined features or new features have some value to provide, they will get automatically
+- **[30:41.7 - 30:47.3]** selected by the model, and the others get dropped out.
+- **[30:47.3 - 30:47.5]** Yeah.
+- **[30:47.5 - 30:49.5]** That is another way to evolve.
+- **[30:49.5 - 30:56.1]** Like when, when I don't have any new data, let us say my model is not performing any better and it is drifting down.
+- **[30:56.1 - 30:58.3]** I don't have any replacement model.
+- **[30:58.3 - 30:59.6]** It is the only model I have.
+- **[30:59.6 - 31:03.8]** And all I can do is retrain, but even the new data looks like the old data.
+
+## Explore–Exploit, Personalization, Relevance, and Ranking
+
+- **[31:03.8 - 31:05.3]** Then what do you do?
+- **[31:07.6 - 31:14.9]** Um, yeah, like, um, that's- Then you have to do this kind of a technique where you have to kinda somehow inject some this one.
+- **[31:14.9 - 31:21.3]** So, uh, have you read through explore and exploit concepts in this one, in algorithmic...
+- **[31:21.3 - 31:22.9]** uh, sorry, in model building?
+- **[31:22.9 - 31:24.7]** Uh, no, sir.
+- **[31:24.7 - 31:27.8]** So- But, like, in this- So one is, uh, one is drift.
+- **[31:27.8 - 31:32.7]** Another is a problem that you're not feeding it any new data than it's, um, supposed to see.
+- **[31:32.7 - 31:33.3]** Mm-hmm.
+- **[31:33.3 - 31:37.7]** Models overfit as you give them more and more data of its kind.
+- **[31:37.7 - 31:44.8]** If it already knows something, it keeps strengthening those weights, and it overfits as you give similar examples.
+- **[31:44.8 - 31:47.5]** So models do this.
+- **[31:47.5 - 31:53.5]** So the, the way it works is, in real life, we never run a model at one hundred percent of the traffic.
+- **[31:53.5 - 32:01.9]** We always run, um, like, one is to, say, run the model on whatever is the predictions.
+- **[32:01.9 - 32:08.2]** But at, at, like, ten percent of the times, I'll do a random prediction rather than a forced prediction of the model.
+- **[32:08.2 - 32:18.2]** What that means is I'm creating randomness into the system to see if the results my model was predicting actually is
+- **[32:18.2 - 32:19.7]** catching the randomness or not.
+- **[32:19.7 - 32:28.4]** And second thing the randomness does is it creates new pathways in the-- for the model building, which you didn't have before.
+- **[32:28.4 - 32:30.1]** Let us say I was...
+- **[32:30.1 - 32:33.0]** Let us say I'm, I'm on Myntra homepage.
+- **[32:33.0 - 32:39.3]** I'm selecting your male, whatever age group I've detected, and I'm selecting something to show you.
+- **[32:39.3 - 32:44.0]** Let us say I never showed you something, I wouldn't know if you like it or not.
+- **[32:44.0 - 32:49.1]** So even though my algorithm will tell you, "Okay, these are ten things you may like"- Yeah ...
+- **[32:49.1 - 32:52.6]** I will throw two more things randomly, which I don't know if you like or not.
+- **[32:52.6 - 32:53.4]** Okay.
+- **[32:53.4 - 32:57.2]** I'm gonna just throw it in there and see how you react to that.
+- **[32:57.2 - 32:58.1]** Okay.
+- **[32:58.1 - 33:03.9]** If you select that, that tells me that you may like this, so then I'll score that higher in my model.
+- **[33:03.9 - 33:14.0]** Now, if I had originally started with my original model with only its features, I would have never introduced you to this new product because the model never would have introduced you to this
+- **[33:14.0 - 33:14.5]** new product.
+- **[33:14.5 - 33:18.9]** So we call this explore and exploit.
+- **[33:18.9 - 33:28.9]** That means a small portion of your model outcome, instead of asking the model to infer the predict something, you select something randomly
+- **[33:28.9 - 33:29.9]** for ten percent of the traffic.
+- **[33:29.9 - 33:32.2]** Just random.
+- **[33:32.2 - 33:33.4]** Oh, got it.
+- **[33:33.4 - 33:37.1]** But you make it part of the feedback loop when you retrain the model.
+- **[33:37.1 - 33:43.9]** So even though the model didn't predict this, model got to see what you did with this new data.
+- **[33:43.9 - 33:45.7]** Yeah.
+- **[33:45.7 - 33:52.4]** And the expectation is that if that exploration was successful, somebody, that's what your random thing was.
+- **[33:52.4 - 34:02.4]** Even though it was not predicted by your model as, "Okay, this person might like it," but that person went and clicked on something I showed by random, the model in the next cycle
+- **[34:02.4 - 34:05.1]** of training will get...
+- **[34:05.1 - 34:09.3]** will incorporate that information and say, "This person looked at that.
+- **[34:09.3 - 34:20.2]** Can I now increase the rank of that product in this probability space for this person's affinity with the various products?" Got
+- **[34:20.2 - 34:20.5]** it?
+- **[34:20.5 - 34:21.2]** Uh, yeah, understood.
+- **[34:21.2 - 34:21.4]** Yes.
+- **[34:21.4 - 34:23.2]** So we call it relevance and ranking.
+- **[34:23.2 - 34:24.4]** That's, that's what it is.
+- **[34:24.4 - 34:26.6]** Go to Google Search, that's what it does.
+- **[34:26.6 - 34:28.7]** Go to any website, that's what it does.
+- **[34:28.7 - 34:31.5]** It is, it's a standard method called relevance and ranking.
+- **[34:31.5 - 34:32.5]** Okay.
+- **[34:32.5 - 34:34.8]** That means, how do I know what is relevant to you?
+- **[34:34.8 - 34:35.5]** Yeah.
+- **[34:35.5 - 34:38.6]** And among the things which are relevant to you, how do I know what to rank it as?
+- **[34:38.6 - 34:40.4]** Which is most important, which is less important?
+- **[34:40.4 - 34:40.7]** Okay.
+- **[34:40.7 - 34:41.6]** Relevance and ranking.
+- **[34:41.6 - 34:41.6]** Yeah.
+- **[34:41.6 - 34:42.4]** Two ideas, right?
+- **[34:42.4 - 34:44.5]** They combine, combine the two ideas.
+- **[34:44.5 - 34:50.8]** All algorithms which are doing affinity or personalization are nothing but these two ideas combined together.
+- **[34:50.8 - 34:53.5]** What would you like?
+- **[34:53.5 - 35:01.8]** And if I were to shortlist what among all the things what you like, in which order should I show it to you knowing what you like?
+- **[35:01.8 - 35:04.6]** Yeah.
+- **[35:04.6 - 35:04.7]** Okay.
+- **[35:04.7 - 35:06.6]** Those two ideas are basically this one.
+- **[35:06.6 - 35:14.2]** And the third idea is I'm gonna see how to interact with this irrespective of the original order in which I showed it.
+- **[35:14.2 - 35:24.2]** If you touch something bottom of the pile, even if I don't show it to you, show it to you as at the top, in the next time, I will make that product come up in the stack.
+- **[35:24.2 - 35:29.2]** And after a few tries, maybe if you like that product so much, it will be on the top of your stack.
+- **[35:29.2 - 35:39.6]** Basically, uh, uh, what is that, uh, most recently used, like your taskbar works or your history works.
+- **[35:39.6 - 35:41.8]** The suggestions- That's what that- ...
+- **[35:41.8 - 35:42.2]** which we did.
+- **[35:42.2 - 35:42.4]** Yeah.
+- **[35:42.4 - 35:47.4]** That, uh, that, uh, that one is effectively getting emulated into the model by doing this technique.
+- **[35:47.4 - 35:52.8]** Uh, so since- Because what you're there saying is if somebody touches something, you give it relevance.
+- **[35:52.8 - 35:53.1]** Yeah.
+- **[35:53.1 - 35:53.4]** Right.
+- **[35:53.4 - 35:54.9]** Yeah.
+- **[35:54.9 - 35:56.1]** Yeah.
+- **[35:56.1 - 35:59.8]** It's an inter, in, uh, in-indirect way of doing the same thing.
+- **[35:59.8 - 36:00.2]** Yeah.
+- **[36:00.2 - 36:02.4]** Because you can't tell a model what to do.
+- **[36:02.4 - 36:03.5]** It'll predict what it'll predict.
+- **[36:03.5 - 36:10.6]** So here is a way for you to get the model to understand new data, look at new data, start to kind of shift.
+- **[36:10.6 - 36:16.5]** Now, when we did this by just doing explore and exploit, in a lot of cases, uh-
+- **[36:16.7 - 36:18.9]** Model drift can be taken care by this.
+- **[36:18.9 - 36:25.8]** Because you put some ten percent exploration, uh, model will automatically get infused with, with new data.
+- **[36:25.8 - 36:32.6]** In a day or two, you start to see the observability results, uh, automatically pick up to normal practices.
+- **[36:32.6 - 36:34.0]** That happens.
+- **[36:34.0 - 36:42.3]** That is because originally you were, you were trained the model with the original set of data, and you never retrained it properly, right?
+- **[36:42.3 - 36:48.8]** You're putting a little bit of randomization, the process automatically gave it the necessary boost it required.
+- **[36:48.8 - 36:51.3]** Um, yeah.
+- **[36:51.3 - 36:52.6]** So, like, one question now.
+- **[36:52.6 - 36:54.2]** Like, uh- Yeah ...
+- **[36:54.2 - 37:03.0]** suppose, like, uh, there is a new data, uh, from the customer behavior based on their, uh, relevance and randomness, uh, like, whatever we discussed.
+- **[37:03.0 - 37:03.5]** Yeah.
+- **[37:03.5 - 37:10.2]** Um, so, um, like, at what frequency is the model trained on this new data set, like, now?
+- **[37:10.2 - 37:12.8]** Like, how, uh- That is something you have to define.
+- **[37:12.8 - 37:22.5]** See, most cases that is defined by, uh, we call that, uh, what is called temporal, uh, value of the data.
+- **[37:22.5 - 37:28.0]** Let, let us say, uh, take any data, sorry, common things about the data, right?
+- **[37:28.0 - 37:28.5]** Yeah.
+- **[37:28.5 - 37:30.3]** Uh, let us say, say, behavior itself.
+- **[37:30.3 - 37:32.9]** Let us say click on an app, like Myntra.
+- **[37:32.9 - 37:37.4]** Like, say, let us say people come to Myntra, they click on something and buy something and go away.
+- **[37:37.4 - 37:38.0]** Okay?
+- **[37:38.0 - 37:48.2]** If I'm looking at behavior data of Myntra itself, I, I know certain characteristics about the user that will help me model
+- **[37:48.2 - 37:49.1]** that data better.
+- **[37:49.1 - 37:51.4]** That means I'll give you these statistics.
+- **[37:51.4 - 37:54.0]** Myntra had an average of about...
+- **[37:54.0 - 37:57.7]** Average session time was about four minutes for a user.
+- **[37:57.7 - 37:58.8]** That's the average.
+- **[37:58.8 - 38:04.2]** Like, if, if, if a user came to a session, they would spend about four minutes.
+- **[38:04.2 - 38:06.9]** Average sessions per day is about two.
+- **[38:06.9 - 38:08.8]** When, you don't know.
+- **[38:08.8 - 38:10.4]** It can happen any time in the day.
+- **[38:10.4 - 38:15.7]** But average, like, about two sessions, two point two sessions per user per day.
+- **[38:15.7 - 38:19.9]** Now, with these two pieces of information, now you know certain things.
+- **[38:19.9 - 38:23.5]** You know that you have two sessions per day coming.
+- **[38:23.5 - 38:30.7]** Uh, if you average multiply it out, you have about eight minutes of activity coming your way every day on an average.
+- **[38:30.7 - 38:31.1]** Correct?
+- **[38:31.1 - 38:31.6]** Yeah.
+- **[38:31.6 - 38:34.9]** That's the right math.
+- **[38:34.9 - 38:37.7]** Now, let us say I have this much information.
+- **[38:37.7 - 38:40.7]** Now, let us take two use cases.
+- **[38:40.7 - 38:46.5]** If I want to improve something about your personalization, I want to know something more about you.
+- **[38:46.5 - 38:47.2]** Yeah.
+- **[38:47.2 - 38:53.0]** The only thing I can know more about you is to show you some products in the eight minutes and get feedback from.
+- **[38:53.0 - 38:53.8]** Got it?
+- **[38:53.8 - 38:54.3]** Yeah.
+- **[38:54.3 - 38:54.5]** Yeah.
+- **[38:54.5 - 38:54.8]** Right.
+- **[38:54.8 - 38:55.0]** Sir.
+- **[38:55.0 - 38:56.1]** Because you click on it, you...
+- **[38:56.1 - 38:56.9]** That's it, whatever.
+- **[38:56.9 - 38:59.1]** There is, there is no other interaction points, right?
+- **[38:59.1 - 38:59.9]** Yeah.
+- **[38:59.9 - 39:03.0]** I have no way to know something about you when you are not touching them.
+- **[39:03.0 - 39:04.2]** Okay?
+- **[39:04.2 - 39:10.9]** That means I have to load enough information into that eight minutes to get me more data points.
+- **[39:10.9 - 39:14.4]** But you're realizing that there's only two sessions a day.
+- **[39:14.4 - 39:22.4]** Even if I m-miss up processing the data from one session to another, I don't lose much because you're coming the next day.
+- **[39:22.4 - 39:23.6]** Okay.
+- **[39:23.6 - 39:31.5]** So that defines, like, in most cases, in this case, I will not retrain the model less than a day.
+- **[39:31.5 - 39:32.7]** There's no point.
+- **[39:32.7 - 39:35.3]** Two problems are happening.
+- **[39:35.3 - 39:41.5]** I'm not getting enough new data unless I serve lot more customers, right?
+- **[39:41.5 - 39:41.8]** Okay.
+- **[39:41.8 - 39:42.0]** Yes.
+- **[39:42.0 - 39:42.2]** Yes, sir.
+- **[39:42.2 - 39:44.3]** For the model to be retrained, I need new data.
+- **[39:44.3 - 39:49.4]** If you have no new data to, to produce, why am I training, retraining this?
+- **[39:49.4 - 39:50.0]** That's number one.
+- **[39:50.0 - 39:50.5]** Yeah.
+- **[39:50.5 - 39:50.8]** That's very true.
+- **[39:50.8 - 39:50.8]** Okay.
+- **[39:50.8 - 40:01.1]** Second is, if the decision point of-- Even if I had the data, let us say I got to know something about the user, I can only apply that information when the user comes for the next session.
+
+## From a Specific Solution to a Reusable Platform
+
+- **[40:01.1 - 40:01.7]** Correct?
+- **[40:01.7 - 40:01.9]** Yeah.
+- **[40:01.9 - 40:02.3]** Right, sir.
+- **[40:02.3 - 40:04.1]** Till then, I'm just stuck here.
+- **[40:04.1 - 40:07.0]** Like, I, I, algorithm knows something, but I don't know.
+- **[40:07.0 - 40:14.3]** So even if I-- algorithm knew something hours before, it doesn't know what to do with that information till the user comes back.
+- **[40:14.3 - 40:15.1]** Yeah.
+- **[40:15.1 - 40:17.9]** Now, take the second scenario.
+- **[40:17.9 - 40:18.8]** This is one scenario.
+- **[40:18.8 - 40:24.6]** This is a simpler scenario of an algorithm working, knowing the number of sessions per day, number-- the average time spent.
+- **[40:24.6 - 40:31.3]** I can determine that more on an average, maybe once in a day, once in a few days, I can train the model.
+- **[40:31.3 - 40:32.1]** That's as much.
+- **[40:32.1 - 40:35.9]** I also have to look at how much data I have to collect to train the model.
+- **[40:35.9 - 40:37.2]** Is it meaningful?
+- **[40:37.2 - 40:38.0]** Yeah.
+- **[40:38.0 - 40:43.2]** So sometimes it may not be that I may not want to re-retrain it every day, but I just don't have new, enough new data.
+- **[40:43.2 - 40:51.7]** Like, let us say I'm, I'm, uh, you have a, let us say a, a cart page where people manage carts.
+- **[40:51.7 - 40:57.7]** Let us say a lot of people don't go to the cart page till they put something in the cart.
+- **[40:57.7 - 40:58.3]** Okay.
+- **[40:58.3 - 40:59.2]** Make sense?
+- **[40:59.2 - 40:59.4]** Yeah.
+- **[40:59.4 - 40:59.7]** Yes, sir.
+- **[40:59.7 - 41:03.4]** Like when you're buying, till you put something in the cart, you're never going to the cart page.
+- **[41:03.4 - 41:04.0]** Yeah.
+- **[41:04.0 - 41:04.3]** Okay.
+- **[41:04.3 - 41:08.2]** Let us say I was running a model, personalization model on the cart page.
+- **[41:08.2 - 41:08.9]** Okay.
+- **[41:08.9 - 41:14.0]** No matter what I do, I just don't have enough users who are landing in the cart page for me to get data points.
+- **[41:14.0 - 41:14.8]** Yeah.
+- **[41:14.8 - 41:15.0]** Right.
+- **[41:15.0 - 41:18.1]** So even if I want to train the model every day, I just don't have enough data points.
+- **[41:18.1 - 41:18.9]** Okay.
+- **[41:18.9 - 41:19.2]** Yeah.
+- **[41:19.2 - 41:26.2]** This page is not visited by that many people for me to have enough new data points for me to actually train the model.
+- **[41:26.2 - 41:27.4]** So that is the-
+- **[41:27.6 - 41:27.8]** One.
+- **[41:27.8 - 41:30.8]** That is the way you look at it when you look at, when you apply this one.
+- **[41:30.8 - 41:32.8]** Now let us take the second use case.
+- **[41:32.8 - 41:35.4]** I want to do in-session personalization.
+- **[41:35.4 - 41:45.3]** That means I not only want to personalize things for you by the time you come next, I want to personalize the next page for you as you click.
+- **[41:45.3 - 41:46.3]** Yeah.
+- **[41:46.3 - 41:53.9]** More demanding, more difficult to do because I have to kind of now, knowing that the average session is only four minutes.
+- **[41:53.9 - 41:58.4]** For a session you have about twenty to twenty-two page clicks.
+- **[41:58.4 - 42:02.6]** That means that's the moment between the pages you're gonna go through.
+- **[42:02.6 - 42:07.6]** So if I divide that up, that tells me how many seconds do I have to react to something.
+- **[42:07.6 - 42:09.7]** Hmm.
+- **[42:09.7 - 42:10.2]** Okay.
+- **[42:10.2 - 42:15.4]** That means on an average, in five to ten seconds you are tak-making a page decision to click something.
+- **[42:15.4 - 42:25.4]** That means whatever information even in session I have, I have about five to ten seconds for me to determine the next
+- **[42:25.4 - 42:26.3]** alternative for you.
+- **[42:26.3 - 42:32.1]** If I don't do it in that time, there is no point my model working or not.
+- **[42:32.1 - 42:34.5]** Yeah.
+- **[42:34.5 - 42:35.1]** You get the point?
+- **[42:35.1 - 42:35.5]** Yes, sir.
+- **[42:35.5 - 42:36.2]** Understanding, sir.
+- **[42:36.2 - 42:36.9]** Yeah.
+- **[42:36.9 - 42:37.8]** So that is the other way.
+- **[42:37.8 - 42:43.7]** So when you have use cases like this, we had build, we had to build a near real-time pipelines specifically for these kind of models.
+- **[42:43.7 - 42:44.2]** Yeah.
+- **[42:44.2 - 42:49.0]** And these kinds of models will be retrained in like five-minute intervals, ten-minute intervals- Yeah.
+- **[42:49.0 - 42:49.3]** Uh- ...
+- **[42:49.3 - 42:52.3]** because they're kind of a different stream of data altogether- Yeah ...
+- **[42:52.3 - 42:53.6]** and a different way of looking at it.
+- **[42:53.6 - 42:54.6]** Now, that's what.
+- **[42:54.6 - 42:57.6]** So it is not easy to just say one thing.
+- **[42:57.6 - 43:03.1]** You have to look at the context, the statistics of the information around you.
+- **[43:03.1 - 43:04.8]** They're all like clues.
+- **[43:04.8 - 43:08.1]** They tell you, and all of this is, there's no...
+- **[43:08.1 - 43:09.6]** nothing written in stone.
+- **[43:09.6 - 43:12.8]** All of this input is a way to kind of...
+- **[43:12.8 - 43:16.9]** Now, what I'm saying would be like the starting point.
+- **[43:16.9 - 43:21.0]** You're not gonna just set something at, uh, on a daily basis and just leave it there.
+- **[43:21.0 - 43:26.1]** You'll say, "My best judgment, we should start on a daily basis." Yeah.
+- **[43:26.1 - 43:34.4]** From here onwards, I will look at which algorithm requires to be done more frequently, less frequently, depending on the output, right?
+- **[43:34.4 - 43:35.0]** Right.
+- **[43:35.0 - 43:41.5]** Like, look, idea is all of this teaches you is how to spot something and start on a baseline.
+- **[43:41.5 - 43:43.7]** Doesn't give you the answer.
+- **[43:43.7 - 43:46.4]** What is the right answer in that situation, I don't know either.
+- **[43:46.4 - 43:47.1]** Yeah.
+- **[43:47.1 - 43:48.2]** You'll have to test it out and see.
+- **[43:48.2 - 43:58.4]** But these, all the data points around you are clues, and you have to use them wisely to narrow it down.
+- **[43:58.4 - 44:04.1]** So like- Ba-basically, if, uh, for that first, like, uh, just to complete the thought- Yeah ...
+- **[44:04.1 - 44:05.3]** on the first exercise, right?
+- **[44:05.3 - 44:05.8]** Yeah.
+- **[44:05.8 - 44:09.7]** I could have started with once an hour training, retraining- Yeah ...
+- **[44:09.7 - 44:16.0]** and then would have discovered all this and realized that, okay, I just don't have enough data to train so frequently.
+- **[44:16.0 - 44:17.5]** I could do that.
+- **[44:17.5 - 44:19.0]** Instead, what I did was the reverse.
+- **[44:19.0 - 44:29.1]** I went, I put a statistician or a data analyst to say, "Give me all the statistics about the data." And on the basis of that statistics, I took a cautious call and
+- **[44:29.1 - 44:32.6]** saying, "Let's start with the daily basis, and then we'll refine more." Yeah.
+- **[44:32.6 - 44:39.7]** So you're kind of using data to your advantage to speak to you about how to take decisions.
+- **[44:39.7 - 44:40.9]** Yeah.
+- **[44:40.9 - 44:43.1]** So data decides, like, when to train.
+- **[44:43.1 - 44:44.6]** Yeah.
+- **[44:44.6 - 44:47.3]** At least it helps me give me a direction, right?
+- **[44:47.3 - 44:49.3]** Yeah.
+- **[44:49.3 - 44:49.6]** Understand.
+- **[44:49.6 - 44:57.9]** It won't be of the most foolish I, I remember when, when I joined Myntra, I, I developed like, um, data and machine learning platforms for a living for twenty years.
+- **[44:57.9 - 44:58.5]** Yeah.
+- **[44:58.5 - 45:08.6]** I came here to India and I, I joined Myntra and they were like, uh, second day one product manager came to me, he's like, "Oh, uh, customers have a huge problem.
+- **[45:08.6 - 45:11.8]** Uh, their queries are not running on time.
+- **[45:11.8 - 45:14.0]** Thousands of queries are stuck." Okay.
+- **[45:14.0 - 45:14.2]** Yeah.
+- **[45:14.2 - 45:16.0]** I said, "Where is the analysis?" Yeah.
+- **[45:16.0 - 45:17.9]** So I asked him like, "Where is the analysis?
+- **[45:17.9 - 45:26.3]** Like, show me what's happening." He went two days, collected feedback from all the customers , wrote it down, and got it to me.
+- **[45:26.3 - 45:27.6]** And I started laughing at him.
+- **[45:27.6 - 45:30.8]** I'm like, "Dude, why are you asking your customers?
+- **[45:30.8 - 45:33.8]** All their patterns are, are logged in your data.
+- **[45:33.8 - 45:38.2]** Get a statistician to look at the data." Right.
+- **[45:38.2 - 45:38.2]** I know.
+- **[45:38.2 - 45:44.3]** The story is so much more clear when, when you look at the data than ask some- Because if you ask somebody, they don't remember everything.
+- **[45:44.3 - 45:45.2]** Right.
+- **[45:45.2 - 45:46.6]** They only remember partial things.
+- **[45:46.6 - 45:49.7]** They remember wo- bad things better than wo- better things.
+- **[45:49.7 - 45:50.2]** Yeah.
+- **[45:50.2 - 45:50.5]** Right.
+- **[45:50.5 - 45:50.6]** Yeah.
+- **[45:50.6 - 45:51.5]** That's human nature.
+- **[45:51.5 - 45:52.3]** Yeah.
+- **[45:52.3 - 45:52.4]** Yeah.
+- **[45:52.4 - 45:52.4]** Absolutely.
+- **[45:52.4 - 45:55.2]** It will give you biased feedback if you try to ask questions like that.
+- **[45:55.2 - 45:55.7]** Yeah.
+- **[45:55.7 - 45:56.0]** Yeah.
+- **[45:56.0 - 46:01.1]** It is the most stupid idea to ask, go and ask questions, "Well, what problem do you have?" Everything is a problem.
+- **[46:01.1 - 46:02.2]** Fucking living is a problem.
+- **[46:02.2 - 46:03.0]** Yeah.
+- **[46:03.0 - 46:03.4]** It does.
+- **[46:03.4 - 46:04.0]** Good point.
+- **[46:04.0 - 46:04.1]** Yeah.
+- **[46:04.1 - 46:05.8]** So don't ask me that question.
+- **[46:05.8 - 46:08.5]** That's a very bad question to ask because it has no good answer.
+- **[46:08.5 - 46:09.2]** Yeah.
+- **[46:09.2 - 46:11.7]** Answers are hidden in patterns in data.
+- **[46:11.7 - 46:15.2]** Your behavior tells me more than you actually want to reveal.
+- **[46:15.2 - 46:20.9]** So I am a big this one of using data to start reading behavior.
+- **[46:20.9 - 46:25.7]** All of this was basically saying human, human behavior in another form.
+- **[46:25.7 - 46:27.7]** Yeah.
+- **[46:27.7 - 46:29.9]** Yeah.
+- **[46:29.9 - 46:31.5]** Anyway, so what we can do is this.
+- **[46:31.5 - 46:31.8]** Yeah.
+- **[46:31.8 - 46:35.5]** Like, first settle down on the q- scope of your project.
+- **[46:35.5 - 46:38.4]** Start to understand, like what, like isolate it-
+- **[46:38.7 - 46:44.5]** One, one problem, one set of problems or on a, on a, a problem on a specific model or a specific data set.
+- **[46:44.5 - 46:51.6]** First isolate it, then I'm happy to work with you and like brainstorm how to set it up.
+- **[46:51.6 - 46:54.4]** Like, because you don't even have to do much of it nowadays.
+- **[46:54.4 - 46:55.1]** Yeah.
+- **[46:55.1 - 46:59.1]** You have professional tools which do most of this.
+- **[46:59.1 - 47:00.6]** You can set things up in there.
+- **[47:00.6 - 47:03.2]** Like MLflow is open source, it's free.
+- **[47:03.2 - 47:04.0]** Yes, sir.
+- **[47:04.0 - 47:06.6]** You really don't have to do much for training pipelines.
+- **[47:06.6 - 47:09.0]** It'll write it in MLflow very, very nicely.
+- **[47:09.0 - 47:16.0]** It has all the components required for managing the training parameters, managing memory, compute, everything.
+- **[47:16.0 - 47:18.3]** It has beautiful architectures.
+- **[47:18.3 - 47:25.8]** I'm ha- I am happy to help you there because I can tell you how the, how an open source setup or a professional setup would look like.
+- **[47:25.8 - 47:26.8]** Oh, yeah.
+- **[47:26.8 - 47:28.4]** And what tools you have at your disposal.
+- **[47:28.4 - 47:33.0]** And I can have you also talk to one or two people from the MLOps team I worked in.
+- **[47:33.0 - 47:37.3]** So they work in Salesforce now, but, uh, that lady would be happy to talk to you.
+- **[47:37.3 - 47:38.8]** She was my MLOps lead.
+- **[47:38.8 - 47:39.8]** Okay, yeah.
+- **[47:39.8 - 47:41.6]** So she built the entire platform in two years.
+- **[47:41.6 - 47:42.4]** So, so- Yeah ...
+- **[47:42.4 - 47:44.2]** she knows in and out of the ML platform.
+- **[47:44.2 - 47:52.2]** So, like, I can put you in touch with people like that, but right now it's too early because you don't have the concept what you want to do.
+- **[47:52.2 - 47:53.1]** Yeah, sir.
+- **[47:53.1 - 47:56.7]** Even if, let us say, you had a con- a conversation with her, I don't know what you would ask.
+- **[47:56.7 - 47:57.2]** Yeah.
+- **[47:57.2 - 47:57.9]** Actually, yeah.
+- **[47:57.9 - 48:00.6]** You, you have to first isolate your problem.
+- **[48:00.6 - 48:03.0]** You say what needs to be done about it.
+- **[48:03.0 - 48:10.0]** Then somebody specialized like that come, come and help you saying, "Okay, if you are trying to do this, here is what is available to you readily.
+- **[48:10.0 - 48:11.7]** Here is what is open source.
+- **[48:11.7 - 48:13.6]** Here is what is you can do on your own.
+- **[48:13.6 - 48:15.5]** Here is where you will have challenges.
+- **[48:15.5 - 48:16.9]** Here is how you run...
+- **[48:16.9 - 48:19.6]** how you get around it." Yeah.
+- **[48:19.6 - 48:22.2]** That insight, somebody like that would give.
+- **[48:22.2 - 48:22.9]** Yeah, exactly.
+- **[48:22.9 - 48:25.4]** Because they have experience doing this hundreds of times before.
+- **[48:25.4 - 48:25.8]** Right, sir.
+- **[48:25.8 - 48:26.1]** Right.
+- **[48:26.1 - 48:27.3]** The, uh- They've seen it, right?
+- **[48:27.3 - 48:27.7]** The way better, yeah.
+- **[48:27.7 - 48:28.1]** Yeah.
+- **[48:28.1 - 48:30.4]** So first isolate your problem.
+- **[48:30.4 - 48:33.9]** Start to kind of narrow it down and say, "Exactly what am I trying to solve?
+- **[48:33.9 - 48:35.3]** On what problem in this one?
+- **[48:35.3 - 48:40.3]** What domain?" Sir, like also, um- Generic platforms are extremely hard to build.
+- **[48:40.3 - 48:41.6]** Very, very hard to build.
+- **[48:41.6 - 48:42.4]** Okay.
+- **[48:42.4 - 48:43.6]** Because you can't anticipate.
+- **[48:43.6 - 48:52.9]** See, our whole point of a platform is to build it with enough, uh, I would say, uh, like it's like a jigsaw puzzle.
+- **[48:52.9 - 48:56.8]** I build the components in such a way that they can be reassembled to solve any problem.
+- **[48:56.8 - 49:04.5]** But at the same time, if I don't know the problem I'm solving, I don't know what pieces to build.
+- **[49:04.5 - 49:05.1]** You get the point?
+- **[49:05.1 - 49:06.2]** Yeah, understanding, sir.
+- **[49:06.2 - 49:08.7]** Yeah, it just kind of...
+- **[49:08.7 - 49:10.8]** Because you can't put one ahead of the other.
+- **[49:10.8 - 49:16.2]** You can't come and say, "I've built a platform with entirely everything, and you can assemble it however you want." Uh, yeah.
+- **[49:16.2 - 49:26.2]** Even though that is the philosophy, it has to be applied in the form of, first let me identify one or two problems I can solve, build the components, assemble them to solve that problem.
+- **[49:26.2 - 49:30.9]** Now I would have-- As that grows, that problem becomes ten more problem.
+- **[49:30.9 - 49:36.2]** Like, I was solving some personalization problem for some of the ML engineers in Myntra.
+- **[49:36.2 - 49:41.5]** That basically meant another team was doing pricing optimization.
+- **[49:41.5 - 49:51.3]** They were also like, "If you can do affinity for personalization, so which product is interested in who, this one, you can also do affinity on price, right?" Yeah.
+- **[49:51.3 - 49:52.0]** Actually, yes, sir.
+- **[49:52.0 - 49:55.2]** Who, who, who has affinity to which price tag?
+- **[49:55.2 - 49:56.0]** Yeah.
+- **[49:56.0 - 49:57.7]** They, they can do it the same way.
+- **[49:57.7 - 50:07.8]** Then seller team came and said, "I need to figure out how to set prices for new fashion things which come in every six months." A sellers need a tool
+- **[50:07.8 - 50:10.8]** which can predict what could be the price range for something new.
+- **[50:10.8 - 50:14.5]** Like you create a T-shirt, what should you price it as?
+- **[50:14.5 - 50:17.6]** You have to have some recommendation to the seller, right?
+- **[50:17.6 - 50:18.0]** Yeah.
+- **[50:18.0 - 50:18.3]** Yes, sir.
+- **[50:18.3 - 50:26.1]** The seller can put their own price, but it would be ideal as a platform you provide saying, "Okay, this T-shirt will sell from X to Y.
+- **[50:26.1 - 50:31.4]** You decide how much to price it at." Mm.
+- **[50:31.4 - 50:33.5]** Knowing what, what the other things sell on the platform.
+- **[50:33.5 - 50:36.3]** So that team came to the same thing.
+- **[50:36.3 - 50:41.2]** They, they took the same pri- affinity model, they applied it to seller pricing.
+- **[50:41.2 - 50:44.9]** So all this happened because...
+- **[50:44.9 - 50:46.8]** Not, not that I went looking for everything.
+- **[50:46.8 - 50:49.2]** I went looking one problem to solve.
+- **[50:49.2 - 50:50.6]** I solved that problem.
+- **[50:50.6 - 50:54.4]** Everybody else saw the pattern of their problem in that problem.
+- **[50:54.4 - 50:55.5]** Yeah.
+- **[50:55.5 - 50:59.3]** And that is how platforms gain their ability.
+- **[50:59.3 - 51:02.3]** Because I built the platform with a modular way- Mm ...
+- **[51:02.3 - 51:04.0]** but it was solving one problem before.
+- **[51:04.0 - 51:08.9]** Now it is solving all the problems, because people started to use the platform differently.
+- **[51:08.9 - 51:12.1]** They started to question, "Why can't I solve that problem also?
+- **[51:12.1 - 51:15.2]** This problem also?" Yeah.
+- **[51:15.2 - 51:16.8]** So- That question never came before.
+- **[51:16.8 - 51:17.6]** It came after.
+- **[51:17.6 - 51:19.8]** So that is a chicken and egg problem.
+- **[51:19.8 - 51:22.2]** So don't try to build a platform for the sake of platform.
+- **[51:22.2 - 51:23.3]** Yeah.
+- **[51:23.3 - 51:23.4]** Okay.
+- **[51:23.4 - 51:26.6]** You will have a lot of problems trying to do that.
+- **[51:26.6 - 51:29.6]** You will have to come at it in a reverse way.
+- **[51:29.6 - 51:30.6]** Mm.
+- **[51:30.6 - 51:37.8]** First, identify a problem to solve, isolate the problem, then build the platform component which solve that.
+- **[51:37.8 - 51:47.9]** Later you figure out, once you have solved the problem, if you need to expand this one solution to incorporate a larger
+- **[51:47.9 - 51:49.0]** business, do that later.
+- **[51:49.5 - 51:50.0]** You get the point?
+- **[51:50.0 - 51:51.9]** I understand you, yeah, completely.
+- **[51:51.9 - 51:52.2]** Yes, sir.
+- **[51:52.2 - 51:59.5]** You can, you can say, "Okay, I built it for..." Whatever your drift point, drift or drift detection monitoring, you built it for that one specific use case.
+- **[51:59.5 - 52:10.3]** But then you can also platformize it by and say, "Anybody who has a model in production can use my software to do drift detection." That
+- **[52:10.3 - 52:12.0]** is platformization of a solution.
+- **[52:12.0 - 52:13.0]** Yeah.
+- **[52:13.0 - 52:15.5]** Because you created the solution already.
+- **[52:15.5 - 52:20.4]** You are now saying, "My stuff can be plugged and played for your problems.
+
+## Final Recommendation: Isolate the Problem and Build the Required Components
+
+- **[52:20.4 - 52:23.4]** Why don't you use it?" Right, sir.
+- **[52:23.4 - 52:23.9]** Yeah.
+- **[52:23.9 - 52:25.8]** That is typically how platforms grow in a company.
+- **[52:25.8 - 52:29.4]** Somebody will create one solution to one problem.
+- **[52:29.4 - 52:32.6]** Every other team will be like, "I'm also suffering the same problem.
+- **[52:32.6 - 52:35.8]** Why should I invent anything?" Yeah.
+- **[52:35.8 - 52:37.9]** I'm gonna reuse it.
+- **[52:37.9 - 52:38.3]** That's what, yeah.
+- **[52:38.3 - 52:39.7]** Easy for everything, right?
+- **[52:39.7 - 52:39.8]** Yeah.
+- **[52:39.8 - 52:43.6]** That, that is how companies will use the-- this one, methods.
+- **[52:43.6 - 52:47.3]** So yeah, talk about the problem, this one.
+- **[52:47.3 - 52:57.2]** Isolate the problem, update the document, and I'm happy to help you do the, like, the architecture and, and the breakdown of what you need to do to accomplish it.
+- **[52:57.2 - 53:06.5]** And then I'm happy to put you in touch with some of these friends of mine- Yeah, absolutely ...who are specialized in this, who can then help you with saying, "Okay, this is exactly what you're gonna solve.
+- **[53:06.5 - 53:08.0]** Here are the three, four softwares.
+- **[53:08.0 - 53:09.1]** Go install it.
+- **[53:09.1 - 53:10.4]** Here is how you do it.
+- **[53:10.4 - 53:12.8]** Here is how you run it." Yeah.
+- **[53:12.8 - 53:17.6]** You can, okay, you can go to Antigravity and any of these AI tools and just to build it.
+- **[53:17.6 - 53:18.2]** Yeah.
+- **[53:18.2 - 53:21.6]** But problem with that is, I don't think that will cut it for a final-year project.
+- **[53:21.6 - 53:25.5]** What it does is very, very poor- Yeah, actually ...in terms of POC.
+- **[53:25.5 - 53:28.3]** And it is not detailed enough.
+- **[53:28.3 - 53:33.9]** And the final-year project, uh, obviously the expectations are high enough that you have to have a lot of meat in the plan.
+- **[53:33.9 - 53:34.8]** Yes, sir.
+- **[53:34.8 - 53:41.3]** So you can't just go and ask AI to-- You still have to go and ask AI to build something, but you have to know what you're asking the AI to do.
+- **[53:41.3 - 53:41.9]** Yes, sir.
+- **[53:41.9 - 53:52.1]** Actually, HOD has told- You have to know everything ...like HOD has told us that, like, uh, our platform, like we need to onboard any two to three new startups for testing.
+- **[53:52.1 - 53:53.1]** Yeah.
+- **[53:53.1 - 53:54.8]** So it should be better.
+- **[53:54.8 - 53:57.0]** But that too, you have to figure out what for what.
+- **[53:57.0 - 53:57.0]** Yeah.
+- **[53:57.0 - 53:57.6]** That- That's the point, right?
+- **[53:57.6 - 53:58.9]** That is the actual point.
+- **[53:58.9 - 53:58.9]** Is it training?
+- **[53:58.9 - 53:59.7]** Is it evaluation?
+- **[53:59.7 - 53:59.8]** Yeah.
+- **[53:59.8 - 54:01.6]** Uh, is it model drift?
+- **[54:01.6 - 54:02.5]** Is it monitoring?
+- **[54:02.5 - 54:03.3]** Is it scaling?
+- **[54:03.3 - 54:06.4]** Like identify which problem you're trying to solve for.
+- **[54:06.4 - 54:09.0]** You can't build a whole platform entirely for everyb- everybody.
+- **[54:09.0 - 54:15.3]** Sir, like, uh, the domain, uh, as we discussed now, like I guess now the retail domain- Domain is a secondary problem.
+- **[54:15.3 - 54:17.1]** First, identify the problem.
+- **[54:17.1 - 54:18.5]** The drift only?
+- **[54:18.5 - 54:18.8]** All right.
+- **[54:18.8 - 54:19.5]** Give me one second.
+- **[54:19.5 - 54:20.1]** Give me one second.
+- **[54:20.1 - 54:21.2]** Give me one- Okay ...and I'll just call you.
+- **[54:21.2 - 54:21.9]** Okay.
+- **[54:21.9 - 54:22.2]** Okay.
+- **[54:22.2 - 54:22.4]** Okay.
+- **[54:22.4 - 54:24.7]** Thank you, sir.
+- **[54:24.7 - 54:35.7]** Hello?
+- **[54:35.7 - 54:36.4]** Sorry.
+- **[54:36.4 - 54:36.8]** Yes, sir.
+- **[54:36.8 - 54:38.4]** Yeah.
+- **[54:38.4 - 54:40.8]** So what I'm saying is the domain is secondary.
+- **[54:40.8 - 54:44.1]** First, identify the exact problem space.
+- **[54:44.1 - 54:48.1]** When you-- Like where in the model lifecycle you're trying to solve a problem.
+- **[54:48.1 - 54:58.3]** Are you solving a problem with data cleaning, data pipelining, compute management, model training, model evaluation, uh, hyperparameter
+- **[54:58.3 - 55:09.1]** tuning, uh, production testing, production scaling, all the way to monitoring, drift management, model retraining, and,
+- **[55:09.1 - 55:14.9]** uh, mm, we call it graceful degradation, which is nothing but, uh, the end of lifecycle of a model.
+- **[55:14.9 - 55:17.1]** You gradually degrade from one model to another.
+- **[55:17.1 - 55:21.3]** So, that is the full spectrum.
+- **[55:21.3 - 55:26.3]** I'm happy to write this up for you, but first identify what is that you're trying to solve here.
+- **[55:26.3 - 55:26.6]** Okay.
+- **[55:26.6 - 55:26.9]** Yeah.
+- **[55:26.9 - 55:28.1]** So we will work on that, sir.
+- **[55:28.1 - 55:30.5]** That, that platform solves everything, right?
+- **[55:30.5 - 55:30.8]** Yes.
+- **[55:30.8 - 55:33.2]** Now when you isolate saying, "Here is what I'm trying to solve.
+- **[55:33.2 - 55:35.0]** I'm tr- solving for training.
+- **[55:35.0 - 55:36.5]** I'm solving for evaluation problems.
+- **[55:36.5 - 55:42.9]** I'm solving for drift," then within that you have to zoom in and say, "Okay, what are the components I have to build?
+- **[55:42.9 - 55:50.9]** What kind of softwares are available out there?" So if you're saying like for example, if you're doing drift detection, you need to have an observability framework.
+- **[55:50.9 - 55:55.2]** You need to have a CI/CD framework so that you have versioning of modeling data.
+- **[55:55.2 - 55:57.8]** Without that, how will you know what you tested on, what you placed?
+- **[55:57.8 - 56:05.3]** Uh, the third is, uh, along with observability and monitoring framework, you need a logging framework so that you can log new data.
+- **[56:05.3 - 56:14.3]** Then you need to create triggering framework which will take that new data, analyze it, and un- understand when to re-trigger a model retraining.
+- **[56:14.3 - 56:20.5]** And then if you retrain a model, you still have to run the evaluation sets, the tuning sets, all of that, right?
+- **[56:20.5 - 56:21.2]** Validation sets.
+- **[56:21.2 - 56:22.6]** They're not gonna go away.
+- **[56:22.6 - 56:23.6]** Yeah.
+- **[56:23.6 - 56:25.7]** So then you need that part.
+- **[56:25.7 - 56:27.8]** So that's what.
+- **[56:27.8 - 56:31.0]** So when you identify a problem, then these parts become clear to you.
+- **[56:31.0 - 56:35.4]** Saying, "I wanna solve this problem," then here is all the pieces I need to solve it.
+- **[56:35.4 - 56:38.2]** Yeah.
+- **[56:38.2 - 56:38.5]** Okay.
+- **[56:38.5 - 56:41.0]** We'll work on this and get back to you, sir.
+- **[56:41.0 - 56:41.2]** Yeah.
+- **[56:41.2 - 56:42.1]** Yeah.
+- **[56:42.1 - 56:42.5]** Happy to.
+- **[56:42.5 - 56:44.1]** Thank you so much.
+- **[56:44.1 - 56:44.1]** See you then.
+- **[56:44.1 - 56:44.5]** Have a...
+- **[56:44.5 - 56:44.6]** Okay.
+- **[56:44.6 - 56:45.4]** Thank you so much.
+- **[56:45.4 - 56:47.9]** Yeah.
+- **[56:47.9 - 56:57.9]** So identifying the problem statement is the first
+- **[56:57.9 - 56:59.6]** and the big challenge
+
+## Key terminology retained from the conversation
+
+The discussion refers to **model drift** (a measurable decline in a deployed model’s performance relative to its original baseline), **observability** (the instrumentation needed to understand what a system is doing), **MLOps** (the broader lifecycle covering training, configuration, evaluation, deployment, scaling, monitoring, retraining, and replacement), **explore–exploit** (using a controlled amount of random exposure to discover useful options while mostly relying on the current model), and **relevance and ranking** (determining what is relevant to a user and the order in which relevant items should appear). These explanations are included only to make the conversation easier to follow; the transcript itself remains complete above.
+

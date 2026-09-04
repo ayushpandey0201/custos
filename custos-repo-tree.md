@@ -9,8 +9,10 @@
 custos/
 │
 ├── README.md                              # Quickstart: run the whole system in <10 min
+├── Dockerfile                             # [MVP] one image, three entrypoints (gateway/control/worker)
 ├── docker-compose.yml                     # [MVP] one-command single-node deployment
-├── pyproject.toml                         # Python workspace; ALL deps pinned (reproducible builds)
+├── alembic.ini                            # migration config; URL comes from CUSTOS_DATABASE_URL
+├── pyproject.toml                         # Python workspace; core deps have no scientific stack
 │
 ├── docs/
 │   ├── architecture.md                    # ← canonical ADD/TDS (source of truth)
@@ -20,14 +22,23 @@ custos/
 │   │   ├── 0003-monorepo.md               # why one repo; exit criteria for splitting
 │   │   ├── 0004-degraded-drift-default.md # why missing severity = trust+degraded, not block
 │   │   └── 0005-unknown-model-review.md   # why unknown model_id → REVIEW, not ALLOW
-│   └── diagrams/
-│       └── .gitkeep                       # source files for any rendered diagrams
+│   ├── diagrams/
+│   │   └── .gitkeep                       # source files for any rendered diagrams
+│   └── presentations/                     # review deliverables, rebuilt from one script
+│       ├── build_deck.py                  # template → 28 filled slides; rerun each review
+│       ├── content.py                     # the tables — edit content without touching OOXML
+│       ├── make_figures.py                # architecture diagram + drift chart (PNG)
+│       ├── figures/                       # generated PNGs
+│       ├── template/                      # the department's untouched .pptx
+│       └── Custos_Phase2_Review1.pptx     # generated output
 │
 │
 ├── shared/                                # ══ CONTRACT LAYER ══ imported by every service
 │   │                                      #    Rule: no service defines its own copy of a
 │   │                                      #    shared type. Changes here first + migration.
 │   ├── __init__.py
+│   ├── cache.py                           # TTL cache: Redis when configured, in-process otherwise
+│   ├── timeutil.py                        # UTC serialisation — SQLite hands back naive datetimes
 │   ├── schemas/                           # Pydantic models = wire + internal contracts
 │   │   ├── __init__.py
 │   │   ├── evaluation.py                  # EvaluationRequest · EvaluationContext · EvaluationResponse
@@ -36,6 +47,7 @@ custos/
 │   ├── db/
 │   │   ├── __init__.py
 │   │   ├── models.py                      # SQLAlchemy ORM — single source of DB schema truth
+│   │   ├── registry.py                    # cached "is this model registered?"; shared by both planes
 │   │   └── session.py                     # engine/session factory · health check
 │   ├── config/
 │   │   ├── __init__.py
@@ -91,6 +103,7 @@ custos/
 │   ├── control/                           # [MVP] CONTROL PLANE — cold, never on hot path
 │   │   ├── __init__.py
 │   │   ├── main.py                        # FastAPI app factory · routes
+│   │   ├── routes_tenants.py              # POST /tenants — bootstrap a tenant, mint its API key
 │   │   ├── routes_models.py               # POST /models · POST /models/{id}/baseline · GET /models
 │   │   ├── routes_config.py               # PUT /config — tenant engines, weights, thresholds
 │   │   ├── routes_audit.py                # GET /audit · GET /audit/export · GET /audit/verify
@@ -118,6 +131,8 @@ custos/
 │   └── src/
 │       ├── App.tsx
 │       ├── main.tsx
+│       ├── styles.css                     # dark operator console; one accent per decision class
+│       ├── vite-env.d.ts                  # typed import.meta.env
 │       ├── views/
 │       │   ├── Models.tsx                 # registered models + status
 │       │   ├── DriftMonitor.tsx           # per-model severity + per-feature breakdown
@@ -126,7 +141,7 @@ custos/
 │       ├── api/
 │       │   └── client.ts                  # typed HTTP client for the control API
 │       └── components/
-│           └── .gitkeep                   # shared UI components (grows as needed)
+│           └── primitives.tsx             # badges · severity bar · sparkline · panel
 │
 │
 ├── migrations/                            # Alembic — schema versioned, NEVER hand-edited
@@ -150,9 +165,10 @@ custos/
 │       │                                  # Simultaneously: pilot demo · onboarding tutorial
 │       │                                  # · e2e test fixture · "does Custos actually work?" proof
 │       ├── README.md                      # how to run the demo end-to-end in <5 min
+│       ├── run_demo.py                    # ★ the narrated five-act runner — one command, no infra ★
 │       ├── model/
-│       │   ├── train.py                   # trains a simple XGBoost credit-risk model on sample data
-│       │   └── credit_model.pkl           # pre-trained artifact (committed for fast demo startup)
+│       │   ├── train.py                   # pure-Python logistic regression (no sklearn/XGBoost/pickle)
+│       │   └── credit_model.json          # trained weights; JSON, so loading cannot execute code
 │       ├── agent/
 │       │   └── loan_bot.py                # fake auto-decisioner: scores → calls @guard → approve/deny
 │       ├── inject_drift.py                # script to inject synthetic drift into the demo data stream

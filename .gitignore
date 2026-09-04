@@ -1,1 +1,24 @@
 .claude
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Local databases — the demo and tests create these on the fly
+*.db
+custos-demo.db
+
+# Node / dashboard
+node_modules/
+dist/
+
+# macOS
+.DS_Store
+
+# Deck build scratch
+docs/presentations/.build/
