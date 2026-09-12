@@ -221,7 +221,7 @@ CONTRIBUTIONS = (
         ],
         [
             "NITIN", "1BM24AD404",
-            "Python SDK · React operator dashboard · fintech demonstration · 268-test suite across unit, integration and end-to-end",
+            "Python SDK · React operator dashboard · fintech demonstration · 274-test suite across unit, integration and end-to-end",
         ],
     ],
     [0.20, 0.14, 0.66],
