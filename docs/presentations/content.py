@@ -119,6 +119,92 @@ MODULE_STATUS = (
 )
 
 
+# --- Data and validation ----------------------------------------------------
+# The long form of this argument is docs/DATASET.md. These tables are the two
+# points a reviewer needs on a projector: what each kind of data is for, and
+# what the controlled half actually proves.
+
+VALIDATION_TRACKS = (
+    ["", "Data used", "Question it answers", "Ground truth", "Status"],
+    [
+        [
+            "Calibration",
+            "Controlled distributions with shifts of a chosen size, injected into the demo's own feature population",
+            "Is the detector correct?",
+            "Known — we chose the shift, so the right answer exists",
+            "Done · 43 detector tests",
+        ],
+        [
+            "Field",
+            "Public real-world credit data, replayed in time order through the same drift code the gateway runs",
+            "Does it fire on drift that actually happened?",
+            "Unknown — but nobody chose the drift, which is what makes it fair",
+            "Harness built · Lending Club run is Review-2",
+        ],
+    ],
+    [0.11, 0.30, 0.19, 0.23, 0.17],
+)
+
+CALIBRATION_EVIDENCE = (
+    ["What is checked", "How", "Why it could not be done on real data"],
+    [
+        [
+            "PSI is arithmetically right",
+            "Checked against a value computed by hand from the definition; KS against a case where the CDF gap is exactly 0.5 by construction",
+            "There is no hand-computable right answer for 2.2 million rows",
+        ],
+        [
+            "0σ reads stable",
+            "Two draws from the same distribution report PSI 0.030 — below the 0.10 stable band",
+            "No real dataset is known to contain zero drift",
+        ],
+        [
+            "1σ reads significant",
+            "A one-standard-deviation mean shift reports PSI 1.019 — 4× the 0.25 threshold a credit-risk team already uses",
+            "The true shift in real data is unmeasured, so the reading cannot be graded",
+        ],
+        [
+            "Severity never moves the wrong way",
+            "500 randomised perturbations: increasing any feature's drift can never lower the reported severity",
+            "Requires controlling the input to know which direction is correct",
+        ],
+        [
+            "It refuses to guess",
+            "An empty window raises rather than returning 0.0; below MIN_SAMPLES = 30 it reports insufficient data",
+            "Reporting 'no drift' for 'no data' is the exact failure the system exists to prevent",
+        ],
+    ],
+    [0.22, 0.46, 0.32],
+)
+
+
+# --- What load testing exposed ----------------------------------------------
+# Written up in full in benchmarks/README.md, with the raw sweep in
+# benchmarks/results-sqlite.json.
+
+LOAD_FINDINGS = (
+    ["What we believed", "What the harness measured", "What we did"],
+    [
+        [
+            "Gateway p99 is 0.5 ms",
+            "0.5 ms was the trust engine's own timer, which stops before the audit write. The caller actually waits 49 ms at the ceiling — 98% of the budget, not 1%",
+            "Report the client-observed number; treat the internal metric as a component timing, not the request",
+        ],
+        [
+            "The audit chain records every decision",
+            "Under concurrent appends, 2 of 96 entries were dropped — and verification still reported the chain intact, because a hash chain detects a modified entry, never a missing one",
+            "Per-tenant advisory lock on Postgres, jittered backoff everywhere. 0 lost from 2 to 48 writers",
+        ],
+        [
+            "Overload makes it slow",
+            "Overload makes it answer differently: past the ceiling, engines exceed their 20 ms timeout, drop out of fusion, and ~13% of verdicts flip ALLOW to REVIEW on traffic an idle gateway allows",
+            "Documented as an operational property; admission control is the Review-2 fix",
+        ],
+    ],
+    [0.20, 0.48, 0.32],
+)
+
+
 # --- Team contributions -----------------------------------------------------
 # Adjust these to match how the work was actually divided before submitting.
 

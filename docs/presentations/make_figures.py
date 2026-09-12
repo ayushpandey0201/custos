@@ -220,6 +220,218 @@ def drift_chart(width_in: float = 11.0, height_in: float = 3.15) -> Path:
     return path
 
 
+# ----------------------------------------------------------- calibration curve
+
+# Produced by running engines/drift/detectors.py over the demo's `income`
+# feature (mu 60000, sigma 15000), shifting the mean by a KNOWN number of
+# standard deviations and recording what PSI reports back. 600 samples per
+# side, 15 trials per point; the band is the min-max across those trials.
+#
+# This is the whole validation argument in one table: the input is chosen, so
+# the correct output is known, so the reading can actually be checked.
+CALIBRATION = [
+    # shift (sigma), PSI mean, PSI min, PSI max, KS mean, band
+    (0.00, 0.030, 0.012, 0.070, 0.053, "stable"),
+    (0.25, 0.104, 0.046, 0.181, 0.134, "moderate"),
+    (0.50, 0.287, 0.162, 0.403, 0.227, "significant"),
+    (0.75, 0.591, 0.389, 0.755, 0.320, "significant"),
+    (1.00, 1.019, 0.764, 1.239, 0.411, "significant"),
+    (1.50, 2.203, 1.728, 2.891, 0.570, "significant"),
+    (2.00, 4.214, 2.890, 5.016, 0.699, "significant"),
+]
+
+
+def calibration_curve(width_in: float = 11.0, height_in: float = 3.45) -> Path:
+    """Measured PSI against a shift of known size — the instrument in ice and steam.
+
+    The y axis is logarithmic because the two thresholds that decide a verdict,
+    0.10 and 0.25, sit in the bottom twentieth of a linear axis that has to
+    reach 4.2. On a linear scale the most important part of this chart is a
+    smudge above the baseline.
+    """
+    import math
+
+    W, H = int(width_in * SCALE), int(height_in * SCALE)
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+
+    f_title = font(40, bold=True)
+    f_sub = font(26)
+    f_val = font(26, bold=True)
+    f_tick = font(24)
+    f_axis = font(27, bold=True)
+    f_note = font(25, bold=True)
+
+    d.text((60, 36), "Calibration — what the detector reports for a shift we chose",
+           font=f_title, fill=INK)
+    d.text((60, 98),
+           "income feature, mean moved by a known number of standard deviations   ·   "
+           "600 samples/side, 15 trials/point",
+           font=f_sub, fill=MUTED)
+
+    left, right = 250, W - 640
+    top, bottom = 205, H - 190
+    y_min, y_max = 0.01, 6.0
+    log_min, log_max = math.log10(y_min), math.log10(y_max)
+    x_max = 2.15
+
+    def y_of(v: float) -> float:
+        frac = (math.log10(max(v, y_min)) - log_min) / (log_max - log_min)
+        return bottom - frac * (bottom - top)
+
+    def x_of(s: float) -> float:
+        return left + (s / x_max) * (right - left)
+
+    # Industry bands as shaded regions — the thresholds a credit-risk team
+    # already uses, so the reading means something before we explain it.
+    for lo, hi, tint in (
+        (y_min, 0.10, (233, 245, 235)),
+        (0.10, 0.25, (252, 246, 230)),
+        (0.25, y_max, (252, 235, 234)),
+    ):
+        d.rectangle([(left, y_of(hi)), (right, y_of(lo))], fill=tint)
+    for thresh, label, colour in ((0.10, "0.10  stable", ALLOW),
+                                  (0.25, "0.25  significant", BLOCK)):
+        y = y_of(thresh)
+        d.line([(left, y), (right, y)], fill=colour, width=3)
+        d.text((right + 24, y - 18), label, font=f_tick, fill=colour)
+
+    for decade in (0.01, 0.1, 1.0):
+        y = y_of(decade)
+        d.text((left - 170, y - 16), f"{decade:g}", font=f_tick, fill=MUTED)
+    d.text((60, top - 8), "PSI", font=f_axis, fill=INK)
+
+    # Spread bars first, then the mean markers on top.
+    points = [(x_of(s), y_of(m)) for s, m, _, _, _, _ in CALIBRATION]
+    d.line(points, fill=ACCENT, width=5)
+    for (shift, mean, lo, hi, _ks, band) in CALIBRATION:
+        x = x_of(shift)
+        d.line([(x, y_of(lo)), (x, y_of(hi))], fill=ACCENT, width=3)
+        d.ellipse([(x - 12, y_of(mean) - 12), (x + 12, y_of(mean) + 12)],
+                  fill=BAND_COLOUR[band], outline=WHITE, width=3)
+        centred(d, f"{shift:g}σ", x, bottom + 44, f_axis, fill=INK)
+        if shift in (0.0, 1.0):
+            centred(d, f"{mean:.3f}", x, y_of(mean) - 52, f_val, fill=BAND_COLOUR[band])
+
+    # No x-axis caption: the subtitle already says what the axis is, and a
+    # second label here collides with the footnote.
+
+    # The two reference points the whole argument rests on.
+    d.text((right + 24, top + 18), "Nothing moved", font=f_note, fill=ALLOW)
+    d.text((right + 24, top + 58), "0σ reads 0.030 —", font=f_tick, fill=MUTED)
+    d.text((right + 24, top + 92), "stable, not zero-drift", font=f_tick, fill=MUTED)
+    d.text((right + 24, top + 148), "Known 1σ shift", font=f_note, fill=BLOCK)
+    d.text((right + 24, top + 188), "reads 1.019 — 4× the", font=f_tick, fill=MUTED)
+    d.text((right + 24, top + 222), "significant threshold", font=f_tick, fill=MUTED)
+
+    d.text((60, H - 68),
+           "Monotone across every step, and the bands are crossed where a credit-risk team "
+           "expects them to be. On real data none of this could be checked — nobody knows the "
+           "true drift in it.",
+           font=f_sub, fill=MUTED)
+
+    path = OUT / "calibration_curve.png"
+    img.save(path, dpi=(SCALE, SCALE))
+    return path
+
+
+# --------------------------------------------------------------- load profile
+
+# Produced by `python -m benchmarks.load_test --sweep 50,100,200,400,600,800
+# --duration 15 --warmup 3` on an M1, SQLite, one uvicorn worker. Raw output in
+# benchmarks/results-sqlite.json. Latencies are the coordinated-omission
+# corrected response time, which is what the caller actually waits.
+LOAD_PROFILE = [
+    # offered, p99 ms, achieved req/s
+    (50, 10.71, 50.0),
+    (100, 49.32, 100.0),
+    (200, 93.66, 200.0),
+    (400, 66390.0, 74.0),
+    (600, 99408.0, 78.3),
+    (800, 149597.0, 72.5),
+]
+BUDGET_MS = 50.0
+
+
+def load_profile(width_in: float = 11.0, height_in: float = 3.3) -> Path:
+    """p99 latency against offered rate, on a log axis, with the budget drawn in.
+
+    Log scale because the data spans four orders of magnitude — 10 ms to 150 s.
+    A linear axis would render every passing rate as an invisible sliver at the
+    baseline and turn the one genuinely interesting region, the crossing of the
+    budget line, into nothing.
+    """
+    import math
+
+    W, H = int(width_in * SCALE), int(height_in * SCALE)
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+
+    f_title = font(40, bold=True)
+    f_sub = font(26)
+    f_val = font(27, bold=True)
+    f_tick = font(24)
+    f_axis = font(26, bold=True)
+
+    d.text((60, 36), "Gateway under load — where the 50 ms budget stops holding",
+           font=f_title, fill=INK)
+    d.text((60, 98),
+           "open-loop generator, latency measured from scheduled send time   ·   "
+           "M1, SQLite, 1 worker",
+           font=f_sub, fill=MUTED)
+
+    left, right = 210, W - 330
+    top, bottom = 200, H - 175
+    y_min, y_max = 5.0, 300_000.0
+    log_min, log_max = math.log10(y_min), math.log10(y_max)
+
+    def y_of(ms: float) -> float:
+        frac = (math.log10(ms) - log_min) / (log_max - log_min)
+        return bottom - frac * (bottom - top)
+
+    # Decade gridlines, drawn first so bars cover them.
+    for decade, label in ((10, "10 ms"), (100, "100 ms"), (1000, "1 s"),
+                          (10_000, "10 s"), (100_000, "100 s")):
+        y = y_of(decade)
+        d.line([(left, y), (right, y)], fill=LINE, width=2)
+        d.text((left - 150, y - 16), label, font=f_tick, fill=MUTED)
+
+    slot = (right - left) / len(LOAD_PROFILE)
+    bar_w = slot * 0.46
+
+    for i, (offered, p99, achieved) in enumerate(LOAD_PROFILE):
+        cx = left + slot * (i + 0.5)
+        passed = p99 <= BUDGET_MS
+        colour = ALLOW if passed else BLOCK
+        y = y_of(p99)
+        d.rounded_rectangle([(cx - bar_w / 2, y), (cx + bar_w / 2, bottom)],
+                            radius=8, fill=colour)
+
+        shown = f"{p99:.0f} ms" if p99 < 1000 else f"{p99 / 1000:.0f} s"
+        centred(d, shown, cx, y - 34, f_val, fill=colour)
+        centred(d, f"{offered}/s", cx, bottom + 40, f_axis, fill=INK)
+        # Achieved throughput under the offered rate: the collapse is only
+        # visible by comparing the two.
+        centred(d, f"{achieved:.0f} served", cx, bottom + 86, f_tick,
+                fill=MUTED if achieved >= offered * 0.95 else BLOCK)
+
+    # Budget line last, on top of everything, because it is the whole point.
+    y_budget = y_of(BUDGET_MS)
+    # Stop the rule short of its own label, or the dashes run through the text.
+    dashed_h(d, y_budget, left - 40, right + 20, colour=BLOCK, width=4)
+    d.text((right + 46, y_budget - 56), "50 ms", font=f_val, fill=BLOCK)
+    d.text((right + 46, y_budget + 14), "budget", font=f_tick, fill=BLOCK)
+
+    d.text((60, H - 62),
+           "Holds to 100 req/s per instance. Throughput survives 200 req/s; the latency "
+           "budget does not. Past that, congestion collapse — more load, less served.",
+           font=f_sub, fill=MUTED)
+
+    path = OUT / "load_profile.png"
+    img.save(path, dpi=(SCALE, SCALE))
+    return path
+
+
 # --------------------------------------------------------------- request flow
 
 
@@ -773,6 +985,8 @@ def main() -> None:
         decision_flow(),
         demo_trajectory(),
         drift_chart(),
+        calibration_curve(),
+        load_profile(),
     )
     for path in figures:
         print(f"wrote {path.relative_to(Path.cwd()) if path.is_absolute() else path}")

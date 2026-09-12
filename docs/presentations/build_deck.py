@@ -5,10 +5,10 @@
 Regenerates `Custos_Phase2_Review1.pptx` end to end: unpack the template,
 duplicate its content slide as many times as the narrative needs, put the slides
 in order, fill every title and body, fill the literature-survey table, and place
-the two figures.
+every generated table and figure.
 
 Written as a script rather than done by hand because the deck has to be rebuilt
-for each review. Editing 20 slides by hand once is tedious; doing it again in a
+for each review. Editing 22 slides by hand once is tedious; doing it again in a
 month, consistently, is where mistakes get made.
 
 The template is never modified — it is unpacked to a scratch directory and the
@@ -47,7 +47,7 @@ BULLET_FONT = (
 TITLE_PH = 'type="ctrTitle"'
 BODY_PH = 'type="subTitle"'
 
-REVIEW_DATE = "4 September 2026"
+REVIEW_DATE = "12 September 2026"
 
 
 def run(text: str, size: int, bold: bool = False, italic: bool = False) -> str:
@@ -174,7 +174,7 @@ def reorder(order: list[str]) -> None:
 
 # --- deck content ----------------------------------------------------------
 #
-# Sixteen slides. Text on a slide is there to frame the visual under it, never
+# Twenty-two slides. Text on a slide is there to frame the visual under it, never
 # to be read aloud — anything that needs a paragraph belongs in the report, not
 # on a projector.
 
@@ -226,6 +226,8 @@ def fill_all() -> None:
             bullet("System design — architecture, request flow, drift pipeline, decision logic", 1800),
             bullet("Implementation status", 1800),
             bullet("Results — live demonstration and drift attribution", 1800),
+            bullet("Data and validation — how the detector is calibrated, and against what", 1800),
+            bullet("Engineering rigour — load testing, the defects it found, and the fixes", 1800),
             bullet("Team contributions and conclusion", 1800),
         ],
     )
@@ -414,21 +416,114 @@ def fill_all() -> None:
         ],
     )
 
-    # ---------------------------------------- 16 contributions and conclusion
+    # ------------------------------------------------ 16 data and validation
+    write_slide(
+        "slide20.xml",
+        [heading("Data and Validation")],
+        [
+            plain(
+                "Custos contains no trained model, no fitted parameters, no weights. It is a "
+                "measuring instrument — so it is validated the way instruments are, by "
+                "calibration against known inputs, not by accuracy on held-out data.",
+                1400, space_before=0,
+            ),
+            plain(
+                "A thermometer is not validated by pointing it at random objects. It goes into "
+                "melting ice to read 0 °C and boiling water to read 100 °C. The reference points "
+                "have to be known, or the reading cannot be checked against anything.",
+                1300, space_before=260,
+            ),
+        ],
+    )
+
+    # ---------------------------------------------- 17 the calibration result
+    write_slide(
+        "slide21.xml",
+        [heading("Calibration — the Instrument in Ice and Steam")],
+        [
+            plain(
+                "Shift a feature's mean by a chosen number of standard deviations and check what "
+                "PSI reports back. Because the input was chosen, the correct output is known — "
+                "which is precisely what real data cannot offer.",
+                1400, space_before=0,
+            ),
+        ],
+    )
+
+    # --------------------------------------------- 18 what calibration proves
+    write_slide(
+        "slide22.xml",
+        [heading("What the Controlled Data Proves")],
+        [
+            plain(
+                "Five properties, 43 detector tests. The right-hand column is the answer to "
+                "“why not just use a real dataset?” — none of these could be checked on one.",
+                1400, space_before=0,
+            ),
+        ],
+    )
+
+    # ------------------------------------------- 19 validating the claim
+    write_slide(
+        "slide17.xml",
+        [heading("Validating the Latency Claim")],
+        [
+            plain(
+                "NFR1 asserts a 50 ms p99. An assertion in a design document is not evidence, "
+                "so we built the instrument that could falsify it — and it did.",
+                1400, space_before=0,
+            ),
+        ],
+    )
+
+    # ------------------------------------------- 17 what load testing exposed
+    write_slide(
+        "slide18.xml",
+        [heading("What Load Testing Exposed")],
+        [
+            plain(
+                "Three defects, none of them reachable by a test that sends one request at a "
+                "time. This is the difference between a suite that passes and a system that works.",
+                1400, space_before=0,
+            ),
+        ],
+    )
+
+    # ------------------------------------------- 18 the audit chain defect
+    write_slide(
+        "slide19.xml",
+        [heading("Case Study — The Audit Log That Lied")],
+        [
+            plain(
+                "Our strongest claim is tamper-evident evidence for every decision. Under "
+                "concurrency it was dropping entries and reporting itself intact.",
+                1400, space_before=0,
+            ),
+            plain("Symptom", 1500, bold=True, space_before=280),
+            bullet("At 24 concurrent writers, 2 of 96 appends were lost — and GET /audit/verify still returned “all 94 entries verified”. A hash chain detects a modified entry, never a missing one.", 1300),
+            plain("Diagnosis before cure", 1500, bold=True, space_before=200),
+            bullet("Measured where it was actually reachable: 0 lost at 1 uvicorn worker, 2 lost at 4. The event loop already serialised single-worker writes, so the obvious per-tenant in-process lock would have protected the only configuration that was not broken.", 1300),
+            plain("Fix", 1500, bold=True, space_before=200),
+            bullet("Postgres: pg_advisory_xact_lock per tenant, taken before the chain head is read. Every backend: jittered backoff, because five instant retries kept the racers in lockstep. Result: 0 lost from 2 to 48 writers — and 2× the throughput, since the retry storm was itself the load.", 1300),
+        ],
+    )
+
+    # ---------------------------------------- 19 contributions and conclusion
     write_slide(
         "slide9.xml",
         [heading("Contributions and Conclusion")],
         [
             plain(
-                "268 tests passing · measured gateway p99 of 0.5 ms against a 50 ms budget · "
-                "audit chain verified and demonstrated under an actual tampering attempt.",
+                "274 tests passing · 50 ms p99 budget verified under load to 100 req/s per "
+                "instance · two concurrency defects found by our own harness and fixed · "
+                "audit chain demonstrated under an actual tampering attempt.",
                 1400, bold=True, space_before=0,
             ),
-            plain("Next, for Review-2", 1600, bold=True, space_before=350),
+            plain("Next, for Review-2", 1600, bold=True, space_before=320),
+            bullet("Admission control: shed load at the door rather than let a spike silently convert auto-approvals into review backlog.", 1350),
             bullet("Validate against real drift using the Lending Club dataset, replacing the controlled synthetic scenarios.", 1350),
             bullet("Model and data versioning, plus a retraining trigger — the components practitioners named as prerequisites.", 1350),
-            bullet("Load-test the gateway under concurrency to confirm the p99 budget at realistic volume.", 1350),
-            bullet("Shadow-mode onboarding with two to three partner startups.", 1350),
+            bullet("Move the audit write off the hot path, and re-measure against Postgres rather than SQLite.", 1350),
         ],
     )
 
@@ -441,7 +536,10 @@ def fill_all() -> None:
 TABLE_SLIDES = {
     "slide6.xml": (content.REQUIREMENTS, 2.70),
     "slide8.xml": (content.MODULE_STATUS, 2.70),
-    "slide9.xml": (content.CONTRIBUTIONS, 4.60),
+    "slide20.xml": (content.VALIDATION_TRACKS, 4.30),
+    "slide22.xml": (content.CALIBRATION_EVIDENCE, 2.70),
+    "slide18.xml": (content.LOAD_FINDINGS, 2.70),
+    "slide9.xml": (content.CONTRIBUTIONS, 4.75),
 }
 
 FIGURE_SLIDES = {
@@ -454,6 +552,8 @@ FIGURE_SLIDES = {
     "slide14.xml": ("decision_flow.png", 3.00, 11.0),
     "slide15.xml": ("demo_trajectory.png", 2.80, 11.0),
     "slide16.xml": ("drift_attribution.png", 2.90, 11.0),
+    "slide21.xml": ("calibration_curve.png", 2.75, 11.0),
+    "slide17.xml": ("load_profile.png", 2.80, 11.0),
 }
 
 SLIDE_WIDTH_IN = 13.333
@@ -615,7 +715,16 @@ ORDER = [
     "slide8.xml",   # 13 implementation status           [table]
     "slide15.xml",  # 14 results — live demonstration    [figure]
     "slide16.xml",  # 15 results — drift attribution     [figure]
-    "slide9.xml",   # 16 contributions and conclusion    [table]
+    # Validation: what the data is for, then the calibration itself, then what
+    # it proves. This block answers "where is your dataset?" before it is asked.
+    "slide20.xml",  # 16 data and validation             [table]
+    "slide21.xml",  # 17 calibration curve               [figure]
+    "slide22.xml",  # 18 what controlled data proves     [table]
+    # Engineering rigour: the claim, the measurement, the defect, the fix.
+    "slide17.xml",  # 19 validating the latency claim    [figure]
+    "slide18.xml",  # 20 what load testing exposed       [table]
+    "slide19.xml",  # 21 case study — the audit log      [text]
+    "slide9.xml",   # 22 contributions and conclusion    [table]
 ]
 
 # Template ships 9 slides; the rest are clones of its plain content slide.

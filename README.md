@@ -31,15 +31,44 @@ HTTP, and narrates five acts:
 
 No Docker, no Postgres, no Redis — the system falls back to SQLite and an in-process cache.
 
-Add `--serve` to keep the servers running afterwards and explore:
+## Run the whole thing
+
+```bash
+./app.sh
+```
+
+Starts the gateway (`:8000`), the control plane (`:8001`) and the operator
+dashboard (`:5173`), seeds the demo data, and prints the tenant API key to paste
+into the dashboard. Creates the Python environment and installs dashboard
+dependencies on first run. Add `--open` to launch the browser too.
+
+**Running it twice is safe.** It starts only what is not already up and never
+stops a healthy server — run it again and it just prints the links. If only the
+dashboard died, it restarts the dashboard and leaves the backend alone.
+
+```bash
+./app.sh --restart
+```
+
+For deliberately fresh demo data: stops everything, then starts clean. The API
+key changes, because the demo database is rebuilt from scratch.
+
+```bash
+./stop.sh
+```
+
+Stops everything — servers, dashboard, and anything left over from a previous
+run or from the benchmark harness. It kills by recorded pid, by command line,
+and by port, so it does not matter how things were started. Browser tabs stay
+open, but every one of them stops working immediately, because there is nothing
+left behind them.
+
+Logs and the API key are written to `.run/`.
+
+### Or by hand
 
 ```bash
 python -m examples.fintech_demo.run_demo --serve
-```
-
-Then, with the API key it prints:
-
-```bash
 cd dashboard && npm install && npm run dev
 ```
 
@@ -58,8 +87,24 @@ waits on them.
 pytest
 ```
 
-268 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
-matrix, hash-chain tamper detection, SDK fail-open behaviour, and a full lifecycle end to end.
+274 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
+matrix, hash-chain tamper detection and chain integrity under concurrent writers, SDK fail-open
+behaviour, and a full lifecycle end to end.
+
+## Load
+
+```bash
+python -m benchmarks.load_test
+```
+
+Sweeps request rates against the real gateway over real HTTP and reports where the p99 budget
+stops holding. On one M1 core against SQLite: **50 ms p99 up to 100 req/s per instance**.
+Throughput itself survives to 200 req/s; the latency budget does not.
+
+The harness is open-loop, so the reported p99 is not flattered by coordinated omission. It
+found three things a single-threaded test cannot — including an audit-chain defect that has
+since been fixed, and the fact that past the ceiling the gateway starts returning *different
+verdicts* rather than merely slower ones. See [`benchmarks/README.md`](benchmarks/README.md).
 
 ---
 
@@ -112,6 +157,7 @@ production service; every dependency it carries is a version conflict it can for
 | `sdk/python/` | the adoption surface |
 | `dashboard/` | React + TypeScript operator console |
 | `examples/fintech_demo/` | ★ kept working at all times ★ |
+| `benchmarks/` | load harness — the only source for a quotable latency number |
 | `docs/architecture.md` | **canonical design doc — source of truth** |
 | `docs/adr/` | one file per irreversible decision |
 

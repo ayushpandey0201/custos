@@ -35,8 +35,9 @@ dev = [
 ]
 
 # Explicit, because this is a monorepo with several top-level packages and
-# setuptools refuses to guess between them. `examples` and `tests` are
-# deliberately excluded: they are fixtures, not shipped code.
+# setuptools refuses to guess between them. `examples`, `tests` and
+# `benchmarks` are deliberately excluded: they are fixtures and instruments,
+# not shipped code.
 #
 # The SDK is not listed here. It is a separate distributable that must stay
 # installable on its own — a caller integrating Custos should not have to pull

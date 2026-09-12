@@ -54,7 +54,7 @@ The design follows practitioner interviews with production credit-risk teams
 | # | Goal | How it is met |
 |---|---|---|
 | G1 | A single blocking verdict fusing multiple trust signals | Trust Engine + weighted fusion (§8) |
-| G2 | Sub-50 ms p99 on the hot path | Precomputed drift (ADR 0002), concurrent fan-out, cached reads |
+| G2 | Sub-50 ms p99 on the hot path | Precomputed drift (ADR 0002), concurrent fan-out, cached reads. **Measured: holds to 100 req/s per instance** (`benchmarks/`) |
 | G3 | Never take the caller down with us | Fail-open by default (ADR 0001) |
 | G4 | Tamper-evident evidence for every decision | SHA-256 hash chain (§9) |
 | G5 | Adding a new signal must be additive | Engine registry seam (§6) |
@@ -122,6 +122,15 @@ on the control plane or in the worker, where latency does not matter.
 ## 4. Data Plane (Gateway)
 
 **Budget: p99 ≤ 50 ms.** Everything below follows from that number.
+
+> **Measured, not assumed.** `benchmarks/load_test.py` drives this path over real HTTP with an
+> open-loop generator. On one M1 core against SQLite the budget holds to **100 req/s per
+> instance**, with thin margin — p99 there ranged 12–49 ms across runs. Throughput survives to
+> 200 req/s; the latency budget does not. Two behaviours that only appear under concurrency —
+> an audit-chain defect that dropped entries while still verifying as intact (now fixed), and
+> ~13% of verdicts flipping ALLOW → REVIEW once engines start timing out — are written up in
+> [`benchmarks/README.md`](../benchmarks/README.md). Read that before quoting a latency number
+> from this document.
 
 ### Request lifecycle
 
