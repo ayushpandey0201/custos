@@ -7,6 +7,7 @@ verdict itself comes entirely from ``trust_engine``.
 
 from __future__ import annotations
 
+import asyncio
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -33,6 +34,27 @@ from shared.telemetry.logging import get_logger
 log = get_logger(__name__)
 
 
+class AdmissionGate:
+    """Bounded in-flight counter. Refuses instead of queueing.
+
+    No lock: the gateway runs on one event loop and enter/leave never await,
+    so the check-and-increment cannot interleave with another request's.
+    """
+
+    def __init__(self, limit: int) -> None:
+        self.limit = limit
+        self.in_flight = 0
+
+    def try_enter(self) -> bool:
+        if self.in_flight >= self.limit:
+            return False
+        self.in_flight += 1
+        return True
+
+    def leave(self) -> None:
+        self.in_flight -= 1
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     ensure_engine()
@@ -41,7 +63,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-def create_app() -> FastAPI:
+def create_app(max_in_flight: int | None = None) -> FastAPI:
+    gate = AdmissionGate(max_in_flight or defaults.MAX_IN_FLIGHT)
+
     app = FastAPI(
         title="Custos Gateway",
         version="0.1.0",
@@ -64,11 +88,30 @@ def create_app() -> FastAPI:
         tenant_id: str = Depends(require_tenant),
     ) -> EvaluationResponse:
         """The hot path. One call, one verdict."""
-        ctx = EvaluationContext.from_request(
-            request,
-            tenant_id=tenant_id,
-            model_known=is_model_registered(tenant_id, request.model_id),
-        )
+        if not gate.try_enter():
+            # Shed, don't queue. The caller learns immediately that no verdict
+            # was produced; the SDK then applies the tenant's fail-open or
+            # fail-closed policy. A fabricated REVIEW here would flood the human
+            # queue with requests nobody evaluated — the overload behaviour this
+            # replaces.
+            metrics.increment("custos_shed_total", {"tenant": tenant_id})
+            return JSONResponse(
+                status_code=503,
+                content={"detail": "custos at capacity, request not evaluated", "shed": True},
+                headers={"Retry-After": "1"},
+            )
+        try:
+            return await _evaluate_admitted(request, background, tenant_id)
+        finally:
+            gate.leave()
+
+    async def _evaluate_admitted(
+        request: EvaluationRequest, background: BackgroundTasks, tenant_id: str
+    ) -> EvaluationResponse | JSONResponse:
+        # Off-thread: a cache miss here reads the database, and nothing on the
+        # hot path may block the event loop (see AdmissionGate).
+        model_known = await asyncio.to_thread(is_model_registered, tenant_id, request.model_id)
+        ctx = EvaluationContext.from_request(request, tenant_id=tenant_id, model_known=model_known)
 
         try:
             response = await trust_engine.evaluate(ctx)
@@ -118,7 +161,7 @@ def create_app() -> FastAPI:
 
     @app.get("/metrics.json")
     async def json_metrics() -> dict:
-        return metrics.snapshot()
+        return {**metrics.snapshot(), "in_flight": gate.in_flight, "max_in_flight": gate.limit}
 
     return app
 

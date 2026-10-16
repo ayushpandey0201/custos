@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 from engines import registry
 from engines.base.engine import SignalEngine
@@ -34,6 +35,18 @@ from shared.telemetry.logging import get_logger
 
 log = get_logger(__name__)
 
+# One thread owns every audit write in this process.
+#
+# The write used to run inline, on the event loop. Load testing showed what that
+# costs: while one request was blocked on SQLite, no other request could even
+# start, so requests queued invisibly in front of the handler and the gateway
+# went into congestion collapse (~148 req/s peak, ~72 req/s under heavier load).
+# Moving the write to a thread frees the loop. Making it *one* thread keeps
+# appends to the hash chain serialised, so freeing the loop does not reopen the
+# seq race that audit.append_to_chain guards against. The caller still awaits
+# its own write, so the response keeps carrying a real audit_id.
+_AUDIT_WRITER = ThreadPoolExecutor(max_workers=1, thread_name_prefix="custos-audit")
+
 
 async def evaluate(
     ctx: EvaluationContext,
@@ -49,7 +62,13 @@ async def evaluate(
 
     signals = await _fan_out(engines, ctx)
     fused = aggregate(signals, config.weights)
-    outcome = evaluate_decision(fused, config.thresholds, model_known=ctx.model_known)
+    drift = next((s for s in signals if s.engine == "drift" and not s.degraded), None)
+    outcome = evaluate_decision(
+        fused,
+        config.thresholds,
+        model_known=ctx.model_known,
+        drift_significant=drift is not None and drift.detail.get("band") == "significant",
+    )
 
     latency_ms = (time.perf_counter() - started) * 1000
     signal_map = {s.engine: s for s in signals}
@@ -68,7 +87,10 @@ async def evaluate(
     metrics.record_latency_ms("gateway", latency_ms)
 
     if write_audit:
-        response.audit_id = _write_audit(ctx, response, fused.contributions)
+        loop = asyncio.get_running_loop()
+        response.audit_id = await loop.run_in_executor(
+            _AUDIT_WRITER, _write_audit, ctx, response, fused.contributions
+        )
 
     log.info(
         "decision",

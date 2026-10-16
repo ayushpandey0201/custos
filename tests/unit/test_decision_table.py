@@ -33,10 +33,11 @@ class TestDecisionMatrix:
             (0.75, False, False, False, Decision.REVIEW),
             # Row 4 — no confident signal from any engine.
             (1.00, False, True, True, Decision.REVIEW),
-            # Row 5 — ambiguous score.
+            # Row 5 (drift floor) is covered in TestDriftFloor.
+            # Row 6 — ambiguous score.
             (0.30, False, True, False, Decision.REVIEW),
             (0.59, False, True, False, Decision.REVIEW),
-            # Row 6 — allow.
+            # Row 7 — allow.
             (0.60, False, True, False, Decision.ALLOW),
             (1.00, False, True, False, Decision.ALLOW),
         ],
@@ -81,6 +82,34 @@ class TestPrecedence:
         outcome = decide_with_reasons(1.0, THRESHOLDS, all_degraded=True)
         assert outcome.decision is Decision.REVIEW
         assert "confident signal" in outcome.reasons[0]
+
+
+class TestDriftFloor:
+    """Rule 5: a significantly drifted model is never auto-approved.
+
+    This used to hold only because the stub risk engine was always excluded,
+    which happened to leave drift enough weight. These tests pin it as a rule.
+    """
+
+    def test_significant_drift_stops_an_otherwise_passing_score(self):
+        outcome = decide_with_reasons(0.95, THRESHOLDS, drift_significant=True)
+        assert outcome.decision is Decision.REVIEW
+        assert "significant" in outcome.reasons[0]
+
+    def test_drift_floor_never_softens_a_block(self):
+        assert decide(0.1, THRESHOLDS, drift_significant=True) is Decision.BLOCK
+        assert decide(1.0, THRESHOLDS, vetoed=True, drift_significant=True) is Decision.BLOCK
+
+    def test_without_significant_drift_the_score_decides(self):
+        assert decide(0.95, THRESHOLDS, drift_significant=False) is Decision.ALLOW
+
+    def test_the_weights_alone_can_no_longer_guarantee_this(self):
+        """Why the rule exists: with all three engines live, a drifted model can
+        out-score the review threshold. severity 0.75 -> drift score 0.25."""
+        weights = {"policy": 0.3, "drift": 0.5, "risk": 0.2}
+        fused = weights["policy"] * 1.0 + weights["drift"] * 0.25 + weights["risk"] * 1.0
+        assert fused >= THRESHOLDS["review"]  # the average alone would ALLOW
+        assert decide(fused, THRESHOLDS, drift_significant=True) is Decision.REVIEW
 
 
 class TestReasons:

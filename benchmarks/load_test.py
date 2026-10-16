@@ -161,6 +161,16 @@ class Sample:
     def ok(self) -> bool:
         return self.error is None and self.status == 200
 
+    @property
+    def shed(self) -> bool:
+        """Refused by the admission gate: a deliberate, immediate "not now".
+
+        Kept apart from failures. A shed request was never evaluated and the
+        SDK applies the tenant's fail-open/fail-closed policy to it — that is
+        the designed overload behaviour, not a malfunction.
+        """
+        return self.error == "shed"
+
 
 @dataclass
 class PhaseResult:
@@ -179,7 +189,12 @@ class PhaseResult:
 
     @property
     def failures(self) -> list[Sample]:
-        return [s for s in self.samples if not s.ok]
+        """Genuine failures — errors, timeouts, unexpected statuses. Not sheds."""
+        return [s for s in self.samples if not s.ok and not s.shed]
+
+    @property
+    def shed(self) -> list[Sample]:
+        return [s for s in self.samples if s.shed]
 
     @property
     def rps_achieved(self) -> float:
@@ -242,6 +257,7 @@ class PhaseResult:
             "duration_s": self.duration_s,
             "requests": len(self.samples),
             "ok": len(self.successes),
+            "shed": len(self.shed),
             "failed": len(self.failures),
             "errors": self.errors,
             "decisions": self.decisions,
@@ -544,6 +560,8 @@ async def run_phase(
                     sample = Sample(
                         scheduled=due, sent=sent, received=received, status=response.status_code
                     )
+                    if response.status_code == 503 and response.json().get("shed"):
+                        sample.error = "shed"
                     if response.status_code == 200:
                         body = response.json()
                         sample.decision = body.get("decision")
@@ -708,7 +726,7 @@ def print_sweep(results: list[PhaseResult], budget_ms: float) -> None:
     print(f"\n{BOLD}{CYAN}── Sweep{RESET}\n")
     header = (
         f"   {'offered':>9}{'achieved':>11}{'p50':>10}{'p95':>10}"
-        f"{'p99':>10}{'max':>10}{'errors':>8}   verdict"
+        f"{'p99':>10}{'max':>10}{'shed':>8}{'errors':>8}   verdict"
     )
     print(f"{BOLD}{header}{RESET}")
 
@@ -718,7 +736,7 @@ def print_sweep(results: list[PhaseResult], budget_ms: float) -> None:
         print(
             f"   {result.rps_offered:>7.0f}/s{result.rps_achieved:>9.1f}/s"
             f"{fmt(dist.p50):>10}{fmt(dist.p95):>10}{fmt(dist.p99):>10}{fmt(dist.max):>10}"
-            f"{len(result.failures):>8}   {colour_verdict(passed)}"
+            f"{len(result.shed):>8}{len(result.failures):>8}   {colour_verdict(passed)}"
         )
 
     holding = [r for r in results if r.passed(budget_ms)]
@@ -891,7 +909,7 @@ def main() -> int:
             ok, total = len(result.successes), len(result.samples)
             print(
                 f"   {'achieved':<22}{result.rps_achieved:.1f} req/s   "
-                f"{ok}/{total} ok, {len(result.failures)} failed"
+                f"{ok}/{total} ok, {len(result.shed)} shed, {len(result.failures)} failed"
             )
             decisions = ", ".join(f"{k} {v}" for k, v in sorted(result.decisions.items()))
             print(f"   {'decisions':<22}{decisions or 'none'}")

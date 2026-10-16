@@ -29,8 +29,8 @@ to be *calibrated*, because there is no known answer to compare against.
 Datasets this has been written against (all public, none bundled — they are
 large and separately licensed):
 
-  Lending Club loan data (2007-2018, ~2.2M rows)
-      --time-column issue_d
+  Lending Club loan data (2007-2018, ~2.2M rows; .csv.gz is read directly)
+      --time-column issue_d --period quarter
       --features loan_amnt,annual_inc,dti,revol_util,fico_range_low
       Genuine distribution shift across the 2008 crisis and the 2016 credit
       policy change. The strongest available test for a credit-risk drift
@@ -47,9 +47,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import gzip
+import json
 import math
 import sys
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 
 from engines.drift.detectors import ks_test, psi
@@ -71,7 +74,10 @@ def read_rows(path: Path, features: list[str], time_column: str | None) -> list[
     kept: list[dict] = []
     dropped = 0
 
-    with path.open(newline="", encoding="utf-8", errors="replace") as handle:
+    # Read .gz in place: the Lending Club file is ~375 MB compressed and ~1.6 GB
+    # unpacked, and nothing here needs the uncompressed copy on disk.
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "rt", newline="", encoding="utf-8", errors="replace") as handle:
         for raw in csv.DictReader(handle):
             row: dict = {}
             ok = True
@@ -97,12 +103,52 @@ def read_rows(path: Path, features: list[str], time_column: str | None) -> list[
     return kept
 
 
-def window_by_time(rows: list[dict]) -> list[tuple[str, list[dict]]]:
-    """Group rows by the raw value of the time column, in sorted order."""
+# Formats seen in the public credit datasets this harness targets. Lending Club
+# uses "Dec-2015"; most others use ISO dates.
+_DATE_FORMATS = ("%b-%Y", "%Y-%m-%d", "%Y-%m", "%m/%d/%Y", "%d/%m/%Y", "%Y")
+
+
+def parse_time(value: str) -> datetime | None:
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(value, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def period_label(moment: datetime, period: str) -> str:
+    if period == "year":
+        return f"{moment.year}"
+    if period == "quarter":
+        return f"{moment.year}-Q{(moment.month - 1) // 3 + 1}"
+    return f"{moment.year}-{moment.month:02d}"
+
+
+def window_by_time(rows: list[dict], period: str = "month") -> list[tuple[str, list[dict]]]:
+    """Group rows into calendar windows, in chronological order.
+
+    Ordering by *parsed date* is the whole job here. An earlier version sorted
+    the raw strings, and Lending Club's "Dec-2015" format sorts alphabetically
+    by month name — "Aug-2018" before "Jun-2007". The baseline became a 2018
+    month and the timeline came out scrambled, while still printing a perfectly
+    plausible-looking table. Rows whose time cannot be parsed are dropped and
+    counted rather than guessed at.
+    """
     buckets: dict[str, list[dict]] = defaultdict(list)
+    keys: dict[str, datetime] = {}
+    unparsed = 0
     for row in rows:
-        buckets[row["__t"]].append(row)
-    return sorted(buckets.items())
+        moment = parse_time(row["__t"])
+        if moment is None:
+            unparsed += 1
+            continue
+        label = period_label(moment, period)
+        buckets[label].append(row)
+        keys[label] = min(keys.get(label, moment), moment)
+    if unparsed:
+        print(f"dropped {unparsed:,} rows with an unparseable time value")
+    return [(label, buckets[label]) for label in sorted(buckets, key=keys.__getitem__)]
 
 
 def window_by_count(rows: list[dict], size: int) -> list[tuple[str, list[dict]]]:
@@ -155,7 +201,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--window-rows", type=int, default=0, help="fixed window size when there is no time column"
     )
+    parser.add_argument(
+        "--period",
+        choices=("month", "quarter", "year"),
+        default="month",
+        help="calendar window size when using --time-column",
+    )
     parser.add_argument("--top", type=int, default=3, help="features to name per window")
+    parser.add_argument("--json", type=Path, default=None, help="also write the timeline here")
     args = parser.parse_args(argv)
 
     if not args.csv.exists():
@@ -171,8 +224,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"need at least {MIN_WINDOW * 2:,} usable rows", file=sys.stderr)
         return 1
 
-    windows = window_by_time(rows) if args.time_column else window_by_count(rows, args.window_rows)
+    windows = (
+        window_by_time(rows, args.period)
+        if args.time_column
+        else window_by_count(rows, args.window_rows)
+    )
+    skipped = [label for label, w in windows if len(w) < MIN_WINDOW]
     windows = [(label, w) for label, w in windows if len(w) >= MIN_WINDOW]
+    if skipped:
+        print(f"skipped {len(skipped)} window(s) under {MIN_WINDOW} rows: {', '.join(skipped[:6])}"
+              + (" …" if len(skipped) > 6 else ""))
     if len(windows) < 2:
         print(f"need at least 2 windows of {MIN_WINDOW:,}+ rows", file=sys.stderr)
         return 1
@@ -185,8 +246,20 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{'window':<24}{'rows':>10}{'severity':>11}  {'band':<13}top drifting features")
     print("-" * 104)
 
+    timeline: list[dict] = []
     for label, window in windows[1:]:
         severity, per_feature = score(baseline, columnar(window, features))
+        timeline.append(
+            {
+                "window": label,
+                "rows": len(window),
+                "severity": round(severity, 6),
+                "band": severity_band(severity),
+                "per_feature": {
+                    n: {k: round(v, 6) for k, v in s.items()} for n, s in per_feature.items()
+                },
+            }
+        )
         # Tie-break on PSI: severity saturates at 1.0, so ranking on it alone
         # orders saturated features arbitrarily and the printed PSI values
         # then look out of sequence.
@@ -205,6 +278,22 @@ def main(argv: list[str] | None = None) -> int:
         "\nseverity bands: <0.33 stable · 0.33-0.66 moderate · >0.66 significant"
         "\nPSI bands: <0.10 stable · 0.10-0.25 moderate shift · >0.25 significant shift"
     )
+
+    if args.json:
+        args.json.write_text(
+            json.dumps(
+                {
+                    "dataset": args.csv.name,
+                    "features": features,
+                    "period": args.period if args.time_column else None,
+                    "baseline": {"window": baseline_label, "rows": len(baseline_rows)},
+                    "timeline": timeline,
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        print(f"\ntimeline written to {args.json}")
     return 0
 
 

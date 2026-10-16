@@ -87,9 +87,9 @@ waits on them.
 pytest
 ```
 
-274 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
-matrix, hash-chain tamper detection and chain integrity under concurrent writers, SDK fail-open
-behaviour, and a full lifecycle end to end.
+304 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
+matrix, the risk engine, admission control, hash-chain tamper detection and chain integrity
+under concurrent writers, SDK fail-open behaviour, and a full lifecycle end to end.
 
 ## Load
 
@@ -98,8 +98,9 @@ python -m benchmarks.load_test
 ```
 
 Sweeps request rates against the real gateway over real HTTP and reports where the p99 budget
-stops holding. On one M1 core against SQLite: **50 ms p99 up to 100 req/s per instance**.
-Throughput itself survives to 200 req/s; the latency budget does not.
+stops holding. On one M1 core against SQLite: **50 ms p99 up to 200 req/s per instance**
+(28 ms at 200). Past capacity the gateway refuses excess requests with 503 rather than queueing
+them, so overload neither collapses throughput nor changes any verdict.
 
 The harness is open-loop, so the reported p99 is not flattered by coordinated omission. It
 found three things a single-threaded test cannot — including an audit-chain defect that has

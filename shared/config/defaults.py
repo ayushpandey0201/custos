@@ -16,6 +16,21 @@ import os
 DEFAULT_TIMEOUT_MS = 50
 ENGINE_TIMEOUT_MS = 20
 
+# --- Admission control -------------------------------------------------------
+# Most evaluations one gateway process will hold in flight at once. Past this,
+# new requests are refused immediately with 503 rather than queued. Queueing is
+# what turned overload into congestion collapse: every waiting request was
+# already late, and the queue kept growing. A fast refusal lets the SDK apply
+# the tenant's own fail-open / fail-closed policy (ADR 0001) straight away.
+#
+# Sized by Little's law and then checked by measurement. Admitted requests
+# queue behind the single audit writer, so the worst wait is roughly
+# limit × per-write service time. At 16 the 200 req/s p99 was 69 ms, over the
+# 50 ms budget; at 8 it was 28 ms. This is a capacity setting, not a tuned
+# detector threshold: it changes how many requests wait, never what any
+# verdict is. Raise it with more workers or a faster audit store.
+MAX_IN_FLIGHT = int(os.getenv("CUSTOS_MAX_IN_FLIGHT", "8"))
+
 # --- Fusion ----------------------------------------------------------------
 # Drift carries the most weight: it is the signal nothing else in the stack
 # provides, and the one this system exists to surface.

@@ -11,11 +11,22 @@ tested row by row in tests/unit/test_decision_table.py.
     2  trust < block threshold            BLOCK      fused evidence is damning
     3  model_id not registered            REVIEW     ADR 0005
     4  every engine degraded              REVIEW     Custos has no signal at all
-    5  trust < review threshold           REVIEW     ambiguous
-    6  otherwise                          ALLOW
+    5  drift in the significant band      REVIEW     drift floor (below)
+    6  trust < review threshold           REVIEW     ambiguous
+    7  otherwise                          ALLOW
 
 Rule 2 precedes rule 3 deliberately: an unregistered model whose signals are
 *already* damning should be blocked, not merely flagged.
+
+Rule 5 exists because fusion is an average, and averages can be outvoted.
+While the risk engine was a stub it was always excluded, drift carried 0.5/0.8
+of the weight, and a significantly drifted model could never reach ALLOW — by
+arithmetic accident. The day risk became a live signal, drift's share fell to
+half, and a model at severity 0.8 could be auto-approved whenever policy and
+risk were both clean. That property is too important to depend on the weights,
+so it is stated here instead: a model that far from its baseline is never
+auto-approved, however reassuring the other signals are. It can still be
+BLOCKed by rules 1-2; it is only kept out of ALLOW.
 """
 
 from __future__ import annotations
@@ -38,9 +49,12 @@ def decide(
     vetoed: bool = False,
     model_known: bool = True,
     all_degraded: bool = False,
+    drift_significant: bool = False,
 ) -> Decision:
     """Apply the decision matrix. See :func:`decide_with_reasons` for the why."""
-    return decide_with_reasons(trust_score, thresholds, vetoed, model_known, all_degraded).decision
+    return decide_with_reasons(
+        trust_score, thresholds, vetoed, model_known, all_degraded, drift_significant
+    ).decision
 
 
 def decide_with_reasons(
@@ -49,6 +63,7 @@ def decide_with_reasons(
     vetoed: bool = False,
     model_known: bool = True,
     all_degraded: bool = False,
+    drift_significant: bool = False,
 ) -> DecisionOutcome:
     """The decision plus the ordered reasons behind it.
 
@@ -77,6 +92,15 @@ def decide_with_reasons(
             Decision.REVIEW, ["no engine produced a confident signal; trust is unestablished"]
         )
 
+    if drift_significant:
+        return DecisionOutcome(
+            Decision.REVIEW,
+            [
+                "model drift is in the significant band; a model this far from its "
+                "baseline is not auto-approved regardless of other signals"
+            ],
+        )
+
     if trust_score < review_at:
         return DecisionOutcome(
             Decision.REVIEW,
@@ -89,7 +113,10 @@ def decide_with_reasons(
 
 
 def evaluate_decision(
-    result: AggregateResult, thresholds: dict[str, float], model_known: bool = True
+    result: AggregateResult,
+    thresholds: dict[str, float],
+    model_known: bool = True,
+    drift_significant: bool = False,
 ) -> DecisionOutcome:
     """Decide from an :class:`AggregateResult`, enriching the reasons with evidence."""
     outcome = decide_with_reasons(
@@ -98,6 +125,7 @@ def evaluate_decision(
         vetoed=result.vetoed,
         model_known=model_known,
         all_degraded=result.all_degraded,
+        drift_significant=drift_significant,
     )
 
     reasons = list(outcome.reasons)

@@ -140,9 +140,11 @@ class TestConcurrentEvaluations:
 
             return list(await asyncio.gather(*(one(i) for i in range(count))))
 
+    # These tests are about correctness under concurrency, not capacity, so the
+    # admission gate gets headroom. Shedding has its own tests below.
     @pytest.mark.asyncio
     async def test_concurrent_requests_all_succeed(self, tenant, registered_model):
-        responses = await self._hammer(create_app(), count=100, concurrency=32)
+        responses = await self._hammer(create_app(max_in_flight=64), count=100, concurrency=32)
 
         assert all(r.status_code == 200 for r in responses)
         assert len({r.json()["trace_id"] for r in responses}) == 100
@@ -151,7 +153,7 @@ class TestConcurrentEvaluations:
     async def test_concurrent_requests_stay_inside_a_sane_latency_ceiling(
         self, tenant, registered_model
     ):
-        responses = await self._hammer(create_app(), count=100, concurrency=32)
+        responses = await self._hammer(create_app(max_in_flight=64), count=100, concurrency=32)
 
         latencies = sorted(float(r.headers["X-Custos-Latency-Ms"]) for r in responses)
         p99 = latencies[int(0.99 * len(latencies)) - 1]
@@ -163,7 +165,7 @@ class TestConcurrentEvaluations:
     @pytest.mark.asyncio
     async def test_concurrent_decisions_all_reach_the_audit_chain(self, tenant, registered_model):
         """The decision is worthless if its evidence did not survive the load."""
-        responses = await self._hammer(create_app(), count=60, concurrency=16)
+        responses = await self._hammer(create_app(max_in_flight=64), count=60, concurrency=16)
 
         audit_ids = [r.json()["audit_id"] for r in responses]
         assert all(audit_ids), "some decisions came back with no audit_id"
@@ -172,3 +174,90 @@ class TestConcurrentEvaluations:
         result = verify_chain("acme")
         assert result["valid"], result["detail"]
         assert result["entries"] == 60
+
+
+class TestAdmissionControl:
+    """Overload is refused at the door instead of queued.
+
+    The load sweep before this existed showed congestion collapse: past ~200
+    req/s the gateway served *fewer* requests as more arrived, because every
+    request queued behind a blocked event loop. The gate bounds that queue.
+    """
+
+    @staticmethod
+    async def _burst(app, count: int) -> list[httpx.Response]:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://gateway") as client:
+            return list(
+                await asyncio.gather(
+                    *(
+                        client.post(
+                            "/v1/evaluate",
+                            json={"model_id": "credit-risk-v3", "features": {"income": 1.0}},
+                            headers=auth(),
+                        )
+                        for _ in range(count)
+                    )
+                )
+            )
+
+    @pytest.mark.asyncio
+    async def test_requests_beyond_the_limit_are_shed_with_503(self, tenant, registered_model):
+        responses = await self._burst(create_app(max_in_flight=4), count=40)
+        codes = [r.status_code for r in responses]
+
+        assert 200 in codes, "nothing was admitted"
+        assert 503 in codes, "a burst ten times the limit was never shed"
+        assert set(codes) <= {200, 503}
+
+        shed = next(r for r in responses if r.status_code == 503)
+        assert shed.json()["shed"] is True
+        assert shed.headers["Retry-After"] == "1"
+
+    @pytest.mark.asyncio
+    async def test_admitted_requests_are_fully_evaluated(self, tenant, registered_model):
+        """Shedding must never produce a half-made verdict."""
+        responses = await self._burst(create_app(max_in_flight=4), count=40)
+        for r in responses:
+            if r.status_code == 200:
+                assert r.json()["audit_id"], "an admitted request lost its audit record"
+
+    @pytest.mark.asyncio
+    async def test_gate_releases_every_slot(self, tenant, registered_model):
+        """A slot that leaks would shrink capacity until everything is refused."""
+        app = create_app(max_in_flight=4)
+        await self._burst(app, count=40)
+
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://gateway") as client:
+            state = (await client.get("/metrics.json")).json()
+        assert state["in_flight"] == 0
+        assert state["max_in_flight"] == 4
+
+    @pytest.mark.asyncio
+    async def test_gate_releases_its_slot_when_evaluation_fails(
+        self, tenant, registered_model, monkeypatch
+    ):
+        from services.gateway import trust_engine
+
+        async def explode(ctx, **_):
+            raise RuntimeError("engine fell over")
+
+        monkeypatch.setattr(trust_engine, "evaluate", explode)
+        app = create_app(max_in_flight=2)
+        responses = await self._burst(app, count=6)
+
+        # Fail-open still answers, and the slot comes back afterwards.
+        assert all(r.status_code in {200, 503} for r in responses)
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://gateway") as client:
+            assert (await client.get("/metrics.json")).json()["in_flight"] == 0
+
+    @pytest.mark.asyncio
+    async def test_shedding_is_counted(self, tenant, registered_model):
+        from shared.telemetry import metrics
+
+        await self._burst(create_app(max_in_flight=2), count=30)
+        counters = metrics.snapshot()["counters"]
+        shed = sum(v for k, v in counters.items() if k.startswith("custos_shed_total"))
+        assert shed > 0

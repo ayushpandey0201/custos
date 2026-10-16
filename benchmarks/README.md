@@ -215,3 +215,39 @@ means a spike leaves the gateway degraded and keeps it there, which is what make
 control (rather than a bigger box) the right next lever.
 
 `tests/integration/test_concurrency.py` pins findings 1 and 2 as regression tests.
+
+---
+
+## Results — 16 October 2026: after admission control
+
+Same machine, same harness, same sweep. Two changes since September:
+
+1. **The audit write moved off the event loop** onto one dedicated writer thread
+   (`services/gateway/trust_engine.py`). One thread, so hash-chain appends stay serialised.
+2. **An admission gate** (`services/gateway/main.py`, `MAX_IN_FLIGHT`). Past the limit, new
+   requests get an immediate 503 instead of a place in a queue; the SDK then applies the
+   tenant's fail-open / fail-closed policy. Shed requests are counted separately from failures.
+
+| offered | served (Sep → Oct) | p99 (Sep → Oct) | shed | verdicts flipped (Sep → Oct) |
+|---|---|---|---|---|
+| 100/s | 100 → 100 | 49 ms → **9 ms** | 0 | 0 → 0 |
+| 200/s | 200 → 200 | 94 ms ❌ → **28 ms** ✅ | 5 | 12 → **0** |
+| 400/s | 74 → **204** | 66 s → 12 s | 626 | 818 → **0** |
+| 800/s | 72 → **190** | 150 s → 43 s | 910 | 985 → **0** |
+
+Raw: `results-before-admission.json`, `results-after-admission-cap8.json`.
+
+**What improved.** The budget holds to 200 req/s, double September. Throughput under overload
+no longer collapses. And finding 3 above is gone: **overload no longer changes any verdict.**
+Engines stopped timing out once the event loop stopped blocking on SQLite.
+
+**How the limit of 8 was chosen.** Admitted requests queue behind the single audit writer, so
+the worst wait is about limit × per-write time (Little's law). At 16, the 200 req/s p99 was
+69 ms; at 8 it was 28 ms (`results-after-admission.json` is the 16 run). This is a capacity
+setting: it changes how many requests wait, never what a verdict is.
+
+**What is still wrong.** At 400 req/s and above, p99 is still 12–43 s. The handler itself is
+fast (p99 57–63 ms), and the wait is *before* it: one Python process saturates at roughly
+300 req/s of total work, admitted plus shed, and requests queue in the socket where no in-app
+gate can see them. The fix is more worker processes behind a shared database, not a tighter
+gate.

@@ -1,0 +1,313 @@
+{
+  "database_url": "sqlite:////Users/ayushpandey/Developer/ayush_projects/custos/custos-bench.db",
+  "workers": 1,
+  "budget_ms": 50.0,
+  "connections": 256,
+  "duration_s": 15.0,
+  "phases": [
+    {
+      "rps_offered": 50.0,
+      "rps_achieved": 50.04,
+      "duration_s": 15.0,
+      "requests": 750,
+      "ok": 750,
+      "shed": 0,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 750
+      },
+      "load_induced_degradations": {},
+      "connections": 256,
+      "peak_in_flight": 3,
+      "response_time": {
+        "p50_ms": 7.338,
+        "p95_ms": 8.411,
+        "p99_ms": 14.269,
+        "max_ms": 49.335,
+        "mean_ms": 7.576,
+        "count": 750
+      },
+      "service_time": {
+        "p50_ms": 6.31,
+        "p95_ms": 7.398,
+        "p99_ms": 13.084,
+        "max_ms": 48.257,
+        "mean_ms": 6.557,
+        "count": 750
+      },
+      "server_handler": {
+        "p50_ms": 4.44,
+        "p95_ms": 5.21,
+        "p99_ms": 9.37,
+        "max_ms": 42.91,
+        "mean_ms": 4.638,
+        "count": 750
+      },
+      "trust_engine": {
+        "p50_ms": 0.427,
+        "p95_ms": 0.489,
+        "p99_ms": 0.727,
+        "max_ms": 1.203,
+        "mean_ms": 0.431,
+        "count": 750
+      },
+      "budget_ms": 50.0,
+      "passed": true
+    },
+    {
+      "rps_offered": 100.0,
+      "rps_achieved": 100.03,
+      "duration_s": 15.0,
+      "requests": 1500,
+      "ok": 1500,
+      "shed": 0,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 1500
+      },
+      "load_induced_degradations": {},
+      "connections": 256,
+      "peak_in_flight": 2,
+      "response_time": {
+        "p50_ms": 5.363,
+        "p95_ms": 6.01,
+        "p99_ms": 8.533,
+        "max_ms": 20.8,
+        "mean_ms": 5.453,
+        "count": 1500
+      },
+      "service_time": {
+        "p50_ms": 4.745,
+        "p95_ms": 5.385,
+        "p99_ms": 7.861,
+        "max_ms": 20.174,
+        "mean_ms": 4.844,
+        "count": 1500
+      },
+      "server_handler": {
+        "p50_ms": 3.38,
+        "p95_ms": 3.94,
+        "p99_ms": 5.45,
+        "max_ms": 14.67,
+        "mean_ms": 3.447,
+        "count": 1500
+      },
+      "trust_engine": {
+        "p50_ms": 0.434,
+        "p95_ms": 0.482,
+        "p99_ms": 0.693,
+        "max_ms": 1.931,
+        "mean_ms": 0.439,
+        "count": 1500
+      },
+      "budget_ms": 50.0,
+      "passed": true
+    },
+    {
+      "rps_offered": 200.0,
+      "rps_achieved": 199.87,
+      "duration_s": 15.0,
+      "requests": 3000,
+      "ok": 2998,
+      "shed": 2,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 2998
+      },
+      "load_induced_degradations": {},
+      "connections": 256,
+      "peak_in_flight": 17,
+      "response_time": {
+        "p50_ms": 4.612,
+        "p95_ms": 27.79,
+        "p99_ms": 68.941,
+        "max_ms": 131.839,
+        "mean_ms": 7.985,
+        "count": 2998
+      },
+      "service_time": {
+        "p50_ms": 4.433,
+        "p95_ms": 27.363,
+        "p99_ms": 66.008,
+        "max_ms": 91.728,
+        "mean_ms": 7.634,
+        "count": 2998
+      },
+      "server_handler": {
+        "p50_ms": 2.91,
+        "p95_ms": 24.01,
+        "p99_ms": 63.06,
+        "max_ms": 82.67,
+        "mean_ms": 5.915,
+        "count": 2998
+      },
+      "trust_engine": {
+        "p50_ms": 0.388,
+        "p95_ms": 0.782,
+        "p99_ms": 1.576,
+        "max_ms": 4.655,
+        "mean_ms": 0.45,
+        "count": 2998
+      },
+      "budget_ms": 50.0,
+      "passed": false
+    },
+    {
+      "rps_offered": 400.0,
+      "rps_achieved": 171.25,
+      "duration_s": 15.0,
+      "requests": 6000,
+      "ok": 4104,
+      "shed": 1896,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 4104
+      },
+      "load_induced_degradations": {},
+      "connections": 256,
+      "peak_in_flight": 256,
+      "response_time": {
+        "p50_ms": 84.116,
+        "p95_ms": 8677.087,
+        "p99_ms": 9816.098,
+        "max_ms": 12253.288,
+        "mean_ms": 2113.937,
+        "count": 4104
+      },
+      "service_time": {
+        "p50_ms": 82.232,
+        "p95_ms": 4270.73,
+        "p99_ms": 6854.45,
+        "max_ms": 12239.125,
+        "mean_ms": 774.662,
+        "count": 4104
+      },
+      "server_handler": {
+        "p50_ms": 59.49,
+        "p95_ms": 91.47,
+        "p99_ms": 115.36,
+        "max_ms": 167.02,
+        "mean_ms": 52.254,
+        "count": 4104
+      },
+      "trust_engine": {
+        "p50_ms": 0.539,
+        "p95_ms": 1.313,
+        "p99_ms": 2.74,
+        "max_ms": 16.521,
+        "mean_ms": 0.677,
+        "count": 4104
+      },
+      "budget_ms": 50.0,
+      "passed": false
+    },
+    {
+      "rps_offered": 600.0,
+      "rps_achieved": 152.55,
+      "duration_s": 15.0,
+      "requests": 9000,
+      "ok": 7824,
+      "shed": 1176,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 7824
+      },
+      "load_induced_degradations": {},
+      "connections": 256,
+      "peak_in_flight": 256,
+      "response_time": {
+        "p50_ms": 16887.49,
+        "p95_ms": 34423.793,
+        "p99_ms": 36310.417,
+        "max_ms": 38447.553,
+        "mean_ms": 16802.734,
+        "count": 7824
+      },
+      "service_time": {
+        "p50_ms": 893.012,
+        "p95_ms": 5168.28,
+        "p99_ms": 8261.219,
+        "max_ms": 15790.265,
+        "mean_ms": 1508.752,
+        "count": 7824
+      },
+      "server_handler": {
+        "p50_ms": 19.03,
+        "p95_ms": 69.09,
+        "p99_ms": 89.25,
+        "max_ms": 110.05,
+        "mean_ms": 26.076,
+        "count": 7824
+      },
+      "trust_engine": {
+        "p50_ms": 0.482,
+        "p95_ms": 1.219,
+        "p99_ms": 2.144,
+        "max_ms": 26.858,
+        "mean_ms": 0.631,
+        "count": 7824
+      },
+      "budget_ms": 50.0,
+      "passed": false
+    },
+    {
+      "rps_offered": 800.0,
+      "rps_achieved": 177.32,
+      "duration_s": 15.0,
+      "requests": 12000,
+      "ok": 10866,
+      "shed": 1133,
+      "failed": 1,
+      "errors": {
+        "ReadError": 1
+      },
+      "decisions": {
+        "ALLOW": 10866
+      },
+      "load_induced_degradations": {
+        "policy": 1
+      },
+      "connections": 256,
+      "peak_in_flight": 256,
+      "response_time": {
+        "p50_ms": 26142.08,
+        "p95_ms": 44704.919,
+        "p99_ms": 46240.904,
+        "max_ms": 48184.09,
+        "mean_ms": 23899.002,
+        "count": 10866
+      },
+      "service_time": {
+        "p50_ms": 839.412,
+        "p95_ms": 4572.093,
+        "p99_ms": 7135.597,
+        "max_ms": 14139.318,
+        "mean_ms": 1354.909,
+        "count": 10866
+      },
+      "server_handler": {
+        "p50_ms": 22.34,
+        "p95_ms": 67.63,
+        "p99_ms": 95.42,
+        "max_ms": 230.32,
+        "mean_ms": 30.242,
+        "count": 10866
+      },
+      "trust_engine": {
+        "p50_ms": 0.544,
+        "p95_ms": 1.269,
+        "p99_ms": 2.089,
+        "max_ms": 39.258,
+        "mean_ms": 0.66,
+        "count": 10866
+      },
+      "budget_ms": 50.0,
+      "passed": false
+    }
+  ]
+}

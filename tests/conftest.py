@@ -18,6 +18,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "sdk" / "python"))
 
 from engines import registry  # noqa: E402
+from engines.risk.engine import reset_state as reset_risk_state  # noqa: E402
 from services.gateway.auth import hash_api_key  # noqa: E402
 from shared.cache import reset_cache  # noqa: E402
 from shared.config.tenant import TenantConfig  # noqa: E402
@@ -38,6 +39,7 @@ def isolated_db(tmp_path, monkeypatch):
 
     reset_cache()
     metrics.reset()
+    reset_risk_state()
     registry.load_builtin_engines()
 
     yield engine
