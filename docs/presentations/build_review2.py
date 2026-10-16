@@ -86,7 +86,7 @@ def fill_all() -> None:
             bullet("System design — architecture and decision logic", 1700),
             bullet("Implementation — new: risk engine and admission control", 1700),
             bullet("Results and validation", 1700),
-            bullet("Engineering rigour, work plan and conclusion", 1700),
+            bullet("Engineering rigour, next phase (self-healing), work plan, conclusion", 1700),
         ],
     )
 
@@ -111,9 +111,11 @@ def fill_all() -> None:
                 1500, space_before=300,
             ),
             plain(
-                "The detector is validated by calibration against shifts of known size; the "
-                "gateway by open-loop load testing. Our own tooling has found five defects in "
-                "the system, all fixed and pinned by tests.",
+                "The detector is validated by calibration against shifts of known size, the "
+                "gateway by open-loop load testing, and the gating idea itself by a "
+                "pre-registered study on 589,186 real loans. That study found that gating on "
+                "population drift catches fewer bad loans than random review. We report it as "
+                "measured, and it now decides what we build next.",
                 1500, space_before=300,
             ),
         ],
@@ -244,7 +246,7 @@ def fill_all() -> None:
         [
             plain(
                 "Seven rules, evaluated in order. New: the drift floor — a significantly "
-                "drifted model is never auto-approved, however clean the other signals.",
+                "drifted model is never auto-approved. Slide 20 tests it on real data.",
                 1400, space_before=0,
             ),
         ],
@@ -256,7 +258,7 @@ def fill_all() -> None:
         [heading("Implementation — Status")],
         [
             plain(
-                "Ten of twelve components complete. New since Review-1 are marked.",
+                "Eleven of twelve components complete. New since Review-1 are marked.",
                 1300, space_before=0,
             ),
         ],
@@ -332,52 +334,80 @@ def fill_all() -> None:
     # ------------------------------------------------- 19 field validation
     bd.write_slide(
         "slide20.xml",
-        [heading("Validation — Field Data: Lending Club")],
+        [heading("Validation — Field Study: How It Was Run")],
         [
             plain(
-                "Calibration proves the detector is correct. Field data proves it fires on "
-                "drift nobody chose: ~2.2 million real loans, 2007–2018, across the 2008 "
-                "crisis and the 2016 credit-policy change.",
+                "Calibration proves the detector is correct. A field study tests whether gating "
+                "on drift actually helps: 2.26 million real Lending Club loans, of which 589,186 "
+                "matured loans from 2012–2015 were evaluated against a model trained on 2007–2011.",
                 1400, space_before=0,
             ),
             bullet(
-                "Harness ready — reads the compressed file directly and scores quarterly windows "
-                "against a fixed 2007 baseline, using the same code as the gateway.",
+                "Pre-registered — hypotheses, metrics and what each outcome would mean were "
+                "committed and pushed before the dataset was even downloaded.",
                 1300, space_before=300,
             ),
             bullet(
-                "Bug found before the first run — dates sorted as text, so “Aug-2018” would "
-                "have become the baseline. Fixed, with a regression test on Lending Club's own "
-                "date format.",
+                "Leakage and censoring enforced in code — only fields known when the loan was "
+                "made, and only loans whose term had ended, so outcomes are real.",
                 1300, space_before=160,
             ),
             bullet(
-                "Harness calibrated on a planted 2016 shift — found at the right quarter, with "
-                "the right feature blamed.",
+                "Seven review strategies compared at the same review budget, from random review "
+                "to the model's own risk score to Custos's drift gating.",
                 1300, space_before=160,
             ),
             bullet(
-                "Status: dataset run pending. Results will be reported as measured — the "
-                "detector is not tuned to the data.",
+                "Two bugs caught before the real run — dates sorted as text, and a harm measure "
+                "that could not see miscalibration. Both fixed, both recorded.",
                 1300, space_before=160,
             ),
         ],
     )
 
-    # ------------------------------------------------------ 20 defects
+    # -------------------------------------------------- 20 field result
     bd.write_slide(
-        "slide21.xml",
-        [heading("Engineering Rigour — Defects We Found in Our Own System")],
+        "slide23.xml",
+        [heading("Field Result — Our Core Assumption Failed")],
         [
             plain(
-                "Five defects, none visible to a test that sends one request at a time. "
-                "Two were introduced and caught during this phase.",
+                "Asked to pick 5% of 589,186 real loans for human review, gating on population "
+                "drift — how Custos works today — caught fewer defaults than picking at random. "
+                "The model's own risk score caught 2.1× random.",
+                1400, space_before=0,
+            ),
+        ],
+    )
+
+    # ------------------------------------------------------ 21 defects
+    bd.write_slide(
+        "slide21.xml",
+        [heading("Engineering Rigour — Problems We Found in Our Own System")],
+        [
+            plain(
+                "Six problems, found by our own tooling. The last is the largest: real data "
+                "contradicted the assumption the gating was built on.",
                 1300, space_before=0,
             ),
         ],
     )
 
-    # ----------------------------------------------------- 21 work plan
+    # ------------------------------------------ 22 next phase: self-healing
+    bd.write_slide(
+        "slide24.xml",
+        [heading("Next Phase — From Gating to Governed Self-Healing")],
+        [
+            plain(
+                "Custos is domain-agnostic MLOps infrastructure: it gates any model whose output "
+                "triggers an action. Our field study showed drift is a poor per-decision gate but "
+                "a strong alarm — so next it triggers a repair, tested in shadow and applied only "
+                "with human approval.",
+                1300, space_before=0,
+            ),
+        ],
+    )
+
+    # ----------------------------------------------------- 23 work plan
     bd.write_slide(
         "slide22.xml",
         [heading("Work Plan to the Final Review")],
@@ -393,6 +423,12 @@ def fill_all() -> None:
                 f"{TESTS} tests passing · latency budget holds to 200 req/s, double Review-1 · "
                 "overload no longer changes verdicts · all three trust signals live.",
                 1400, bold=True, space_before=0,
+            ),
+            plain(
+                "And the hardest result: on 589,186 real loans, gating on drift did worse than "
+                "random review. Pre-registered, reported as measured — and it now decides what "
+                "we build next.",
+                1300, space_before=200,
             ),
         ],
     )
@@ -420,6 +456,8 @@ FIGURE_SLIDES = {
     "slide17.xml": ("demo_trajectory.png", 2.80, 11.0),
     "slide18.xml": ("drift_attribution.png", 2.90, 11.0),
     "slide19.xml": ("calibration_curve.png", 2.75, 11.0),
+    "slide23.xml": ("gating_results.png", 2.75, 11.0),
+    "slide24.xml": ("self_healing_loop.png", 2.95, 11.0),
 }
 
 ORDER = [
@@ -441,10 +479,12 @@ ORDER = [
     "slide17.xml",  # 16 live demo                      [figure]
     "slide18.xml",  # 17 drift attribution              [figure]
     "slide19.xml",  # 18 calibration                    [figure]
-    "slide20.xml",  # 19 field validation
-    "slide21.xml",  # 20 defects                        [table]
-    "slide22.xml",  # 21 work plan                      [table]
-    "slide9.xml",   # 22 conclusion + contributions     [table]
+    "slide20.xml",  # 19 field study: how it was run
+    "slide23.xml",  # 20 field result                   [figure]
+    "slide21.xml",  # 21 problems found                 [table]
+    "slide24.xml",  # 22 next phase: self-healing       [figure]
+    "slide22.xml",  # 23 work plan                      [table]
+    "slide9.xml",   # 24 conclusion + contributions     [table]
 ]
 
 
