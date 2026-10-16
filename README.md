@@ -65,6 +65,14 @@ left behind them.
 
 Logs and the API key are written to `.run/`.
 
+Then open **http://localhost:5173**. The dashboard has four sections:
+
+- **Why Custos** — what it is, how it differs from monitoring and guardrails, and the evidence.
+- **Live demo** — a seven-step guided walkthrough with presenter instructions on every step. It
+  drives the real system and connects the console automatically, so no API key is needed.
+- **Documentation** — setup, concepts, the decision rules, the API, validation results and limits.
+- **Console** — the operator view of models, drift, decisions and the audit chain.
+
 ### Or by hand
 
 ```bash
@@ -87,7 +95,7 @@ waits on them.
 pytest
 ```
 
-304 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
+342 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
 matrix, the risk engine, admission control, hash-chain tamper detection and chain integrity
 under concurrent writers, SDK fail-open behaviour, and a full lifecycle end to end.
 

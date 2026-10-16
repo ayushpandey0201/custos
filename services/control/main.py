@@ -8,6 +8,7 @@ chain — that would be unacceptable in the gateway.
 
 from __future__ import annotations
 
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -34,7 +35,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-def create_app() -> FastAPI:
+def create_app(demo: bool | None = None, demo_gateway_url: str | None = None) -> FastAPI:
+    """Build the control plane.
+
+    ``demo`` mounts the guided-demo endpoints. Off unless asked for, by argument
+    or CUSTOS_DEMO_MODE=1: one of those endpoints edits the audit log on
+    purpose, which is the point of the demo and must never ship enabled.
+    """
+    if demo is None:
+        demo = os.getenv("CUSTOS_DEMO_MODE") == "1"
+
     app = FastAPI(
         title="Custos Control Plane",
         version="0.1.0",
@@ -56,6 +66,13 @@ def create_app() -> FastAPI:
     app.include_router(routes_drift.router)
     app.include_router(routes_config.router)
     app.include_router(routes_audit.router)
+
+    if demo:
+        from services.control import routes_demo
+
+        gateway = demo_gateway_url or os.getenv("CUSTOS_GATEWAY_URL", "http://127.0.0.1:8000")
+        app.include_router(routes_demo.build_router(gateway))
+        log.warning("demo_mode_enabled", extra={"gateway_url": gateway})
 
     @app.get("/health")
     def health() -> dict:

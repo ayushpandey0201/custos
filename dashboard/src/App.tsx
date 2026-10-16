@@ -1,155 +1,92 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ControlApiClient,
-  type AuditEntry,
-  type DecisionRow,
-  type DriftHistory,
-  type ModelSummary,
-  type TenantConfig,
-} from "./api/client";
-import { AuditLog } from "./views/AuditLog";
-import { Decisions } from "./views/Decisions";
-import { DriftMonitor } from "./views/DriftMonitor";
-import { ExplainContext } from "./components/primitives";
-import { Models } from "./views/Models";
+import { useEffect, useState } from "react";
+import { Console } from "./views/Console";
+import { Docs } from "./views/Docs";
+import { GuidedDemo } from "./views/GuidedDemo";
+import { Home } from "./views/Home";
 
 const CONTROL_URL = import.meta.env.VITE_CONTROL_URL ?? "http://localhost:8001";
 const STORAGE_KEY = "custos.apiKey";
 
+type Route = "home" | "demo" | "docs" | "console";
+
+const NAV: { route: Route; label: string }[] = [
+  { route: "home", label: "Why Custos" },
+  { route: "demo", label: "Live demo" },
+  { route: "docs", label: "Documentation" },
+  { route: "console", label: "Console" },
+];
+
+/** Hash routing: no router dependency, and a refresh keeps you where you were. */
+function readRoute(): Route {
+  const hash = window.location.hash.replace(/^#\/?/, "");
+  return (NAV.find((n) => n.route === hash)?.route ?? "home") as Route;
+}
+
+function Logo() {
+  return (
+    <svg viewBox="0 0 32 32" className="logo" aria-hidden="true">
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#7cc4ff" />
+          <stop offset="1" stopColor="#a78bfa" />
+        </linearGradient>
+      </defs>
+      <path d="M16 2 4 7v8c0 7.4 5.1 13.4 12 15 6.9-1.6 12-7.6 12-15V7L16 2Z" fill="url(#lg)" />
+      <path d="m10.5 16 4 4 7-8" fill="none" stroke="#0b1020" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function App() {
-  // The dashboard is a thin window onto the control plane and holds no
-  // credentials of its own — the operator pastes the tenant's API key and it
-  // stays in this browser.
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEY) ?? "");
-  const [keyDraft, setKeyDraft] = useState(apiKey);
-
-  const [models, setModels] = useState<ModelSummary[]>([]);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [drift, setDrift] = useState<DriftHistory | null>(null);
-  const [decisions, setDecisions] = useState<DecisionRow[]>([]);
-  const [audit, setAudit] = useState<AuditEntry[]>([]);
-  const [config, setConfig] = useState<TenantConfig | null>(null);
-  const [auditFilter, setAuditFilter] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  // Default on: the first person to open this screen is usually being
-  // shown the system, not operating it.
-  const [explain, setExplain] = useState(true);
-
-  const client = useMemo(() => new ControlApiClient(CONTROL_URL, apiKey), [apiKey]);
-
-  const refresh = useCallback(async () => {
-    if (!apiKey) return;
-    try {
-      const [modelList, decisionRows, auditPage, tenantConfig] = await Promise.all([
-        client.listModels(),
-        client.recentDecisions(50),
-        client.auditEntries({ limit: 50, decision: auditFilter || undefined }),
-        client.config(),
-      ]);
-      setModels(modelList);
-      setDecisions(decisionRows);
-      setAudit(auditPage.entries);
-      setConfig(tenantConfig);
-      setError(null);
-
-      // Default to the first model so the drift view is never empty on load.
-      setSelected((current) => current ?? modelList[0]?.model_id ?? null);
-    } catch (caught) {
-      setError(String(caught));
-    }
-  }, [apiKey, auditFilter, client]);
+  const [route, setRoute] = useState<Route>(readRoute);
+  const [apiKey, setApiKeyState] = useState(() => localStorage.getItem(STORAGE_KEY) ?? "");
 
   useEffect(() => {
-    void refresh();
-    // Polling rather than websockets: the control plane is deliberately cold,
-    // and a 5s refresh is well inside how fast any of this data changes.
-    const timer = setInterval(() => void refresh(), 5000);
-    return () => clearInterval(timer);
-  }, [refresh]);
+    const onHash = () => {
+      setRoute(readRoute());
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
-  useEffect(() => {
-    if (!selected || !apiKey) return;
-    client
-      .driftHistory(selected)
-      .then(setDrift)
-      .catch(() => setDrift(null));
-  }, [selected, apiKey, client, models]);
-
-  if (!apiKey) {
-    return (
-      <div className="gate">
-        <h1>Custos</h1>
-        <p className="muted">Runtime trust layer for AI agents and models.</p>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            localStorage.setItem(STORAGE_KEY, keyDraft.trim());
-            setApiKey(keyDraft.trim());
-          }}
-        >
-          <input
-            value={keyDraft}
-            onChange={(event) => setKeyDraft(event.target.value)}
-            placeholder="tenant API key"
-            autoFocus
-          />
-          <button type="submit">Connect</button>
-        </form>
-        <p className="muted small">Control plane: {CONTROL_URL}</p>
-      </div>
-    );
-  }
+  const setApiKey = (key: string) => {
+    if (key) localStorage.setItem(STORAGE_KEY, key);
+    else localStorage.removeItem(STORAGE_KEY);
+    setApiKeyState(key);
+  };
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <div>
-          <h1>Custos</h1>
-          <span className="muted">
-            {config ? `${config.tenant_id} · engines ${config.enabled_engines.join(", ")}` : "…"}
-          </span>
-        </div>
-        <div className="actions">
-          {config && (
-            <span className="muted small">
-              block &lt; {config.thresholds.block} · review &lt; {config.thresholds.review} ·{" "}
-              {config.fail_open ? "fail-open" : "fail-closed"}
-            </span>
-          )}
-          <button
-            className={explain ? "button-on" : undefined}
-            onClick={() => setExplain((on) => !on)}
-            title="Show a plain-English description on every panel"
-          >
-            {explain ? "Explain: on" : "Explain: off"}
-          </button>
-          <button
-            onClick={() => {
-              localStorage.removeItem(STORAGE_KEY);
-              setApiKey("");
-            }}
-          >
-            Disconnect
-          </button>
-        </div>
+    <div className="site">
+      <header className="nav">
+        <a className="brand" href="#/home">
+          <Logo />
+          <span className="brand-name">Custos</span>
+          <span className="brand-tag">runtime trust layer</span>
+        </a>
+        <nav className="nav-links">
+          {NAV.map((n) => (
+            <a key={n.route} href={`#/${n.route}`} className={`nav-link ${route === n.route ? "is-active" : ""}`}>
+              {n.label}
+            </a>
+          ))}
+        </nav>
+        <a className="btn btn-primary nav-cta" href="#/demo">Start demo</a>
       </header>
 
-      {error && <div className="verdict verdict-bad">{error}</div>}
-
-      <ExplainContext.Provider value={explain}>
-      <main>
-        <Models
-          client={client}
-          models={models}
-          selected={selected}
-          onSelect={setSelected}
-          onChanged={() => void refresh()}
-        />
-        <DriftMonitor modelId={selected} drift={drift} />
-        <Decisions decisions={decisions} />
-        <AuditLog client={client} entries={audit} filter={auditFilter} onFilter={setAuditFilter} />
+      <main className="site-main">
+        {route === "home" && <Home />}
+        {route === "demo" && <GuidedDemo controlUrl={CONTROL_URL} onKey={setApiKey} />}
+        {route === "docs" && <Docs />}
+        {route === "console" && <Console controlUrl={CONTROL_URL} apiKey={apiKey} setApiKey={setApiKey} />}
       </main>
-      </ExplainContext.Provider>
+
+      <footer className="footer">
+        <span>
+          <b>Custos</b> · Project Work Phase-II (23AI7PWPP1) · Dept. of AI &amp; DS, BMS College of Engineering
+        </span>
+        <span className="muted">Ayush Pandey · Vivek Boora · Nitin — guided by Dr. Seemanthini K G</span>
+      </footer>
     </div>
   );
 }
