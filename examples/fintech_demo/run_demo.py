@@ -160,7 +160,12 @@ def main() -> int:
     gateway_port = args.gateway_port or (8000 if args.serve else free_port())
     control_port = args.control_port or (8001 if args.serve else free_port())
     serve(gateway_app(), gateway_port)
-    serve(control_app(), control_port)
+    # --serve is the presenter's mode, so it also mounts the guided-demo
+    # endpoints the dashboard drives. A plain run never exposes them.
+    serve(
+        control_app(demo=args.serve, demo_gateway_url=f"http://127.0.0.1:{gateway_port}"),
+        control_port,
+    )
 
     gateway_url = f"http://127.0.0.1:{gateway_port}"
     control_url = f"http://127.0.0.1:{control_port}"

@@ -1,6 +1,6 @@
 # Review-2 Speech — Custos
 
-> **Deck:** `Custos_Phase2_Review2.pptx` — 22 slides, 17 October 2026.
+> **Deck:** `Custos_Phase2_Review2.pptx` — 24 slides, 17 October 2026.
 > **Time:** about 14–16 minutes at a normal pace.
 >
 > **The story of Review-2 in one line:** *at Review-1 we told you where our
@@ -21,7 +21,7 @@ Every one of these is measured, and the source is in the repo.
 
 | What | Review-1 | Review-2 | Source |
 |---|---|---|---|
-| Tests passing | 274 | **304** | `pytest` |
+| Tests passing | 274 | **342** | `pytest` |
 | Load the 50 ms budget holds to | 100 req/s | **200 req/s** | `benchmarks/results-*.json` |
 | p99 latency at 100 req/s | 49 ms | **9 ms** | same |
 | p99 latency at 200 req/s | 94 ms ❌ | **28 ms** ✅ | same |
@@ -29,11 +29,13 @@ Every one of these is measured, and the source is in the repo.
 | Requests served at 400 req/s offered | 74/s | **204/s** | same |
 | Live trust signals | 2 of 3 (risk was a stub) | **3 of 3** | `engines/risk/engine.py` |
 | Demo Act 4 trust | 0.48 | **0.58** — still REVIEW, now held by the drift floor | `run_demo` |
+| Lending Club study (589,186 real loans) | not run | **drift gating 126 vs random 140** per 1,000 reviews — worse than random | `experiments/gating/RESULTS_v1.md` |
 
 **The honest limits, also by heart:** at 400 req/s and above the budget is still
 missed (12–43 s p99), because one Python process saturates near 300 req/s; the
-fix is more worker processes, which is on the work plan. The Lending Club run has
-not happened yet — the harness is ready, the dataset is not downloaded.
+fix is more worker processes, which is on the work plan. And the big one: on real
+loans, gating on population drift — the idea Custos was built on — did **worse than
+random review**. That is on slide 20, deliberately, and you should own it, not hide it.
 
 ---
 
@@ -98,9 +100,9 @@ progress / Not started**, and the evidence.
 > Together these doubled the load we can handle within budget. I'll show the
 > before-and-after on slide 15.
 >
-> **In progress:** the Lending Club validation. The tool is ready, and while
-> preparing it we found and fixed a bug that would have silently scrambled the
-> results. The dataset run itself is next.
+> **Done, and the answer was no:** the Lending Club validation. We ran a
+> pre-registered study on 589,186 real loans — and our core assumption failed. I'll
+> show you exactly how on slide 20.
 >
 > **Not started:** model versioning and the Postgres measurement. Both are on our
 > work plan.
@@ -271,6 +273,9 @@ The hot path just *reads* the answer the worker prepared.
 > **So we made it a rule instead of an accident: a significantly drifted model is
 > never auto-approved, however reassuring the other signals are.** It's tested
 > directly.
+>
+> *Then add:* And then we tested whether this rule actually helps on real loans.
+> Hold that thought — slide 20 has the answer, and it isn't the one we wanted.
 
 ---
 
@@ -426,68 +431,180 @@ So we shift the income data by an amount *we chose*, and check what Custos reads
 
 ---
 
-## Slide 19 — Validation: Field Data (Lending Club) ⭐
+## Slide 19 — Validation: Field Study — How It Was Run ⭐
 
-### The idea
-Calibration proves the detector is **correct**. Real data proves it's **useful** —
-that it fires on drift nobody chose. Lending Club: about 2.2 million real loans
-from 2007 to 2018, through the 2008 crash and a 2016 lending-policy change.
+### The idea, simply
+Calibration proved the detector measures drift **correctly**. This study asks a
+different question: **does gating on drift actually help?** If humans can only
+review some loans, does Custos send them the *right* ones?
 
-### The bug we caught — tell this, it's a strong moment
-> Lending Club writes dates like "Dec-2015". Our tool sorted those as **text** —
-> so alphabetically, "Aug-2018" came first and would have become the 2007
-> baseline. Every result would have been scrambled — and still looked perfectly
-> believable. We found it with a test before touching the real data.
+### How it was set up
+- **Real data:** 2.26 million Lending Club loans. We kept 589,186 matured 36-month
+  loans from 2012–2015 — loans whose outcome (repaid or defaulted) is known.
+- **A model trained on 2007–2011**, never updated — the exact situation Custos is for.
+- **Seven strategies** each pick **5%** of loans for a human to review. Score =
+  how many of the picked loans really defaulted.
+- **Pre-registered:** hypotheses and what each result would mean were committed
+  and pushed to GitHub **before we downloaded the data**. We couldn't move the
+  goalposts even if we wanted to.
 
-### How we know the tool is right now
-> We built a fake dataset in Lending Club's exact format, planted an income drop
-> in 2016, and ran the tool. It found the shift in the right quarter and blamed the
-> right feature. We calibrated the tool the same way we calibrated the detector.
-
-### What to say
-> **Calibration proves the detector is correct. Field data proves it fires on
-> drift nobody chose.** The tool is ready and checked; the dataset run is next.
-> **And the results will be reported as measured — we won't tune the detector
-> until the chart looks good.**
-
----
-
-## Slide 20 — Engineering Rigour: Defects We Found in Our Own System ⭐
-
-### The five
-| # | Found by | Defect | Fixed |
-|---|---|---|---|
-| 1 | Load test (R1) | Our 0.5 ms figure measured the wrong timer — real was 49 ms | Now 9 ms at the same load |
-| 2 | Load test (R1) | Audit log dropped records and still said "all verified" | 0 lost from 2 to 48 writers |
-| 3 | Load test (R1) | Overload changed verdicts (~13% flipped) | 0 flips |
-| 4 | Unit test (R2) | Replay tool sorted dates as text | Parsed dates + regression test |
-| 5 | Fusion maths (R2) | Live risk let a drifted model reach ALLOW | Explicit drift-floor rule |
-
-### What to say
-> **Five defects, none visible to a test that sends one request at a time.** The
-> first three we disclosed at Review-1 — all three are now fixed and measured.
-> The last two we introduced and caught during this phase.
+### Two bugs we caught before the real run — tell these
+> First: Lending Club writes dates like "Dec-2015". Our tool sorted them as text,
+> so "Aug-2018" would have become the 2007 baseline. Scrambled results that look
+> believable.
 >
-> We'd rather show you a system we've pushed until it broke than one nobody has
-> pushed hard enough.
+> Second: our first definition of "harm" was AUC. On test data we found AUC can't
+> see the model's *level* going wrong — it predicted 17% defaults when reality was
+> 30%, and AUC didn't move. We fixed the definition and recorded why — before
+> seeing real data.
+
+### What to say
+> **Calibration proves the detector is correct. This study tests whether using it
+> actually helps** — on real loans, with real outcomes, with the rules written down
+> before we saw the data.
 
 ---
 
-## Slide 21 — Work Plan to the Final Review
+## Slide 20 — Field Result: Our Core Assumption Failed ⭐⭐
 
-> What remains: the Lending Club run — ready, waiting on the dataset. Scaling out
-> to multiple gateway workers, which fixes the 400-plus latency. Measuring on
-> Postgres instead of SQLite. Model and data versioning with a retraining trigger.
-> Separating a broken data feed from a real population shift. And the final
-> report.
+> **The most important slide. Slow down. Do not apologise — this is rigour.**
+
+### Reading the chart, simply
+Each bar: out of 1,000 loans a strategy sent to a human, **how many really
+defaulted.** Higher is better. The dashed line is **random** — just picking loans
+blindly: 140 per 1,000, because 14% of all loans defaulted.
+
+| Strategy | Defaults caught per 1,000 reviews |
+|---|---|
+| Model's own risk score | **292** — about 2× random |
+| Our proposed blend | 274 |
+| Per-request novelty | 188 |
+| Random | 140 |
+| **Population drift — Custos today** | **126 — worse than random** |
+
+### Why it happened — know these three points cold
+1. **Drift pointed at the safest loans.** Drift peaked in 2012–13, when Lending
+   Club *changed how it priced loans*. Those quarters had *fewer* defaults than
+   average, so Custos sent reviewers to the wrong place.
+2. **Drift was "significant" almost all the time** — 13 of 16 quarters. A warning
+   that is always on can't tell you anything.
+3. **The model did go wrong — drift just couldn't tell which way.** It
+   *over*estimated risk for two years, then *under*estimated it. Drift was "high"
+   in both.
+
+**And the drift floor from slide 12** would have sent **92% of all loans** to
+human review — and those loans defaulted at 14.2%, the same as random. Safe, but
+useless.
+
+### What to say
+> We asked one question: if humans can review only 5% of loans, does gating on
+> drift send them the right ones? We wrote down our hypotheses and pushed them to
+> GitHub before downloading the data.
+>
+> **The answer was no. On 589,186 real loans, gating on population drift — how
+> Custos works today — caught fewer bad loans than picking at random.** The
+> model's own risk score caught about twice as many.
+>
+> We're not hiding this. It's the most valuable thing we learned this semester,
+> because it tells us exactly what to build next: review queues ranked by risk,
+> with drift as a monitoring signal — not as the gate.
+
+### If they push: "So your project failed?"
+> The *assumption* failed, and our method caught it — that's what the method is
+> for. A system that had never been tested against real outcomes would still be
+> claiming drift gating works. Ours now knows it doesn't, on this data, and why.
+> The policy rules, risk engine, audit chain and admission control are all
+> unaffected.
 
 ---
 
-## Slide 22 — Conclusion
+## Slide 21 — Engineering Rigour: Problems We Found in Our Own System ⭐
 
-> **304 tests passing. The latency budget holds to 200 requests a second, double
+### The six
+| # | Found by | Problem | Status |
+|---|---|---|---|
+| 1 | Load test (R1) | Our 0.5 ms figure measured the wrong timer — real was 49 ms | Fixed: now 9 ms at the same load |
+| 2 | Load test (R1) | Audit log dropped records and still said "all verified" | Fixed: 0 lost from 2 to 48 writers |
+| 3 | Load test (R1) | Overload changed verdicts (~13% flipped) | Fixed: 0 flips |
+| 4 | Unit test (R2) | Replay tool sorted dates as text | Fixed + regression test |
+| 5 | Fusion maths (R2) | Live risk let a drifted model reach ALLOW | Fixed: explicit drift-floor rule |
+| 6 | **Pre-registered study (R2)** | **Drift gating worse than random on real loans** | **Not yet fixed — gating to be rebuilt** |
+
+### What to say
+> **Six problems, all found by our own tooling, none visible to a test that sends
+> one request at a time.** Five are fixed. The sixth is the largest — and it's the
+> one that sets our plan for the final review.
+
+---
+
+## Slide 22 — Next Phase: From Gating to Governed Self-Healing ⭐
+
+### Why this slide exists
+So nobody leaves thinking Custos is a "lending bot". The lending bot is a
+674-line demo in `examples/`. The core (about 4,400 lines) has no lending logic
+at all: every request is just a model, an action, inputs and context. Lending is
+our **test case** because it is the one domain with public, real outcome data
+to test against honestly.
+
+### Reading the figure — colours are honesty, not decoration
+| Stage | Status | What is actually there today |
+|---|---|---|
+| Detect | **green, built** | Drift worker: PSI + KS per input, offline |
+| Diagnose | amber, partly | Per-input drift scores say *which input moved*; telling a broken feed from a real shift is not built |
+| Propose fix | blue, next | Retrain on a recent window, roll back, or quarantine one input |
+| Shadow test | blue, next | The fix runs beside production without acting |
+| Human approves | amber, partly | Custos returns REVIEW today; an approval queue is not built |
+| Apply | blue, next | Promote the fix |
+| Verify + audit | amber, partly | The hash chain covers decisions today; repairs will go on it too |
+
+**Do not say self-healing is built. It isn't.** One stage is built and three
+are partly there. Say "the next phase", and point at the colours.
+
+### What to say
+> One thing we want to be clear about: **Custos is not a lending product.** It's
+> domain-agnostic MLOps infrastructure — it gates any model whose output triggers
+> an action: credit, fraud, insurance claims, triage, or an AI agent that spends
+> money. We test on lending because that's where real outcome data exists to test
+> honestly.
+>
+> And the field study told us something useful: drift is a poor *per-decision*
+> gate, but a good *alarm*. So the next phase turns that alarm into a repair loop —
+> **governed self-healing**. Detect, diagnose, propose a fix, test it in shadow,
+> and apply it **only with human approval**, with every repair on the same
+> tamper-evident chain as every decision.
+>
+> The colours are honest: green is in the repository today, amber is partly
+> there, blue is what we build next. Rauba et al. at NeurIPS 2024 propose
+> autonomous self-healing; what we add is the human checkpoint and the evidence.
+
+### If they ask "what will you show at the final review?"
+> The first working piece: Custos notices one input has gone dead — a broken data
+> feed — and proposes rolling back, tested in shadow, waiting for a person to
+> approve it, with the whole thing on the audit chain.
+
+---
+
+## Slide 23 — Work Plan to the Final Review
+
+> First, rebuild the gating around what the data says works: review queues ranked
+> by the model's own risk, with drift kept as a monitoring signal. Second,
+> replicate the study on a second credit dataset — one dataset can't support a
+> general claim. Then the first two steps of self-healing: catching a broken data
+> feed and proposing a rollback in shadow, then the human approval queue with
+> every repair on the audit chain. Then scaling out to multiple gateway workers,
+> measuring on Postgres, and the final report.
+
+---
+
+## Slide 24 — Conclusion
+
+> **342 tests passing. The latency budget holds to 200 requests a second, double
 > Review-1. Overload no longer changes our verdicts. All three trust signals are
 > live.**
+>
+> **And the hardest result: on 589,186 real loans, gating on drift did worse than
+> random review. We pre-registered it, reported it as measured, and it now decides
+> what we build next.**
 >
 > Thank you — we're happy to take questions.
 
@@ -535,16 +652,46 @@ from 2007 to 2018, through the 2008 crash and a 2016 lending-policy change.
 > which makes the signal a little less sensitive, never wrong. A shared Redis
 > history is the multi-server step.
 
-**"Where are the Lending Club results?"**
-> Not yet run — the dataset download is pending. The tool is ready and checked on
-> a planted shift, and we fixed a bug in it first that would have scrambled the
-> results. We'd rather show you no result than a wrong one.
+**"Couldn't you have tuned the study until drift looked good?"**
+> No — that's what pre-registration prevents. The hypotheses, metrics and the
+> meaning of each outcome were committed and pushed to GitHub at 21:44; the data
+> was downloaded at 21:54; the results were pushed at 22:01. Anyone can check the
+> timestamps.
+
+**"Why did drift point at safe loans?"**
+> Most of the measured drift was Lending Club repricing its loans — `int_rate` is
+> set by the platform, not the borrower. The quarters with the most repricing had
+> fewer defaults. Drift measures *change*, and change is not the same as danger.
+
+**"Is drift useless, then?"**
+> Not proven — this is one dataset, and the biggest drift was a platform policy
+> change. What it shows is that drift against a fixed old baseline is a poor guide
+> to *which decisions* need review. We're keeping drift as a monitoring signal and
+> testing a rolling baseline and a second dataset next.
+
+**"Why not just use the risk score, then — what does Custos add?"**
+> The risk ranking needs somewhere to run: a gate on the decision path, policy
+> rules with vetoes, velocity checks, an audit trail that can prove what happened,
+> and fail-safe behaviour under overload. That's the part of Custos the study
+> didn't touch — and the part we're building the next phase around.
 
 **"Self-healing ML exists — why not just fix the model automatically?"**
 > Rauba et al. at NeurIPS 2024 do exactly that, and it's complementary. But a
 > repair happens *after* degradation, and it acts on the model. While the model is
 > unreliable, decisions are still being made — Custos is what protects those, and
-> it leaves the decision to fix the model with a human, with evidence.
+> it leaves the decision to fix the model with a human, with evidence. That's
+> exactly our next phase on slide 22: governed self-healing.
+
+**"Isn't this just a lending bot?"**
+> No. The lending bot is a small demo in `examples/`. The core has no lending
+> logic — a request is a model, an action, inputs and context, so it gates fraud,
+> claims, triage or an AI agent's payments the same way. We test on lending
+> because that's where public, real outcome data exists.
+
+**"Is this MLOps?"**
+> Yes — the runtime half of it: monitoring, governance and control of models in
+> production. Training pipelines are the other half; our next phase connects to
+> them through governed repair.
 
 **"Is the 400+ req/s latency a failure?"**
 > It's a known limit of one process, and we say so on the slide. The improvement
@@ -558,12 +705,17 @@ from 2007 to 2018, through the 2008 crash and a 2016 lending-policy change.
 
 - [ ] Open `Custos_Phase2_Review2.pptx` and flip through once. I checked layout
       by calculation, not by rendering (no LibreOffice on this machine).
-- [ ] If presenting from Google Slides: upload it, then check slides 8, 10, 13
-      and 20 — the tables. Google Slides resizes to 10×5.6 in, which squeezed the
+- [ ] If presenting from Google Slides: upload it, then check slides 4, 8, 10, 13,
+      21 and 23 — the tables. Google Slides resizes to 10×5.6 in, which squeezed the
       tables last time.
-- [ ] **Contributions table (slide 22):** it shows Review-1 ownership. The new
-      work — risk engine, admission control, harness fixes — isn't assigned to
+- [ ] **Contributions table (slide 24):** it shows Review-1 ownership. The new
+      work — risk engine, admission control, the field study — isn't assigned to
       anyone, because who did what is yours to state. Add it if you want credit
       attributed.
 - [ ] `./app.sh` the morning of, so the demo is warm. The API key is in
       `.run/api-key.txt`.
+- [ ] **For the live demo, open http://localhost:5173 → “Live demo”.** Check the
+      light is green, then click through the seven steps. Every step tells you
+      what to click, what to say and what to point at — no key to paste.
+- [ ] Do one full practice run tonight. Use “Run the demo again” at the end to
+      reset; each run starts from a clean slate.

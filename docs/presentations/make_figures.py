@@ -522,6 +522,191 @@ def load_before_after(width_in: float = 11.0, height_in: float = 3.4) -> Path:
     return path
 
 
+# --------------------------------------------------------- gating study result
+
+GATING_RESULTS = (
+    Path(__file__).resolve().parents[2] / "experiments" / "results" / "lending_club_gating_v1.json"
+)
+
+# Plain-English names for the slide; the JSON keeps the registered names.
+GATING_LABELS = {
+    "model_risk": "Model's own risk score*",
+    "risk_plus_novelty": "Risk + novelty blend",
+    "custos_adaptive": "Custos adaptive  (proposed)",
+    "novelty": "Per-request novelty",
+    "random": "Random review",
+    "population_drift": "Population drift  (Custos today)",
+}
+
+
+def gating_results(width_in: float = 11.0, height_in: float = 3.3) -> Path:
+    """Defaults caught per 1,000 reviews at the registered 5% budget, from the JSON.
+
+    Horizontal bars, best first, with 95% intervals and a dashed line at random
+    review — so "worse than random" is visible as a bar that stops short of it.
+
+    `low_confidence` is folded into the risk-score row: with a 14% base rate the
+    least-confident predictions *are* the riskiest ones, so the two select the
+    same loans. Drawn separately, rounding made it look like a different winner.
+    """
+    import json
+
+    result = json.loads(GATING_RESULTS.read_text())
+    at = {
+        name: by_budget["0.05"]
+        for name, by_budget in result["strategies"].items()
+        if name != "low_confidence"
+    }
+    order = sorted(at, key=lambda n: -at[n]["per_1000_reviews"])
+    base = at["random"]["per_1000_reviews"]
+    loans = result["data"]["eval"]["loans"]
+
+    W, H = int(width_in * SCALE), int(height_in * SCALE)
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+    f_title = font(38, bold=True)
+    f_sub = font(25)
+    f_label = font(28, bold=True)
+    f_val = font(26, bold=True)
+    f_tick = font(22)
+
+    d.text((60, 30), "Defaults caught per 1,000 human reviews, 5% review budget",
+           font=f_title, fill=INK)
+    d.text((60, 88),
+           f"{loans:,} real Lending Club loans, 2012–2015  ·  pre-registered before the data "
+           "was downloaded  ·  bars show 95% intervals",
+           font=f_sub, fill=MUTED)
+
+    left, right = 820, W - 260
+    top, row = 175, 92
+    x_max = 360.0
+
+    def x_of(v: float) -> float:
+        return left + (v / x_max) * (right - left)
+
+    # Random-review reference, drawn first so bars sit over it.
+    bottom = top + row * len(order) - 20
+    xb = x_of(base)
+    for y in range(top - 20, bottom, 26):
+        d.line([(xb, y), (xb, y + 14)], fill=MUTED, width=3)
+    centred(d, f"random = {base:.0f}", xb, bottom + 24, f_tick, MUTED)
+
+    for i, name in enumerate(order):
+        r = at[name]
+        v, (lo, hi) = r["per_1000_reviews"], r["ci95_per_1000"]
+        y = top + i * row
+        colour = (BLOCK if v < base and name != "random"
+                  else MUTED if name == "random"
+                  else ALLOW if i == 0 else ACCENT)
+        d.text((60, y + 12), GATING_LABELS.get(name, name), font=f_label,
+               fill=BLOCK if name == "population_drift" else INK)
+        d.rounded_rectangle([(left, y + 8), (max(x_of(v), left + 6), y + 62)],
+                            radius=7, fill=colour)
+        if name != "random":
+            d.line([(x_of(lo), y + 35), (x_of(hi), y + 35)], fill=INK, width=3)
+        # Past the random line for bars that fall short of it, so the label
+        # never sits on the dashes.
+        label_x = x_of(max(v, hi, base if v < base else 0.0)) + 22
+        d.text((label_x, y + 16), f"{v:.0f}", font=f_val, fill=colour)
+
+    d.text((60, H - 112),
+           "Gating on population drift — how Custos works today — caught fewer defaults than "
+           "picking loans at random. The model's own risk ranking was best at every budget.",
+           font=f_sub, fill=MUTED)
+    d.text((60, H - 66),
+           "* The least-confident-prediction baseline selected the same loans (292.5), as "
+           "expected when the default rate is far below 50%.",
+           font=f_tick, fill=MUTED)
+
+    path = OUT / "gating_results.png"
+    img.save(path, dpi=(SCALE, SCALE))
+    return path
+
+
+# ---------------------------------------------------- governed self-healing
+
+HEALING_STAGES = [
+    # label, detail, status
+    ("Detect", "drift worker, PSI + KS", "built"),
+    ("Diagnose", "per-input drift scores", "partial"),
+    ("Propose fix", "retrain · roll back · quarantine", "next"),
+    ("Shadow test", "fix runs beside production", "next"),
+    ("Human approves", "REVIEW verdict; no queue yet", "partial"),
+    ("Apply", "promote the fix", "next"),
+    ("Verify + audit", "chain covers decisions today", "partial"),
+]
+HEALING_COLOUR = {"built": ALLOW, "partial": REVIEW, "next": ACCENT}
+HEALING_TAG = {"built": "built", "partial": "partly built", "next": "next phase"}
+
+DOMAINS = ["credit scoring", "fraud detection", "insurance claims", "medical triage",
+           "AI agents making payments"]
+
+
+def self_healing_loop(width_in: float = 11.0, height_in: float = 2.35) -> Path:
+    """The roadmap: Custos's existing pieces arranged into a governed repair loop.
+
+    Status is drawn on every stage so the slide cannot overclaim: green is in the
+    repository today, amber is partial, blue is the next phase.
+    """
+    W, H = int(width_in * SCALE), int(height_in * SCALE)
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+    f_title = font(36, bold=True)
+    f_sub = font(24)
+    f_box = font(27, bold=True)
+    f_detail = font(20)
+    f_tag = font(19, bold=True)
+
+    d.text((60, 28), "Next: governed self-healing — every repair needs a human and leaves evidence",
+           font=f_title, fill=INK)
+
+    n = len(HEALING_STAGES)
+    left, gap = 60, 34
+    box_w = (W - 2 * left - gap * (n - 1)) // n
+    top, box_h = 130, 230
+    for i, (label, detail, status) in enumerate(HEALING_STAGES):
+        x0 = left + i * (box_w + gap)
+        colour = HEALING_COLOUR[status]
+        human = label == "Human approves"
+        box(d, (x0, top, x0 + box_w, top + box_h), fill=PANEL if not human else (255, 248, 230),
+            outline=colour, width=6 if human else 4)
+        centred(d, label, x0 + box_w // 2, top + 62, f_box, INK)
+        centred(d, detail, x0 + box_w // 2, top + 112, f_detail, MUTED)
+        tag = HEALING_TAG[status]
+        tw = d.textbbox((0, 0), tag, font=f_tag)[2] + 30
+        cx = x0 + box_w // 2
+        d.rounded_rectangle([(cx - tw // 2, top + 160), (cx + tw // 2, top + 200)],
+                            radius=18, fill=colour)
+        centred(d, tag, cx, top + 180, f_tag, WHITE)
+        if i < n - 1:
+            arrow(d, (x0 + box_w + 4, top + box_h // 2), (x0 + box_w + gap - 4, top + box_h // 2),
+                  MUTED, width=4, head=12)
+
+    y = top + box_h + 52
+    d.text((60, y),
+           "Domain-agnostic: every decision is just a model, an action, inputs and context.",
+           font=f_sub, fill=INK)
+    x = 60
+    y2 = y + 50
+    for domain in DOMAINS:
+        tw = d.textbbox((0, 0), domain, font=f_detail)[2] + 36
+        d.rounded_rectangle([(x, y2), (x + tw, y2 + 44)], radius=22, outline=LINE, width=3,
+                            fill=WHITE)
+        centred(d, domain, x + tw // 2, y2 + 22, f_detail, INK)
+        x += tw + 16
+    d.text((x + 10, y2 + 8), "← lending is our test case, not the product",
+           font=f_detail, fill=MUTED)
+
+    d.text((60, H - 62),
+           "Rauba et al. (NeurIPS 2024) propose autonomous self-healing. Our design adds a human "
+           "checkpoint and a tamper-evident record of every repair.",
+           font=f_sub, fill=MUTED)
+
+    path = OUT / "self_healing_loop.png"
+    img.save(path, dpi=(SCALE, SCALE))
+    return path
+
+
 # --------------------------------------------------------------- request flow
 
 
@@ -1078,10 +1263,13 @@ def main() -> None:
         drift_chart(),
         calibration_curve(),
         load_profile(),
+        self_healing_loop(),
     )
     # Needs both sweeps on disk; skip quietly on a checkout that lacks them.
     if (BENCH / "results-after-admission-cap8.json").exists():
         figures += (load_before_after(),)
+    if GATING_RESULTS.exists():
+        figures += (gating_results(),)
     for path in figures:
         print(f"wrote {path.relative_to(Path.cwd()) if path.is_absolute() else path}")
 

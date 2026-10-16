@@ -32,8 +32,8 @@ PROGRESS = (
         ],
         [
             "Validate against real drift (Lending Club)",
-            "In progress",
-            "Replay harness hardened: reads .gz directly, quarterly windows, and a date-ordering bug found and fixed. Dataset run pending download",
+            "Done — negative",
+            "Pre-registered study, 589,186 real loans: drift gating caught fewer defaults than random review. Reported as measured",
         ],
         [
             "Model and data versioning + retraining trigger",
@@ -166,7 +166,7 @@ MODULE_STATUS = (
         ["Python SDK", "@guard decorator, fail-open client — standard library only", "Complete"],
         ["Dashboard", "React + TypeScript operator console: models, drift, decisions, audit", "Complete"],
         ["Replay harness", "Real-data drift replay; date-order bug fixed; calibrated on a planted shift", "Complete"],
-        ["Lending Club run", "Field validation on 2.2M real loans, 2007–2018", "In progress"],
+        ["Lending Club study", "new — pre-registered field study on 589,186 matured loans; results committed", "Complete"],
         ["Versioning + retraining trigger", "Model / data version tracking and a drift-driven retrain signal", "Final review"],
     ],
     [0.21, 0.66, 0.13],
@@ -231,6 +231,11 @@ DEFECTS = (
             "Adding a live risk signal let a significantly drifted model reach ALLOW",
             "Explicit drift-floor rule in the decision cascade, pinned by tests",
         ],
+        [
+            "Pre-registered study (R2)",
+            "On real loans, drift gating caught fewer defaults than random; the drift floor would escalate 92% of decisions for no gain",
+            "Not yet fixed — gating to be rebuilt around risk-ranked review",
+        ],
     ],
     [0.17, 0.48, 0.35],
 )
@@ -241,11 +246,12 @@ DEFECTS = (
 WORK_PLAN = (
     ["Item", "Why it matters", "Depends on"],
     [
-        ["Lending Club field validation", "Real drift nobody chose — the field half of validation", "Dataset download (ready to run)"],
+        ["Rebuild gating around risk-ranked review", "On real loans the model's risk ranking caught 2.1× random; drift gating caught less than random", "—"],
+        ["Replicate on a second credit dataset", "One dataset cannot support a general claim", "Dataset access"],
         ["Scale-out: multiple gateway workers", "One process saturates near 300 req/s; past that, requests queue before the gate can see them", "Postgres for shared state"],
         ["Postgres load measurement", "SQLite is the pessimistic floor; production runs Postgres", "Docker"],
-        ["Model / data versioning + retraining trigger", "What practitioners named as prerequisites", "—"],
-        ["Pipeline-break vs population-shift signal", "One dead feed needs a different response from a real shift", "—"],
+        ["Self-healing step 1: broken-feed detection + proposed rollback, in shadow", "A dead input feed needs a different repair from a real population shift", "Model versioning"],
+        ["Self-healing step 2: human approval queue; every repair on the audit chain", "No repair is applied without a person and a tamper-evident record", "Step 1"],
         ["Final report and paper draft", "Department submission", "All of the above"],
     ],
     [0.30, 0.48, 0.22],
