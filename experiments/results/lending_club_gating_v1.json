@@ -1,0 +1,801 @@
+{
+  "protocol": "gating-v1",
+  "provenance": {
+    "dataset": "accepted_2007_to_2018Q4.csv.gz",
+    "bytes": 392582231,
+    "sha256": "55c16f75120f897683f02e7aabcf080d0e4a20c4832feb1d592cfa941bd62a2d",
+    "git_commit": "414e7e3faacef1e374bb2bedd9903cbdb281d0ea",
+    "git_dirty": true,
+    "run_at": "2026-10-16T21:56:37"
+  },
+  "config": {
+    "features": [
+      "loan_amnt",
+      "annual_inc",
+      "dti",
+      "revol_util",
+      "fico_range_low",
+      "int_rate",
+      "inq_last_6mths",
+      "delinq_2yrs",
+      "open_acc"
+    ],
+    "term_months": 36,
+    "snapshot": "2018-12",
+    "train_until": "2011-12",
+    "eval_until": "2015-12",
+    "period": "quarter",
+    "severity_lag": 1,
+    "budgets": [
+      0.01,
+      0.02,
+      0.05,
+      0.1,
+      0.2
+    ],
+    "primary_budget": 0.05,
+    "seed": 20261016
+  },
+  "data": {
+    "rows_read": 2260701,
+    "kept": 620634,
+    "excluded": {
+      "unparseable_date": 33,
+      "other_term": 650914,
+      "not_matured": 988585,
+      "unresolved_status": 147,
+      "missing_feature": 388
+    },
+    "train": {
+      "loans": 31448,
+      "default_rate": 0.1226
+    },
+    "eval": {
+      "loans": 589186,
+      "default_rate": 0.1403
+    }
+  },
+  "model": {
+    "weights": [
+      -2.11553,
+      0.05924,
+      -0.26761,
+      0.01316,
+      0.08414,
+      -0.14808,
+      0.31416,
+      0.24501,
+      0.00275,
+      0.0066
+    ],
+    "train_auc": 0.6775,
+    "eval_auc": 0.6642
+  },
+  "windows": [
+    {
+      "window": "2012-Q1",
+      "loans": 6486,
+      "default_rate": 0.1317,
+      "mean_predicted": 0.1229,
+      "calibration_gap": 0.0088,
+      "auc": 0.6325,
+      "severity": 0.3525,
+      "band": "moderate",
+      "top_drift": [
+        "loan_amnt 0.15",
+        "int_rate 0.14"
+      ]
+    },
+    {
+      "window": "2012-Q2",
+      "loans": 8461,
+      "default_rate": 0.1423,
+      "mean_predicted": 0.1341,
+      "calibration_gap": 0.0082,
+      "auc": 0.6524,
+      "severity": 0.4015,
+      "band": "moderate",
+      "top_drift": [
+        "int_rate 0.18",
+        "revol_util 0.14"
+      ]
+    },
+    {
+      "window": "2012-Q3",
+      "loans": 13310,
+      "default_rate": 0.1418,
+      "mean_predicted": 0.1452,
+      "calibration_gap": 0.0034,
+      "auc": 0.6579,
+      "severity": 0.7695,
+      "band": "significant",
+      "top_drift": [
+        "int_rate 0.57",
+        "dti 0.28"
+      ]
+    },
+    {
+      "window": "2012-Q4",
+      "loans": 15172,
+      "default_rate": 0.1285,
+      "mean_predicted": 0.1483,
+      "calibration_gap": 0.0199,
+      "auc": 0.628,
+      "severity": 0.8021,
+      "band": "significant",
+      "top_drift": [
+        "int_rate 1.47",
+        "fico_range_low 0.31"
+      ]
+    },
+    {
+      "window": "2013-Q1",
+      "loans": 17979,
+      "default_rate": 0.1259,
+      "mean_predicted": 0.1508,
+      "calibration_gap": 0.025,
+      "auc": 0.6642,
+      "severity": 0.8404,
+      "band": "significant",
+      "top_drift": [
+        "int_rate 1.55",
+        "fico_range_low 0.44"
+      ]
+    },
+    {
+      "window": "2013-Q2",
+      "loans": 23125,
+      "default_rate": 0.1283,
+      "mean_predicted": 0.1552,
+      "calibration_gap": 0.0269,
+      "auc": 0.6653,
+      "severity": 0.8026,
+      "band": "significant",
+      "top_drift": [
+        "int_rate 1.08",
+        "fico_range_low 0.36"
+      ]
+    },
+    {
+      "window": "2013-Q3",
+      "loans": 27299,
+      "default_rate": 0.1222,
+      "mean_predicted": 0.1502,
+      "calibration_gap": 0.028,
+      "auc": 0.6589,
+      "severity": 0.6968,
+      "band": "significant",
+      "top_drift": [
+        "int_rate 0.39",
+        "fico_range_low 0.35"
+      ]
+    },
+    {
+      "window": "2013-Q4",
+      "loans": 31963,
+      "default_rate": 0.1191,
+      "mean_predicted": 0.1453,
+      "calibration_gap": 0.0262,
+      "auc": 0.6624,
+      "severity": 0.6581,
+      "band": "moderate",
+      "top_drift": [
+        "fico_range_low 0.32",
+        "revol_util 0.29"
+      ]
+    },
+    {
+      "window": "2014-Q1",
+      "loans": 34060,
+      "default_rate": 0.1286,
+      "mean_predicted": 0.1457,
+      "calibration_gap": 0.0171,
+      "auc": 0.6606,
+      "severity": 0.7572,
+      "band": "significant",
+      "top_drift": [
+        "fico_range_low 0.43",
+        "dti 0.30"
+      ]
+    },
+    {
+      "window": "2014-Q2",
+      "loans": 37866,
+      "default_rate": 0.1355,
+      "mean_predicted": 0.1416,
+      "calibration_gap": 0.0062,
+      "auc": 0.6611,
+      "severity": 0.6857,
+      "band": "significant",
+      "top_drift": [
+        "fico_range_low 0.38",
+        "dti 0.27"
+      ]
+    },
+    {
+      "window": "2014-Q3",
+      "loans": 40569,
+      "default_rate": 0.1363,
+      "mean_predicted": 0.1396,
+      "calibration_gap": 0.0033,
+      "auc": 0.6665,
+      "severity": 0.6725,
+      "band": "significant",
+      "top_drift": [
+        "fico_range_low 0.35",
+        "dti 0.34"
+      ]
+    },
+    {
+      "window": "2014-Q4",
+      "loans": 49998,
+      "default_rate": 0.1453,
+      "mean_predicted": 0.1319,
+      "calibration_gap": 0.0134,
+      "auc": 0.6767,
+      "severity": 0.7854,
+      "band": "significant",
+      "top_drift": [
+        "fico_range_low 0.48",
+        "dti 0.39"
+      ]
+    },
+    {
+      "window": "2015-Q1",
+      "loans": 56542,
+      "default_rate": 0.1483,
+      "mean_predicted": 0.1271,
+      "calibration_gap": 0.0212,
+      "auc": 0.6749,
+      "severity": 0.7675,
+      "band": "significant",
+      "top_drift": [
+        "fico_range_low 0.45",
+        "dti 0.44"
+      ]
+    },
+    {
+      "window": "2015-Q2",
+      "loans": 64200,
+      "default_rate": 0.1538,
+      "mean_predicted": 0.1247,
+      "calibration_gap": 0.0291,
+      "auc": 0.6766,
+      "severity": 0.7447,
+      "band": "significant",
+      "top_drift": [
+        "dti 0.42",
+        "fico_range_low 0.40"
+      ]
+    },
+    {
+      "window": "2015-Q3",
+      "loans": 73527,
+      "default_rate": 0.1458,
+      "mean_predicted": 0.1208,
+      "calibration_gap": 0.0249,
+      "auc": 0.6833,
+      "severity": 0.7495,
+      "band": "significant",
+      "top_drift": [
+        "dti 0.42",
+        "fico_range_low 0.33"
+      ]
+    },
+    {
+      "window": "2015-Q4",
+      "loans": 88629,
+      "default_rate": 0.1481,
+      "mean_predicted": 0.1165,
+      "calibration_gap": 0.0316,
+      "auc": 0.6808,
+      "severity": 0.7415,
+      "band": "significant",
+      "top_drift": [
+        "dti 0.43",
+        "fico_range_low 0.33"
+      ]
+    }
+  ],
+  "drift_vs_harm": {
+    "windows": 16,
+    "rho_severity_calibration_gap": 0.2118,
+    "p_severity_calibration_gap": 0.4366,
+    "rho_severity_default_rate": -0.0412,
+    "p_severity_default_rate": 0.8817,
+    "rho_severity_auc": 0.2,
+    "p_severity_auc": 0.4504
+  },
+  "strategies": {
+    "random": {
+      "0.01": {
+        "reviews": 5892,
+        "defaults_caught": 826.8,
+        "per_1000_reviews": 140.32,
+        "ci95_per_1000": [
+          131.69,
+          149.42
+        ],
+        "recall": 0.01,
+        "lift": 1.0,
+        "principal_caught": null
+      },
+      "0.02": {
+        "reviews": 11784,
+        "defaults_caught": 1653.5,
+        "per_1000_reviews": 140.32,
+        "ci95_per_1000": [
+          134.17,
+          146.71
+        ],
+        "recall": 0.02,
+        "lift": 1.0,
+        "principal_caught": null
+      },
+      "0.05": {
+        "reviews": 29459,
+        "defaults_caught": 4133.7,
+        "per_1000_reviews": 140.32,
+        "ci95_per_1000": [
+          136.4,
+          144.33
+        ],
+        "recall": 0.05,
+        "lift": 1.0,
+        "principal_caught": null
+      },
+      "0.1": {
+        "reviews": 58919,
+        "defaults_caught": 8267.6,
+        "per_1000_reviews": 140.32,
+        "ci95_per_1000": [
+          137.54,
+          143.15
+        ],
+        "recall": 0.1,
+        "lift": 1.0,
+        "principal_caught": null
+      },
+      "0.2": {
+        "reviews": 117837,
+        "defaults_caught": 16535.0,
+        "per_1000_reviews": 140.32,
+        "ci95_per_1000": [
+          138.35,
+          142.32
+        ],
+        "recall": 0.2,
+        "lift": 1.0,
+        "principal_caught": null
+      }
+    },
+    "model_risk": {
+      "0.01": {
+        "reviews": 5892,
+        "defaults_caught": 1962,
+        "per_1000_reviews": 332.99,
+        "ci95_per_1000": [
+          321.07,
+          345.13
+        ],
+        "recall": 0.0237,
+        "lift": 2.373,
+        "principal_caught": 17350450.0,
+        "loss_caught": 10279978.35
+      },
+      "0.02": {
+        "reviews": 11784,
+        "defaults_caught": 3736,
+        "per_1000_reviews": 317.04,
+        "ci95_per_1000": [
+          308.7,
+          325.5
+        ],
+        "recall": 0.0452,
+        "lift": 2.259,
+        "principal_caught": 35040075.0,
+        "loss_caught": 20474476.48
+      },
+      "0.05": {
+        "reviews": 29459,
+        "defaults_caught": 8616,
+        "per_1000_reviews": 292.47,
+        "ci95_per_1000": [
+          287.31,
+          297.7
+        ],
+        "recall": 0.1042,
+        "lift": 2.084,
+        "principal_caught": 85797425.0,
+        "loss_caught": 48836416.72
+      },
+      "0.1": {
+        "reviews": 58919,
+        "defaults_caught": 15933,
+        "per_1000_reviews": 270.42,
+        "ci95_per_1000": [
+          266.85,
+          274.02
+        ],
+        "recall": 0.1927,
+        "lift": 1.927,
+        "principal_caught": 165646900.0,
+        "loss_caught": 92437566.56
+      },
+      "0.2": {
+        "reviews": 117837,
+        "defaults_caught": 28978,
+        "per_1000_reviews": 245.92,
+        "ci95_per_1000": [
+          243.47,
+          248.38
+        ],
+        "recall": 0.3505,
+        "lift": 1.753,
+        "principal_caught": 315028700.0,
+        "loss_caught": 171878928.06
+      }
+    },
+    "low_confidence": {
+      "0.01": {
+        "reviews": 5892,
+        "defaults_caught": 1963,
+        "per_1000_reviews": 333.16,
+        "ci95_per_1000": [
+          321.24,
+          345.3
+        ],
+        "recall": 0.0237,
+        "lift": 2.374,
+        "principal_caught": 17367450.0,
+        "loss_caught": 10287139.24
+      },
+      "0.02": {
+        "reviews": 11784,
+        "defaults_caught": 3736,
+        "per_1000_reviews": 317.04,
+        "ci95_per_1000": [
+          308.7,
+          325.5
+        ],
+        "recall": 0.0452,
+        "lift": 2.259,
+        "principal_caught": 35040075.0,
+        "loss_caught": 20474476.48
+      },
+      "0.05": {
+        "reviews": 29459,
+        "defaults_caught": 8617,
+        "per_1000_reviews": 292.51,
+        "ci95_per_1000": [
+          287.34,
+          297.73
+        ],
+        "recall": 0.1042,
+        "lift": 2.085,
+        "principal_caught": 85802425.0,
+        "loss_caught": 48837576.64
+      },
+      "0.1": {
+        "reviews": 58919,
+        "defaults_caught": 15933,
+        "per_1000_reviews": 270.42,
+        "ci95_per_1000": [
+          266.85,
+          274.02
+        ],
+        "recall": 0.1927,
+        "lift": 1.927,
+        "principal_caught": 165646900.0,
+        "loss_caught": 92437566.56
+      },
+      "0.2": {
+        "reviews": 117837,
+        "defaults_caught": 28978,
+        "per_1000_reviews": 245.92,
+        "ci95_per_1000": [
+          243.47,
+          248.38
+        ],
+        "recall": 0.3505,
+        "lift": 1.753,
+        "principal_caught": 315028700.0,
+        "loss_caught": 171878928.06
+      }
+    },
+    "population_drift": {
+      "0.01": {
+        "reviews": 5892,
+        "defaults_caught": 752,
+        "per_1000_reviews": 127.63,
+        "ci95_per_1000": [
+          119.35,
+          136.39
+        ],
+        "recall": 0.0091,
+        "lift": 0.91,
+        "principal_caught": 8562575.0,
+        "loss_caught": 4277746.58
+      },
+      "0.02": {
+        "reviews": 11784,
+        "defaults_caught": 1537,
+        "per_1000_reviews": 130.43,
+        "ci95_per_1000": [
+          124.47,
+          136.63
+        ],
+        "recall": 0.0186,
+        "lift": 0.93,
+        "principal_caught": 17970700.0,
+        "loss_caught": 9057950.91
+      },
+      "0.05": {
+        "reviews": 29459,
+        "defaults_caught": 3718,
+        "per_1000_reviews": 126.21,
+        "ci95_per_1000": [
+          122.47,
+          130.05
+        ],
+        "recall": 0.045,
+        "lift": 0.899,
+        "principal_caught": 43263375.0,
+        "loss_caught": 21883109.42
+      },
+      "0.1": {
+        "reviews": 58919,
+        "defaults_caught": 7362,
+        "per_1000_reviews": 124.95,
+        "ci95_per_1000": [
+          122.31,
+          127.65
+        ],
+        "recall": 0.089,
+        "lift": 0.89,
+        "principal_caught": 86408950.0,
+        "loss_caught": 43660950.86
+      },
+      "0.2": {
+        "reviews": 117837,
+        "defaults_caught": 15877,
+        "per_1000_reviews": 134.74,
+        "ci95_per_1000": [
+          132.8,
+          136.7
+        ],
+        "recall": 0.192,
+        "lift": 0.96,
+        "principal_caught": 193622425.0,
+        "loss_caught": 97360869.02
+      }
+    },
+    "novelty": {
+      "0.01": {
+        "reviews": 5892,
+        "defaults_caught": 1028,
+        "per_1000_reviews": 174.47,
+        "ci95_per_1000": [
+          165.0,
+          184.38
+        ],
+        "recall": 0.0124,
+        "lift": 1.243,
+        "principal_caught": 12662100.0,
+        "loss_caught": 6406938.25
+      },
+      "0.02": {
+        "reviews": 11784,
+        "defaults_caught": 2194,
+        "per_1000_reviews": 186.18,
+        "ci95_per_1000": [
+          179.26,
+          193.31
+        ],
+        "recall": 0.0265,
+        "lift": 1.327,
+        "principal_caught": 25910000.0,
+        "loss_caught": 13382268.41
+      },
+      "0.05": {
+        "reviews": 29459,
+        "defaults_caught": 5544,
+        "per_1000_reviews": 188.19,
+        "ci95_per_1000": [
+          183.77,
+          192.7
+        ],
+        "recall": 0.0671,
+        "lift": 1.341,
+        "principal_caught": 64933875.0,
+        "loss_caught": 34750723.98
+      },
+      "0.1": {
+        "reviews": 58919,
+        "defaults_caught": 10467,
+        "per_1000_reviews": 177.65,
+        "ci95_per_1000": [
+          174.59,
+          180.76
+        ],
+        "recall": 0.1266,
+        "lift": 1.266,
+        "principal_caught": 126535825.0,
+        "loss_caught": 66837835.3
+      },
+      "0.2": {
+        "reviews": 117837,
+        "defaults_caught": 19436,
+        "per_1000_reviews": 164.94,
+        "ci95_per_1000": [
+          162.83,
+          167.07
+        ],
+        "recall": 0.2351,
+        "lift": 1.175,
+        "principal_caught": 243950875.0,
+        "loss_caught": 126454847.72
+      }
+    },
+    "risk_plus_novelty": {
+      "0.01": {
+        "reviews": 5892,
+        "defaults_caught": 1923,
+        "per_1000_reviews": 326.37,
+        "ci95_per_1000": [
+          314.52,
+          338.46
+        ],
+        "recall": 0.0233,
+        "lift": 2.326,
+        "principal_caught": 17593025.0,
+        "loss_caught": 10465512.91
+      },
+      "0.02": {
+        "reviews": 11784,
+        "defaults_caught": 3611,
+        "per_1000_reviews": 306.43,
+        "ci95_per_1000": [
+          298.17,
+          314.82
+        ],
+        "recall": 0.0437,
+        "lift": 2.184,
+        "principal_caught": 34615925.0,
+        "loss_caught": 20357129.33
+      },
+      "0.05": {
+        "reviews": 29459,
+        "defaults_caught": 8263,
+        "per_1000_reviews": 280.49,
+        "ci95_per_1000": [
+          275.39,
+          285.65
+        ],
+        "recall": 0.0999,
+        "lift": 1.999,
+        "principal_caught": 85478825.0,
+        "loss_caught": 48699996.1
+      },
+      "0.1": {
+        "reviews": 58919,
+        "defaults_caught": 15550,
+        "per_1000_reviews": 263.92,
+        "ci95_per_1000": [
+          260.38,
+          267.5
+        ],
+        "recall": 0.1881,
+        "lift": 1.881,
+        "principal_caught": 170904525.0,
+        "loss_caught": 95450659.23
+      },
+      "0.2": {
+        "reviews": 117837,
+        "defaults_caught": 28139,
+        "per_1000_reviews": 238.8,
+        "ci95_per_1000": [
+          236.37,
+          241.24
+        ],
+        "recall": 0.3404,
+        "lift": 1.702,
+        "principal_caught": 325697700.0,
+        "loss_caught": 177136155.89
+      }
+    },
+    "custos_adaptive": {
+      "0.01": {
+        "reviews": 5892,
+        "defaults_caught": 1898,
+        "per_1000_reviews": 322.13,
+        "ci95_per_1000": [
+          310.32,
+          334.18
+        ],
+        "recall": 0.023,
+        "lift": 2.296,
+        "principal_caught": 17805700.0,
+        "loss_caught": 10626856.21
+      },
+      "0.02": {
+        "reviews": 11784,
+        "defaults_caught": 3498,
+        "per_1000_reviews": 296.84,
+        "ci95_per_1000": [
+          288.66,
+          305.16
+        ],
+        "recall": 0.0423,
+        "lift": 2.115,
+        "principal_caught": 33928500.0,
+        "loss_caught": 19977801.09
+      },
+      "0.05": {
+        "reviews": 29459,
+        "defaults_caught": 8078,
+        "per_1000_reviews": 274.21,
+        "ci95_per_1000": [
+          269.15,
+          279.34
+        ],
+        "recall": 0.0977,
+        "lift": 1.954,
+        "principal_caught": 84836775.0,
+        "loss_caught": 48250951.28
+      },
+      "0.1": {
+        "reviews": 58919,
+        "defaults_caught": 14984,
+        "per_1000_reviews": 254.32,
+        "ci95_per_1000": [
+          250.81,
+          257.85
+        ],
+        "recall": 0.1812,
+        "lift": 1.812,
+        "principal_caught": 167879250.0,
+        "loss_caught": 93186472.86
+      },
+      "0.2": {
+        "reviews": 117837,
+        "defaults_caught": 26316,
+        "per_1000_reviews": 223.33,
+        "ci95_per_1000": [
+          220.96,
+          225.71
+        ],
+        "recall": 0.3183,
+        "lift": 1.592,
+        "principal_caught": 310598375.0,
+        "loss_caught": 167060599.17
+      }
+    }
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "claim": "population-drift gating beats random review",
+      "verdict": "contradicted",
+      "evidence": "126.21 [122.47, 130.05] vs base 140.32"
+    },
+    {
+      "id": "H2",
+      "claim": "per-request novelty beats population-drift gating",
+      "verdict": "supported",
+      "evidence": "novelty 188.19 [183.77, 192.7] vs population_drift 126.21 [122.47, 130.05]"
+    },
+    {
+      "id": "H3",
+      "claim": "custos_adaptive beats model_risk",
+      "verdict": "contradicted",
+      "evidence": "custos_adaptive 274.21 [269.15, 279.34] vs model_risk 292.47 [287.31, 297.7]"
+    },
+    {
+      "id": "H4",
+      "claim": "population drift predicts model error (calibration gap)",
+      "verdict": "inconclusive",
+      "evidence": "Spearman rho=0.2118 p=0.4366 over 16 windows (secondary, AUC: rho=0.2 p=0.4504)"
+    }
+  ]
+}
