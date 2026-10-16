@@ -17,7 +17,8 @@ TEAM = [
     ("VIVEK BOORA", "1BM23AD073"),
     ("NITIN", "1BM24AD404"),
 ]
-GUIDE = "Dr. Shruthi K R"
+GUIDE = "Dr. Seemanthini K G"
+GUIDE_DESIGNATION = "HOD, Dept. of AI & DS, BMSCE"
 
 
 # --- Literature survey ------------------------------------------------------

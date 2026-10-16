@@ -107,7 +107,7 @@ def architecture(width_in: float = 11.0, height_in: float = 3.4) -> Path:
     engines = [
         ("Policy", "rules · veto", 1180, ALLOW),
         ("Drift", "PSI · KS · the core", 1890, ACCENT),
-        ("Risk", "future seam", 2600, MUTED),
+        ("Risk", "amount · velocity", 2600, REVIEW),
     ]
     for label, sub, x0, colour in engines:
         box(d, (x0, y0, x0 + 640, y1), fill=WHITE, outline=colour, width=4)
@@ -432,6 +432,96 @@ def load_profile(width_in: float = 11.0, height_in: float = 3.3) -> Path:
     return path
 
 
+# --------------------------------------------------------- load: before/after
+
+BENCH = Path(__file__).resolve().parents[2] / "benchmarks"
+
+
+def _sweep(name: str) -> dict[float, dict]:
+    import json
+
+    phases = json.loads((BENCH / name).read_text())["phases"]
+    return {p["rps_offered"]: p for p in phases}
+
+
+def load_before_after(width_in: float = 11.0, height_in: float = 3.4) -> Path:
+    """Review-1 vs Review-2 under the same load, read straight from the JSON.
+
+    Two panels, because the improvement is two different things: the latency
+    budget now holds at twice the rate, and overload no longer collapses
+    throughput or changes verdicts.
+    """
+    import math
+
+    before = _sweep("results-before-admission.json")
+    after = _sweep("results-after-admission-cap8.json")
+    rates = [r for r in (100.0, 200.0, 400.0, 800.0) if r in before and r in after]
+
+    W, H = int(width_in * SCALE), int(height_in * SCALE)
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+    f_title = font(38, bold=True)
+    f_sub = font(25)
+    f_tick = font(23)
+    f_val = font(23, bold=True)
+    f_axis = font(25, bold=True)
+
+    d.text((60, 30), "Same load, Review-1 vs Review-2", font=f_title, fill=INK)
+    d.text((60, 88), "open-loop load test · M1 · SQLite · one gateway process",
+           font=f_sub, fill=MUTED)
+
+    # Legend
+    for i, (label, colour) in enumerate((("Review-1", MUTED), ("Review-2", ACCENT))):
+        x = W - 640 + i * 300
+        d.rounded_rectangle([(x, 44), (x + 34, 78)], radius=6, fill=colour)
+        d.text((x + 48, 44), label, font=f_sub, fill=INK)
+
+    def panel(x0, x1, title, value, log, y_lo, y_hi, fmt_v, budget=None):
+        top, bottom = 230, H - 150
+        d.text((x0, top - 64), title, font=f_axis, fill=INK)
+
+        def y_of(v):
+            v = max(v, y_lo)
+            if log:
+                f = (math.log10(v) - math.log10(y_lo)) / (math.log10(y_hi) - math.log10(y_lo))
+            else:
+                f = (v - y_lo) / (y_hi - y_lo)
+            return bottom - min(1.0, f) * (bottom - top)
+
+        d.line([(x0, bottom), (x1, bottom)], fill=LINE, width=3)
+        slot = (x1 - x0) / len(rates)
+        bar = slot * 0.30
+        for i, r in enumerate(rates):
+            cx = x0 + slot * (i + 0.5)
+            for j, (src, colour) in enumerate(((before, MUTED), (after, ACCENT))):
+                v = value(src[r])
+                bx = cx - bar - 4 if j == 0 else cx + 4
+                d.rounded_rectangle([(bx, y_of(v)), (bx + bar, bottom)], radius=5, fill=colour)
+                centred(d, fmt_v(v), bx + bar / 2, y_of(v) - 22, f_val, colour)
+            centred(d, f"{r:.0f}/s", cx, bottom + 34, f_tick, INK)
+        if budget is not None:
+            # Labelled in the panel title rather than inline: an inline label
+            # collides with whichever bar happens to be tallest at the right.
+            dashed_h(d, y_of(budget), x0, x1, colour=BLOCK, width=3)
+
+    def ms(v):
+        return f"{v:.0f}ms" if v < 1000 else f"{v / 1000:.0f}s"
+
+    panel(70, 1560, "p99 latency (log scale) — red dashed line: 50 ms budget",
+          lambda p: p["response_time"]["p99_ms"], True, 5.0, 300_000.0, ms, budget=50.0)
+    panel(1760, W - 70, "requests actually served per second",
+          lambda p: p["rps_achieved"], False, 0.0, 260.0, lambda v: f"{v:.0f}")
+
+    d.text((60, H - 70),
+           "Budget now holds to 200 req/s (was 100). Past capacity, excess is refused with 503 "
+           "instead of queued — served throughput no longer collapses.",
+           font=f_sub, fill=MUTED)
+
+    path = OUT / "load_before_after.png"
+    img.save(path, dpi=(SCALE, SCALE))
+    return path
+
+
 # --------------------------------------------------------------- request flow
 
 
@@ -557,12 +647,13 @@ def decision_flow(width_in: float = 11.0, height_in: float = 2.75) -> Path:
         (["trust < 0.30?"], "block threshold", BLOCK, "BLOCK"),
         (["model", "unregistered?"], "ADR 0005", REVIEW, "REVIEW"),
         (["all engines", "degraded?"], "no signal at all", REVIEW, "REVIEW"),
+        (["drift band", "significant?"], "drift floor", REVIEW, "REVIEW"),
         (["trust < 0.60?"], "review threshold", REVIEW, "REVIEW"),
     ]
 
     # Widths chosen so the trailing ALLOW terminal still lands inside the
-    # canvas: 70 + 4*(box_w + gap) + box_w + gap + 250 must stay under 3300.
-    x0, box_w, gap = 70, 490, 70
+    # canvas: 70 + 5*(box_w + gap) + box_w + gap + 250 must stay under 3300.
+    x0, box_w, gap = 70, 420, 60
     cy, cond_h = 230, 190
     verdict_y = 570
 
@@ -604,8 +695,8 @@ def decision_flow(width_in: float = 11.0, height_in: float = 2.75) -> Path:
 
     centred(
         d,
-        "Evaluated top to bottom in this order. Rule 2 precedes rule 3 deliberately: an "
-        "unregistered model whose signals are already damning is blocked, not merely flagged.",
+        "Evaluated left to right; the order is the specification. The drift floor keeps a "
+        "significantly drifted model out of ALLOW however clean the other signals are.",
         W // 2,
         H - 55,
         f_small,
@@ -920,7 +1011,7 @@ def demo_trajectory(width_in: float = 11.0, height_in: float = 3.4) -> Path:
         ("Act 1", "unregistered", 1.00, "REVIEW", REVIEW),
         ("Act 2", "healthy traffic", 0.99, "ALLOW", ALLOW),
         ("Act 3", "population shifts", None, "drift 0.02 -> 0.83", BLOCK),
-        ("Act 4", "same input, same code", 0.48, "REVIEW", REVIEW),
+        ("Act 4", "same input, same code", 0.58, "REVIEW", REVIEW),
         ("Act 5", "policy veto", 0.00, "BLOCK", BLOCK),
     ]
 
@@ -988,6 +1079,9 @@ def main() -> None:
         calibration_curve(),
         load_profile(),
     )
+    # Needs both sweeps on disk; skip quietly on a checkout that lacks them.
+    if (BENCH / "results-after-admission-cap8.json").exists():
+        figures += (load_before_after(),)
     for path in figures:
         print(f"wrote {path.relative_to(Path.cwd()) if path.is_absolute() else path}")
 
