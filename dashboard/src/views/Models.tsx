@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ControlApiClient, ModelSummary } from "../api/client";
-import { Empty, Panel, relativeTime } from "../components/primitives";
+import { Empty, Explain, Panel, relativeTime } from "../components/primitives";
 
 export function Models({
   client,
@@ -40,6 +40,10 @@ export function Models({
 
   return (
     <Panel title="Models">
+      <Explain
+        what="Every model Custos has been told about, and whether a reference snapshot of its input data has been captured yet."
+        why="Custos compares live traffic against that reference. Until it exists there is nothing to compare against, so the model's traffic is sent for human review rather than approved automatically."
+      />
       {models.length === 0 ? (
         <Empty>No models registered. Traffic for an unknown model routes to REVIEW.</Empty>
       ) : (

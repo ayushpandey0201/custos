@@ -326,3 +326,55 @@ tbody tr:last-child td {
   border-color: color-mix(in srgb, var(--block) 35%, transparent);
   background: color-mix(in srgb, var(--block) 10%, transparent);
 }
+
+
+/* --- explain mode -------------------------------------------------------
+ * Deliberately low-contrast against the panel rather than a bright callout:
+ * the explanation supports the data, it should not outshout it.
+ */
+.explain {
+  border-left: 3px solid var(--accent);
+  background: rgba(88, 152, 255, 0.07);
+  border-radius: 0 6px 6px 0;
+  padding: 0.7rem 0.9rem;
+  margin: 0 0 1rem;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.explain p {
+  margin: 0;
+}
+
+.explain p + p {
+  margin-top: 0.4rem;
+}
+
+.explain strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.term {
+  border-bottom: 1px dotted var(--muted);
+  cursor: help;
+}
+
+.term-open {
+  border-bottom: none;
+  cursor: default;
+}
+
+.term-means {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 0.1rem;
+}
+
+.button-on {
+  border-color: var(--accent);
+  color: var(--accent);
+}

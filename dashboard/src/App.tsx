@@ -10,6 +10,7 @@ import {
 import { AuditLog } from "./views/AuditLog";
 import { Decisions } from "./views/Decisions";
 import { DriftMonitor } from "./views/DriftMonitor";
+import { ExplainContext } from "./components/primitives";
 import { Models } from "./views/Models";
 
 const CONTROL_URL = import.meta.env.VITE_CONTROL_URL ?? "http://localhost:8001";
@@ -30,6 +31,9 @@ export function App() {
   const [config, setConfig] = useState<TenantConfig | null>(null);
   const [auditFilter, setAuditFilter] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Default on: the first person to open this screen is usually being
+  // shown the system, not operating it.
+  const [explain, setExplain] = useState(true);
 
   const client = useMemo(() => new ControlApiClient(CONTROL_URL, apiKey), [apiKey]);
 
@@ -113,6 +117,13 @@ export function App() {
             </span>
           )}
           <button
+            className={explain ? "button-on" : undefined}
+            onClick={() => setExplain((on) => !on)}
+            title="Show a plain-English description on every panel"
+          >
+            {explain ? "Explain: on" : "Explain: off"}
+          </button>
+          <button
             onClick={() => {
               localStorage.removeItem(STORAGE_KEY);
               setApiKey("");
@@ -125,6 +136,7 @@ export function App() {
 
       {error && <div className="verdict verdict-bad">{error}</div>}
 
+      <ExplainContext.Provider value={explain}>
       <main>
         <Models
           client={client}
@@ -137,6 +149,7 @@ export function App() {
         <Decisions decisions={decisions} />
         <AuditLog client={client} entries={audit} filter={auditFilter} onFilter={setAuditFilter} />
       </main>
+      </ExplainContext.Provider>
     </div>
   );
 }

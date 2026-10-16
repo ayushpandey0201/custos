@@ -13,6 +13,13 @@ venv/
 *.db
 custos-demo.db
 
+# Runtime state written by app.sh: pids, logs, the demo tenant's API key
+.run/
+
+# Public datasets for the replay harness — large and separately licensed,
+# so they are downloaded locally and never committed
+data/
+
 # Node / dashboard
 node_modules/
 dist/

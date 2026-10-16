@@ -18,10 +18,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import random
+import time
+import zlib
 from typing import Any
 
-from sqlalchemy import func, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func, select, text
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
 from shared.db.models import AuditEntry
@@ -32,9 +35,17 @@ from shared.timeutil import iso_utc
 # prev_hash of the first entry in a chain.
 GENESIS_HASH = "0" * 64
 
-# Concurrent appends race for the same sequence number. The unique constraint
-# on (tenant_id, seq) turns that race into an IntegrityError, which we retry.
-_MAX_APPEND_RETRIES = 5
+# On Postgres `_lock_chain` removes the race outright and these are never
+# needed. On SQLite they are the whole defence, which is why there are more of
+# them than there used to be and why they back off: a dropped append is a
+# decision with no evidence, and `_write_audit` cannot tell the difference
+# between that and a decision that was never made.
+_MAX_APPEND_RETRIES = 12
+_BACKOFF_BASE_S = 0.002
+# Uncapped, doubling twelve times would let one unlucky append block its caller
+# for several seconds — far past the request's whole latency budget. Capped,
+# the worst case across all attempts is well under a second.
+_BACKOFF_MAX_S = 0.05
 
 
 def canonical_json(payload: dict) -> str:
@@ -75,6 +86,46 @@ def build_record(decision: DecisionRecord, context: dict[str, Any] | None = None
     return payload
 
 
+def _lock_chain(db: Session, tenant_id: str) -> None:
+    """Serialise appends to one tenant's chain for the rest of this transaction.
+
+    Allocating ``seq`` means reading the current head and then inserting
+    ``head + 1``. Those are two statements, so without a lock two appenders
+    read the same head and one of them loses — and losing means the entry is
+    *dropped*, because ``_write_audit`` treats a failed append as non-fatal.
+
+    A process-local lock is not enough. In a single-worker gateway the event
+    loop already serialises these writes, so an in-process lock would be
+    protecting a path that is not racing; the race appears precisely when the
+    gateway is scaled out to several workers, and by then the contending
+    appenders are in different processes and cannot see each other's locks.
+    Measured through the real gateway: 0 entries lost of 1200 at one worker,
+    2 lost at four. So the lock has to live where all the workers meet, which
+    is the database.
+
+    The lock is taken *before* the head is read, which is the whole point — a
+    lock acquired after the read would serialise nothing.
+
+    Postgres gets a real lock. SQLite gets nothing here and relies on the
+    retry loop instead: forcing ``BEGIN IMMEDIATE`` would mean either raw SQL
+    inside a transaction SQLAlchemy is already managing (an error) or an
+    engine-wide event hook that makes *every* transaction take a write lock,
+    including the read-only ones on the control plane. SQLite is the
+    single-node backend, where one uvicorn worker means the event loop
+    serialises these writes anyway; Postgres is what runs multi-worker, and
+    Postgres is where the race is reachable.
+    """
+    if db.get_bind().dialect.name != "postgresql":
+        return
+
+    # Advisory lock keyed on the tenant, released automatically at commit or
+    # rollback. Per-tenant rather than global so one busy tenant's appends do
+    # not serialise every other tenant's. crc32 is offset into the signed
+    # 64-bit range pg_advisory_xact_lock expects.
+    key = zlib.crc32(tenant_id.encode("utf-8")) - 2**31
+    db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": key})
+
+
 def append_to_chain(record: dict, tenant_id: str | None = None) -> str:
     """Append a payload to a tenant's chain. Returns the new entry hash."""
     tenant = tenant_id or record.get("tenant_id")
@@ -82,9 +133,10 @@ def append_to_chain(record: dict, tenant_id: str | None = None) -> str:
         raise ValueError("append_to_chain requires a tenant_id")
 
     last_error: Exception | None = None
-    for _ in range(_MAX_APPEND_RETRIES):
+    for attempt in range(_MAX_APPEND_RETRIES):
         try:
             with session_scope() as db:
+                _lock_chain(db, tenant)
                 seq, prev_hash = _chain_head(db, tenant)
                 entry_hash = compute_hash(prev_hash, record)
                 db.add(
@@ -98,13 +150,32 @@ def append_to_chain(record: dict, tenant_id: str | None = None) -> str:
                     )
                 )
             return entry_hash
-        except IntegrityError as exc:
-            # Lost the race for this seq. Re-read the head and try again.
+        except (IntegrityError, OperationalError) as exc:
+            # IntegrityError: lost the race for this seq.
+            # OperationalError: SQLite's writer lock was held past its timeout.
+            # Both mean "someone else got there first", and both are retryable.
             last_error = exc
+            _backoff(attempt)
 
     raise RuntimeError(
         f"could not append to audit chain after {_MAX_APPEND_RETRIES} attempts"
     ) from last_error
+
+
+def _backoff(attempt: int) -> None:
+    """Randomised exponential backoff between append attempts.
+
+    Retrying immediately is what made the original five attempts insufficient:
+    every loser of a race re-reads the head at the same moment and collides
+    with the same peers again, so the contenders stay in lockstep and burn all
+    their attempts in a few microseconds. Jitter is what actually breaks the
+    tie — the exponential part only keeps the wait bounded as contention rises.
+
+    This blocks, which is deliberate. ``append_to_chain`` is called
+    synchronously from the request path, so the alternative to a brief sleep is
+    returning a decision with no evidence behind it.
+    """
+    time.sleep(random.uniform(0, min(_BACKOFF_MAX_S, _BACKOFF_BASE_S * (2**attempt))))
 
 
 def _chain_head(db: Session, tenant_id: str) -> tuple[int, str]:

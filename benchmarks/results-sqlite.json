@@ -1,0 +1,323 @@
+{
+  "database_url": "sqlite:////Users/ayushpandey/Developer/ayush_projects/custos/custos-bench.db",
+  "workers": 1,
+  "budget_ms": 50.0,
+  "connections": 256,
+  "duration_s": 15.0,
+  "phases": [
+    {
+      "rps_offered": 50.0,
+      "rps_achieved": 50.04,
+      "duration_s": 15.0,
+      "requests": 750,
+      "ok": 750,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 750
+      },
+      "load_induced_degradations": {},
+      "connections": 256,
+      "peak_in_flight": 2,
+      "response_time": {
+        "p50_ms": 8.108,
+        "p95_ms": 8.939,
+        "p99_ms": 10.712,
+        "max_ms": 23.65,
+        "mean_ms": 8.142,
+        "count": 750
+      },
+      "service_time": {
+        "p50_ms": 7.024,
+        "p95_ms": 7.843,
+        "p99_ms": 9.577,
+        "max_ms": 23.258,
+        "mean_ms": 7.066,
+        "count": 750
+      },
+      "server_handler": {
+        "p50_ms": 4.94,
+        "p95_ms": 5.49,
+        "p99_ms": 6.43,
+        "max_ms": 21.41,
+        "mean_ms": 4.986,
+        "count": 750
+      },
+      "trust_engine": {
+        "p50_ms": 0.468,
+        "p95_ms": 0.519,
+        "p99_ms": 0.609,
+        "max_ms": 1.274,
+        "mean_ms": 0.464,
+        "count": 750
+      },
+      "budget_ms": 50.0,
+      "passed": true
+    },
+    {
+      "rps_offered": 100.0,
+      "rps_achieved": 100.03,
+      "duration_s": 15.0,
+      "requests": 1500,
+      "ok": 1500,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 1500
+      },
+      "load_induced_degradations": {},
+      "connections": 256,
+      "peak_in_flight": 12,
+      "response_time": {
+        "p50_ms": 4.88,
+        "p95_ms": 5.643,
+        "p99_ms": 49.318,
+        "max_ms": 115.236,
+        "mean_ms": 6.001,
+        "count": 1500
+      },
+      "service_time": {
+        "p50_ms": 4.22,
+        "p95_ms": 4.922,
+        "p99_ms": 48.336,
+        "max_ms": 114.145,
+        "mean_ms": 5.238,
+        "count": 1500
+      },
+      "server_handler": {
+        "p50_ms": 2.75,
+        "p95_ms": 3.36,
+        "p99_ms": 26.09,
+        "max_ms": 91.0,
+        "mean_ms": 3.386,
+        "count": 1500
+      },
+      "trust_engine": {
+        "p50_ms": 0.263,
+        "p95_ms": 0.302,
+        "p99_ms": 10.183,
+        "max_ms": 28.281,
+        "mean_ms": 0.487,
+        "count": 1500
+      },
+      "budget_ms": 50.0,
+      "passed": true
+    },
+    {
+      "rps_offered": 200.0,
+      "rps_achieved": 200.01,
+      "duration_s": 15.0,
+      "requests": 3000,
+      "ok": 3000,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 2988,
+        "REVIEW": 12
+      },
+      "load_induced_degradations": {
+        "drift": 15,
+        "policy": 12
+      },
+      "connections": 256,
+      "peak_in_flight": 23,
+      "response_time": {
+        "p50_ms": 4.151,
+        "p95_ms": 72.872,
+        "p99_ms": 93.658,
+        "max_ms": 113.529,
+        "mean_ms": 14.363,
+        "count": 3000
+      },
+      "service_time": {
+        "p50_ms": 4.018,
+        "p95_ms": 72.05,
+        "p99_ms": 92.704,
+        "max_ms": 113.166,
+        "mean_ms": 14.102,
+        "count": 3000
+      },
+      "server_handler": {
+        "p50_ms": 2.51,
+        "p95_ms": 54.62,
+        "p99_ms": 71.78,
+        "max_ms": 88.29,
+        "mean_ms": 10.158,
+        "count": 3000
+      },
+      "trust_engine": {
+        "p50_ms": 0.239,
+        "p95_ms": 23.772,
+        "p99_ms": 34.229,
+        "max_ms": 48.948,
+        "mean_ms": 3.551,
+        "count": 3000
+      },
+      "budget_ms": 50.0,
+      "passed": false
+    },
+    {
+      "rps_offered": 400.0,
+      "rps_achieved": 73.98,
+      "duration_s": 15.0,
+      "requests": 6000,
+      "ok": 6000,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 5182,
+        "REVIEW": 818
+      },
+      "load_induced_degradations": {
+        "policy": 819,
+        "drift": 818
+      },
+      "connections": 256,
+      "peak_in_flight": 256,
+      "response_time": {
+        "p50_ms": 31726.976,
+        "p95_ms": 63023.664,
+        "p99_ms": 66390.271,
+        "max_ms": 69134.494,
+        "mean_ms": 31443.839,
+        "count": 6000
+      },
+      "service_time": {
+        "p50_ms": 2499.176,
+        "p95_ms": 9894.468,
+        "p99_ms": 15072.243,
+        "max_ms": 24189.336,
+        "mean_ms": 3352.767,
+        "count": 6000
+      },
+      "server_handler": {
+        "p50_ms": 57.22,
+        "p95_ms": 431.38,
+        "p99_ms": 528.74,
+        "max_ms": 690.48,
+        "mean_ms": 101.194,
+        "count": 6000
+      },
+      "trust_engine": {
+        "p50_ms": 14.579,
+        "p95_ms": 176.308,
+        "p99_ms": 239.157,
+        "max_ms": 281.096,
+        "mean_ms": 34.403,
+        "count": 6000
+      },
+      "budget_ms": 50.0,
+      "passed": false
+    },
+    {
+      "rps_offered": 600.0,
+      "rps_achieved": 78.28,
+      "duration_s": 15.0,
+      "requests": 9000,
+      "ok": 8994,
+      "failed": 6,
+      "errors": {
+        "ReadError": 6
+      },
+      "decisions": {
+        "ALLOW": 8271,
+        "REVIEW": 723
+      },
+      "load_induced_degradations": {
+        "policy": 725,
+        "drift": 727
+      },
+      "connections": 256,
+      "peak_in_flight": 256,
+      "response_time": {
+        "p50_ms": 47325.93,
+        "p95_ms": 95971.281,
+        "p99_ms": 99407.605,
+        "max_ms": 101463.357,
+        "mean_ms": 48313.229,
+        "count": 8994
+      },
+      "service_time": {
+        "p50_ms": 2305.947,
+        "p95_ms": 9143.954,
+        "p99_ms": 13144.232,
+        "max_ms": 33139.909,
+        "mean_ms": 3188.581,
+        "count": 8994
+      },
+      "server_handler": {
+        "p50_ms": 47.63,
+        "p95_ms": 307.85,
+        "p99_ms": 403.6,
+        "max_ms": 693.05,
+        "mean_ms": 73.826,
+        "count": 8994
+      },
+      "trust_engine": {
+        "p50_ms": 0.565,
+        "p95_ms": 119.214,
+        "p99_ms": 173.473,
+        "max_ms": 227.294,
+        "mean_ms": 22.227,
+        "count": 8994
+      },
+      "budget_ms": 50.0,
+      "passed": false
+    },
+    {
+      "rps_offered": 800.0,
+      "rps_achieved": 72.45,
+      "duration_s": 15.0,
+      "requests": 12000,
+      "ok": 11996,
+      "failed": 4,
+      "errors": {
+        "ReadError": 4
+      },
+      "decisions": {
+        "ALLOW": 11011,
+        "REVIEW": 985
+      },
+      "load_induced_degradations": {
+        "policy": 990,
+        "drift": 986
+      },
+      "connections": 256,
+      "peak_in_flight": 256,
+      "response_time": {
+        "p50_ms": 69264.184,
+        "p95_ms": 143529.62,
+        "p99_ms": 149596.853,
+        "max_ms": 151825.229,
+        "mean_ms": 71600.022,
+        "count": 11996
+      },
+      "service_time": {
+        "p50_ms": 2591.296,
+        "p95_ms": 10332.322,
+        "p99_ms": 14612.424,
+        "max_ms": 31391.682,
+        "mean_ms": 3466.701,
+        "count": 11996
+      },
+      "server_handler": {
+        "p50_ms": 55.14,
+        "p95_ms": 275.5,
+        "p99_ms": 477.32,
+        "max_ms": 623.1,
+        "mean_ms": 79.34,
+        "count": 11996
+      },
+      "trust_engine": {
+        "p50_ms": 4.427,
+        "p95_ms": 122.302,
+        "p99_ms": 211.432,
+        "max_ms": 261.545,
+        "mean_ms": 24.491,
+        "count": 11996
+      },
+      "budget_ms": 50.0,
+      "passed": false
+    }
+  ]
+}

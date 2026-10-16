@@ -1,7 +1,7 @@
 // Recent ALLOW / BLOCK / REVIEW stream.
 
 import type { DecisionRow } from "../api/client";
-import { DecisionBadge, Empty, Panel, relativeTime } from "../components/primitives";
+import { DecisionBadge, Empty, Explain, Panel, relativeTime } from "../components/primitives";
 
 export function Decisions({ decisions }: { decisions: DecisionRow[] }) {
   const counts = decisions.reduce<Record<string, number>>((acc, row) => {
@@ -23,6 +23,10 @@ export function Decisions({ decisions }: { decisions: DecisionRow[] }) {
         </span>
       }
     >
+      <Explain
+        what="Every request Custos has judged, newest first, with the verdict it returned and how long it took."
+        why="This is the system doing its job, live. The response time matters as much as the verdict: Custos sits in front of real traffic, so if it were slow it would slow down everything behind it."
+      />
       {decisions.length === 0 ? (
         <Empty>No decisions yet. Send traffic through the gateway.</Empty>
       ) : (

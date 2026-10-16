@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from "react";
 import type { AuditEntry, ChainVerification, ControlApiClient } from "../api/client";
-import { DecisionBadge, Empty, Panel, relativeTime } from "../components/primitives";
+import { DecisionBadge, Empty, Explain, Panel, Term, relativeTime } from "../components/primitives";
 import type { DecisionValue } from "../api/client";
 
 export function AuditLog({
@@ -51,6 +51,10 @@ export function AuditLog({
         </div>
       }
     >
+      <Explain
+        what="A permanent record of every decision, where each entry is mathematically locked to the one before it."
+        why="An ordinary log can be edited by anyone with database access, so it proves nothing. Here, changing any past record breaks the lock on every record after it. Press Verify chain to check the whole history — if someone altered an entry, it says exactly which one."
+      />
       {verification && (
         <div className={verification.valid ? "verdict verdict-ok" : "verdict verdict-bad"}>
           <strong>{verification.valid ? "Chain verified" : "Chain broken"}</strong>

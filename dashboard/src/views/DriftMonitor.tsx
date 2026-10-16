@@ -6,7 +6,16 @@
 // or a broken upstream feed.
 
 import type { DriftHistory } from "../api/client";
-import { BandBadge, Empty, Panel, SeverityBar, Sparkline, relativeTime } from "../components/primitives";
+import {
+  BandBadge,
+  Empty,
+  Explain,
+  Panel,
+  SeverityBar,
+  Sparkline,
+  Term,
+  relativeTime,
+} from "../components/primitives";
 
 export function DriftMonitor({ modelId, drift }: { modelId: string | null; drift: DriftHistory | null }) {
   if (!modelId) {
@@ -33,6 +42,10 @@ export function DriftMonitor({ modelId, drift }: { modelId: string | null; drift
       title={`Drift monitor · ${modelId}`}
       actions={<span className="muted">computed {relativeTime(current.computed_at)}</span>}
     >
+      <Explain
+        what="How far this model's incoming data has moved away from the data it was originally set up with, both overall and for each individual input."
+        why="A model only works on the kind of data it was built for. When the incoming data changes shape, the model keeps answering confidently while quietly becoming less reliable. The per-input breakdown is what tells you whether the world changed or a data feed broke."
+      />
       <div className="drift-summary">
         <div className="stat">
           <div className="stat-value">{current.severity.toFixed(3)}</div>
