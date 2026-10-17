@@ -8,7 +8,7 @@
 const STATS = [
   { value: "≤ 50 ms", label: "p99 decision latency up to 200 requests/s, on one CPU core" },
   { value: "0", label: "verdicts changed by overload (was up to 985 per run)" },
-  { value: "342", label: "automated tests, from statistics to tamper detection" },
+  { value: "392", label: "automated tests, from statistics to tamper detection" },
   { value: "589,186", label: "real loans in our pre-registered field study" },
 ];
 
@@ -30,6 +30,12 @@ const COMPARE: { row: string; monitor: string; guard: string; custos: string }[]
     monitor: "Batches of past traffic",
     guard: "The text of one request",
     custos: "Business policy, request risk and model reliability, fused",
+  },
+  {
+    row: "When the data breaks",
+    monitor: "Alerts someone to investigate",
+    guard: "Not its job",
+    custos: "Diagnoses it, proposes a tested repair, applies it once a person approves",
   },
   {
     row: "Evidence it leaves",
@@ -190,6 +196,50 @@ export function Home() {
 
       <section className="section">
         <div className="section-head">
+          <div className="eyebrow">Governed self-healing</div>
+          <h2>When a data feed breaks, Custos proposes the fix. A person decides.</h2>
+        </div>
+        <div className="pillars">
+          <div className="pillar card">
+            <div className="pillar-num">Diagnose</div>
+            <h3>Broken pipe or changed world?</h3>
+            <p>
+              A credit-score feed stuck at one value and a real recession both look like “drift”. Custos
+              tells them apart — because the right repair for one is the wrong repair for the other.
+            </p>
+          </div>
+          <div className="pillar card">
+            <div className="pillar-num">Test</div>
+            <h3>Shadow-tested on real decisions</h3>
+            <p>
+              Every proposed repair is replayed on the model's recent real decisions — up to 500 — through
+              the same decision logic, so the reviewer sees exactly how many verdicts it would change.
+            </p>
+          </div>
+          <div className="pillar card">
+            <div className="pillar-num">Approve</div>
+            <h3>A named person decides</h3>
+            <p>
+              Nothing changes until someone approves — and a repair that failed its test can't be. Their
+              name goes on the same tamper-evident chain as every decision.
+            </p>
+          </div>
+          <div className="pillar card">
+            <div className="pillar-num">Refuse</div>
+            <h3>It knows what not to do</h3>
+            <p>
+              It will never re-learn “normal” from a broken feed, and it never claims to retrain a model it
+              doesn't own. Those are recorded as requests, with evidence.
+            </p>
+          </div>
+        </div>
+        <p className="compare-note">
+          <a className="btn btn-ghost" href="#/healing">See a data feed break and get repaired, live →</a>
+        </p>
+      </section>
+
+      <section className="section">
+        <div className="section-head">
           <div className="eyebrow">What changes</div>
           <h2>Before and after Custos.</h2>
         </div>
@@ -201,6 +251,7 @@ export function Home() {
               <li>An unregistered or experimental model can move real money.</li>
               <li>Decision logs can be edited, and nobody can prove they were.</li>
               <li>A traffic spike slows everything down — or quietly changes answers.</li>
+              <li>A dead data feed keeps the model approving on garbage until someone notices.</li>
             </ul>
           </div>
           <div className="ba card ba-after">
@@ -210,6 +261,7 @@ export function Home() {
               <li>Unknown models and policy breaches go to a human or are stopped.</li>
               <li>Every verdict is provable; any edit is detected and located.</li>
               <li>Overload is refused cleanly; answers never change under load.</li>
+              <li>A dead feed is diagnosed, and decisions are held the moment a person approves the repair.</li>
             </ul>
           </div>
         </div>

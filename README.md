@@ -24,9 +24,9 @@ HTTP, and narrates five acts:
 | Act | What happens | Verdict |
 |---|---|---|
 | 1 | An unregistered model asks to disburse money | **REVIEW** — Custos does not guess |
-| 2 | Register + baseline, healthy traffic | **ALLOW** — trust 0.99 |
-| 3 | The population shifts (incomes fall, utilisation spikes) | drift severity 0.02 → **0.83** |
-| 4 | The *same* application, the *same* code, no config change | **REVIEW** — trust 0.48 |
+| 2 | Register + baseline, healthy traffic | **ALLOW** — trust 0.91 |
+| 3 | The population shifts (incomes fall, utilisation spikes) | drift severity 0.18 → **0.91** |
+| 4 | The *same* application, the *same* code, no config change | **REVIEW** — trust 0.54 |
 | 5 | A policy veto on a large disbursement | **BLOCK**, then the audit chain catches tampering |
 
 No Docker, no Postgres, no Redis — the system falls back to SQLite and an in-process cache.
@@ -65,13 +65,15 @@ left behind them.
 
 Logs and the API key are written to `.run/`.
 
-Then open **http://localhost:5173**. The dashboard has four sections:
+Then open **http://localhost:5173**. The dashboard has five sections:
 
 - **Why Custos** — what it is, how it differs from monitoring and guardrails, and the evidence.
 - **Live demo** — a seven-step guided walkthrough with presenter instructions on every step. It
   drives the real system and connects the console automatically, so no API key is needed.
+- **Self-healing** — a data feed breaks live: Custos diagnoses it, proposes a tested repair, and
+  applies it once you approve. Plus the live approval queue.
 - **Documentation** — setup, concepts, the decision rules, the API, validation results and limits.
-- **Console** — the operator view of models, drift, decisions and the audit chain.
+- **Console** — the operator view of models, drift, decisions, the audit chain and the incident queue.
 
 ### Or by hand
 
@@ -95,9 +97,10 @@ waits on them.
 pytest
 ```
 
-342 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
+392 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
 matrix, the risk engine, admission control, hash-chain tamper detection and chain integrity
-under concurrent writers, SDK fail-open behaviour, and a full lifecycle end to end.
+under concurrent writers, SDK fail-open behaviour, self-healing diagnosis and the full
+approve-apply-verify loop, and a full lifecycle end to end.
 
 ## Load
 
@@ -107,7 +110,7 @@ python -m benchmarks.load_test
 
 Sweeps request rates against the real gateway over real HTTP and reports where the p99 budget
 stops holding. On one M1 core against SQLite: **50 ms p99 up to 200 req/s per instance**
-(28 ms at 200). Past capacity the gateway refuses excess requests with 503 rather than queueing
+(28 ms at 200; 31 ms re-measured with self-healing's check on the request path). Past capacity the gateway refuses excess requests with 503 rather than queueing
 them, so overload neither collapses throughput nor changes any verdict.
 
 The harness is open-loop, so the reported p99 is not flattered by coordinated omission. It
@@ -136,6 +139,29 @@ agent ──▶ gateway ──┬──▶ PolicyEngine ─┐
 - **The audit log is tamper-evident.** `entry_hash = SHA256(prev_hash ‖ canonical_json(payload))`.
   `GET /audit/verify` recomputes the chain and reports the *first broken entry*.
 
+## Governed self-healing
+
+Every drift recompute also asks *why* the model's inputs moved, because the two common causes
+need opposite repairs:
+
+| Diagnosis | Custos proposes | Custos refuses |
+|---|---|---|
+| **Broken feed** — an input stuck on one value or missing | **Quarantine** it: hold the model's decisions for review until the feed is fixed, then **release** | Re-baselining: a reference learned from broken data makes broken data look normal |
+| **Population shift** — inputs arrive normally, the population moved | **Re-baseline** (undoable via rollback), or a recorded **retrain request** to the model's owner | Re-baselining while the population is still moving (a hold-out test must pass) |
+
+Each proposal is **shadow-tested** by replaying the model's recent recorded decisions through the
+real decision cascade with the repair applied. Nothing is applied until a **named person approves**,
+a repair that failed its shadow test cannot be approved, the repair is **verified** on traffic that
+arrived afterwards, and every step is appended to the same **hash chain** as the decisions. Custos
+never retrains a model it does not own. See [ADR 0006](docs/adr/0006-governed-self-healing.md).
+
+```bash
+curl -X POST localhost:8001/healing/scan/credit-risk-v3 -H "X-API-Key: $KEY"
+curl localhost:8001/healing/incidents?status=open -H "X-API-Key: $KEY"
+curl -X POST localhost:8001/healing/remediations/1/approve -H "X-API-Key: $KEY" \
+     -H "Content-Type: application/json" -d '{"approver": "A. Reviewer", "note": "feed confirmed down"}'
+```
+
 ## Integrating
 
 ```python
@@ -163,6 +189,7 @@ production service; every dependency it carries is a version conflict it can for
 | `engines/` | the extensibility seam: policy, drift, risk. **Engines never import each other.** |
 | `services/gateway/` | data plane — hot path |
 | `services/control/` | control plane — cold path |
+| `services/healing/` | governed self-healing — diagnose, propose, shadow-test, apply, verify |
 | `sdk/python/` | the adoption surface |
 | `dashboard/` | React + TypeScript operator console |
 | `examples/fintech_demo/` | ★ kept working at all times ★ |

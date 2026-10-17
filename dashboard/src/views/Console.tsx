@@ -8,6 +8,7 @@ import {
   type TenantConfig,
 } from "../api/client";
 import { ExplainContext } from "../components/primitives";
+import { IncidentQueue } from "./IncidentQueue";
 import { AuditLog } from "./AuditLog";
 import { Decisions } from "./Decisions";
 import { DriftMonitor } from "./DriftMonitor";
@@ -150,6 +151,13 @@ export function Console({ controlUrl, apiKey, setApiKey }: {
           <Decisions decisions={decisions} />
           <AuditLog client={client} entries={audit} filter={auditFilter} onFilter={setAuditFilter} />
         </main>
+        <section className="console-healing">
+          <div className="section-head">
+            <div className="eyebrow">Self-healing</div>
+            <h2>Incident queue</h2>
+          </div>
+          <IncidentQueue client={client} />
+        </section>
       </ExplainContext.Provider>
     </div>
   );

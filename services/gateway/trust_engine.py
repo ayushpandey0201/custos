@@ -27,6 +27,7 @@ from services.gateway.aggregate import aggregate
 from services.gateway.decision import evaluate_decision
 from shared.config import defaults
 from shared.config.tenant import TenantConfig, load_tenant_config
+from shared.db.quarantine import active_quarantines, peek_quarantines
 from shared.schemas.decision import DecisionRecord
 from shared.schemas.evaluation import EvaluationContext, EvaluationResponse
 from shared.schemas.signals import SignalResult
@@ -60,7 +61,10 @@ async def evaluate(
     config = config or load_tenant_config(ctx.tenant_id)
     engines = registry.build_engines(config.enabled_engines)
 
-    signals = await _fan_out(engines, ctx)
+    # The quarantine lookup runs beside the engines rather than after them, so
+    # it costs no latency on top of the fan-out. Off-thread for the same reason
+    # as the drift read: a cache miss touches the database.
+    signals, quarantined = await asyncio.gather(_fan_out(engines, ctx), _quarantines(ctx))
     fused = aggregate(signals, config.weights)
     drift = next((s for s in signals if s.engine == "drift" and not s.degraded), None)
     outcome = evaluate_decision(
@@ -68,6 +72,7 @@ async def evaluate(
         config.thresholds,
         model_known=ctx.model_known,
         drift_significant=drift is not None and drift.detail.get("band") == "significant",
+        quarantined=quarantined,
     )
 
     latency_ms = (time.perf_counter() - started) * 1000
@@ -105,6 +110,16 @@ async def evaluate(
         },
     )
     return response
+
+
+async def _quarantines(ctx: EvaluationContext) -> dict[str, str]:
+    """Inputs a person has quarantined for this model (services/healing)."""
+    if not ctx.model_known:
+        return {}
+    cached = peek_quarantines(ctx.tenant_id, ctx.model_id)
+    if cached is not None:
+        return cached
+    return await asyncio.to_thread(active_quarantines, ctx.tenant_id, ctx.model_id)
 
 
 async def _fan_out(engines: list[SignalEngine], ctx: EvaluationContext) -> list[SignalResult]:

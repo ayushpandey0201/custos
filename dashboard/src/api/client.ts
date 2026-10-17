@@ -80,6 +80,79 @@ export interface TenantConfig {
   fail_open: boolean;
 }
 
+/* --- governed self-healing (services/healing) ------------------------------ */
+
+export type RemediationAction =
+  | "quarantine_input"
+  | "release_input"
+  | "rebaseline"
+  | "rollback_baseline"
+  | "request_retrain";
+
+export type RemediationStatus =
+  | "proposed"
+  | "approved"
+  | "applied"
+  | "rejected"
+  | "superseded"
+  | "released"
+  | "rolled_back"
+  | "failed_verification";
+
+export interface ShadowImpact {
+  replayed: number;
+  changed: number;
+  transitions: Record<string, number>;
+  examples: { trace_id: string; from: string; to: string }[];
+}
+
+export interface Remediation {
+  id: number;
+  action: RemediationAction;
+  status: RemediationStatus;
+  params: Record<string, unknown>;
+  rationale: string;
+  shadow: {
+    passed: boolean;
+    checks: string[];
+    impact: ShadowImpact;
+    summary: string;
+    held_out_severity?: number | null;
+  };
+  decided_by: string | null;
+  decision_note: string;
+  proposed_at: string;
+  decided_at: string | null;
+  applied_at: string | null;
+}
+
+export interface InputHealth {
+  name: string;
+  status: "ok" | "missing" | "stuck" | "shifted";
+  detail: string;
+  evidence: Record<string, number>;
+}
+
+export interface Incident {
+  id: number;
+  model_id: string;
+  kind: "pipeline_break" | "population_shift";
+  status: "open" | "resolved";
+  summary: string;
+  diagnosis: {
+    kind: string;
+    summary: string;
+    window: number;
+    severity: number | null;
+    band: DriftBand | null;
+    inputs: InputHealth[];
+    withheld: { action: string; why: string }[];
+  };
+  opened_at: string;
+  resolved_at: string | null;
+  remediations: Remediation[];
+}
+
 export class ApiError extends Error {
   constructor(readonly status: number, message: string) {
     super(message);
@@ -144,6 +217,42 @@ export class ControlApiClient {
 
   config() {
     return this.request<TenantConfig>("/config");
+  }
+
+  incidents(status?: "open" | "resolved") {
+    return this.request<Incident[]>(`/healing/incidents${status ? `?status=${status}` : ""}`);
+  }
+
+  scan(modelId: string) {
+    return this.request<{ incident: Incident | null; new?: boolean; verification?: string }>(
+      `/healing/scan/${encodeURIComponent(modelId)}`,
+      { method: "POST" },
+    );
+  }
+
+  verifyIncident(id: number) {
+    return this.request<{ incident: Incident; verification: string }>(
+      `/healing/incidents/${id}/verify`,
+      { method: "POST" },
+    );
+  }
+
+  decideRemediation(id: number, verdict: "approve" | "reject", approver: string, note = "") {
+    return this.request<Incident>(`/healing/remediations/${id}/${verdict}`, {
+      method: "POST",
+      body: JSON.stringify({ approver, note }),
+    });
+  }
+
+  retestRemediation(id: number) {
+    return this.request<Incident>(`/healing/remediations/${id}/retest`, { method: "POST" });
+  }
+
+  closeIncident(id: number, approver: string, note = "") {
+    return this.request<Incident>(`/healing/incidents/${id}/close`, {
+      method: "POST",
+      body: JSON.stringify({ approver, note }),
+    });
   }
 
   /** Absolute URL for the evidence export, for use as a download link. */

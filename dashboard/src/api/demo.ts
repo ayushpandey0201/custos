@@ -3,7 +3,7 @@
 // No API key: the demo creates its own tenant and hands the key back, so a
 // first-time presenter never has to copy one from a terminal.
 
-import type { DecisionValue, DriftBand } from "./client";
+import type { DecisionValue, DriftBand, Incident } from "./client";
 
 export type BotVerdict = "APPROVED" | "DENIED" | "HELD_FOR_REVIEW" | "BLOCKED";
 
@@ -58,19 +58,58 @@ export interface DemoStatus {
   run: { tenant_id: string; done: number[] } | null;
 }
 
+export interface HealingStart {
+  tenant_id: string;
+  api_key: string;
+  model_id: string;
+  traffic: Traffic;
+  severity: number | null;
+  decision: DemoDecision;
+}
+
+export interface HealingEvent {
+  seq: number;
+  entry_hash: string;
+  event: string;
+  action: string | null;
+  actor: string;
+  created_at: string;
+}
+
+export interface HealingStep {
+  step: number;
+  stuck_value?: number;
+  traffic?: Traffic;
+  healing?: { incident_id: number | null; kind: string | null; new: boolean; verification: string | null };
+  incident?: Incident;
+  decision?: DemoDecision;
+  events?: HealingEvent[];
+  decisions_on_chain?: number;
+  chain?: ChainCheck;
+}
+
+export interface HealingStatus {
+  gateway: boolean;
+  run: { tenant_id: string; done: number[] } | null;
+}
+
 export class DemoUnavailable extends Error {}
 
 export class DemoClient {
   constructor(private baseUrl: string) {}
 
-  private async call<T>(path: string, method: "GET" | "POST" = "GET"): Promise<T> {
+  private async call<T>(path: string, method: "GET" | "POST" = "GET", body?: unknown): Promise<T> {
     let response: Response;
     try {
-      response = await fetch(`${this.baseUrl}${path}`, { method });
+      response = await fetch(`${this.baseUrl}${path}`, {
+        method,
+        headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
     } catch {
       throw new DemoUnavailable("Custos is not running.");
     }
-    if (response.status === 404 && path === "/demo/status") {
+    if (response.status === 404 && path.endsWith("/status")) {
       throw new DemoUnavailable("Custos is running without demo mode.");
     }
     if (!response.ok) {
@@ -99,5 +138,17 @@ export class DemoClient {
 
   tamper() {
     return this.call<DemoStep>("/demo/tamper", "POST");
+  }
+
+  healingStatus() {
+    return this.call<HealingStatus>("/demo/healing/status");
+  }
+
+  healingStart() {
+    return this.call<HealingStart>("/demo/healing/start", "POST");
+  }
+
+  healingStep(step: number, approver?: string) {
+    return this.call<HealingStep>(`/demo/healing/step/${step}`, "POST", approver ? { approver } : {});
   }
 }

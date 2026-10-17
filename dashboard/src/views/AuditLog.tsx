@@ -83,6 +83,9 @@ export function AuditLog({
                 decision?: DecisionValue;
                 trust_score?: number;
                 reasons?: string[];
+                type?: string;
+                event?: string;
+                actor?: string;
               };
               return (
                 <Fragment key={entry.seq}>
@@ -93,7 +96,18 @@ export function AuditLog({
                     <td className="numeric">{entry.seq}</td>
                     <td className="muted">{relativeTime(entry.created_at)}</td>
                     <td>{payload.model_id ?? "—"}</td>
-                    <td>{payload.decision ? <DecisionBadge decision={payload.decision} /> : "—"}</td>
+                    <td>
+                      {payload.decision ? (
+                        <DecisionBadge decision={payload.decision} />
+                      ) : payload.type === "healing" ? (
+                        <span className="heal-event-tag" title="Self-healing record">
+                          {payload.event?.replace(/_/g, " ")}
+                          {payload.actor && payload.actor !== "custos" ? ` · ${payload.actor}` : ""}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                     {/* Truncated: the full hash is in the expanded payload and
                         in the export. A 64-char column would push out the
                         fields an operator actually scans. */}

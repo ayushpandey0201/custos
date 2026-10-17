@@ -12,7 +12,10 @@ from services.gateway.auth import require_tenant
 from shared.db.models import FeatureSample, Model
 from shared.db.registry import invalidate_model_registration
 from shared.db.session import get_db
+from shared.telemetry.logging import get_logger
 from shared.timeutil import iso_utc
+
+log = get_logger(__name__)
 
 router = APIRouter(prefix="/models", tags=["models"])
 
@@ -132,17 +135,42 @@ def recompute(
     Synchronous on purpose. This is an operator action on the cold control
     plane — an operator who asks for a recompute wants the number, not a task
     id. The scheduled path stays asynchronous via Celery.
+
+    Every recompute also runs self-healing detection: a new snapshot is
+    exactly when a broken feed or a shift becomes visible, and an open
+    incident is verified against the same fresh traffic.
     """
     result = worker.recompute_drift(tenant_id, model_id, window_hours=window_hours)
+    healing = _scan(tenant_id, model_id)
     if result is None:
         return {
             "model_id": model_id,
             "computed": False,
             "detail": "no baseline, or too few samples in the window",
+            "healing": healing,
         }
     return {
         "model_id": model_id,
         "computed": True,
         "severity": round(result["severity"], 4),
         "sample_size": result["sample_size"],
+        "healing": healing,
+    }
+
+
+def _scan(tenant_id: str, model_id: str) -> dict | None:
+    """Summary of the self-healing scan. Never fails the recompute that triggered it."""
+    from services.healing import service
+
+    try:
+        outcome = service.scan(tenant_id, model_id)
+    except Exception as exc:
+        log.error("healing_scan_failed", extra={"model_id": model_id, "error": str(exc)})
+        return None
+    incident = outcome.get("incident")
+    return {
+        "incident_id": None if incident is None else incident["id"],
+        "kind": None if incident is None else incident["kind"],
+        "new": outcome.get("new", False),
+        "verification": outcome.get("verification"),
     }

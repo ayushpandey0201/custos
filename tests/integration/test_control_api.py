@@ -21,6 +21,16 @@ def auth() -> dict:
     return {"X-API-Key": TEST_API_KEY}
 
 
+def live_traffic(model_id: str, rows: list[dict]) -> None:
+    """What the gateway records for each evaluated request (trust_engine.record_features)."""
+    from shared.db.models import FeatureSample
+    from shared.db.session import session_scope
+
+    with session_scope() as db:
+        for row in rows:
+            db.add(FeatureSample(tenant_id="acme", model_id=model_id, features=row))
+
+
 class TestTenantBootstrap:
     def test_create_tenant_returns_a_usable_key(self, client):
         response = client.post("/tenants", json={"tenant_id": "newco", "name": "New Co"})
@@ -95,10 +105,24 @@ class TestModelLifecycle:
         client.post("/models", json={"model_id": "m1"}, headers=auth())
         rows = rows_from_columns(baseline_features)
         client.post("/models/m1/baseline", json={"samples": rows}, headers=auth())
+        live_traffic("m1", rows[:200])
 
         body = client.post("/models/m1/recompute", headers=auth()).json()
         assert body["computed"] is True
         assert body["severity"] < 1 / 3
+
+    def test_the_baseline_is_not_scored_as_its_own_live_traffic(
+        self, client, tenant, baseline_features
+    ):
+        """Rows supplied as the baseline are stored as samples too, but they are
+        the reference — scoring them as live traffic would report "stable" with
+        no live traffic at all, and dilute every later reading."""
+        client.post("/models", json={"model_id": "m1"}, headers=auth())
+        rows = rows_from_columns(baseline_features)
+        client.post("/models/m1/baseline", json={"samples": rows}, headers=auth())
+
+        body = client.post("/models/m1/recompute", headers=auth()).json()
+        assert body["computed"] is False
 
     def test_recompute_without_a_baseline_is_reported_honestly(self, client, tenant):
         client.post("/models", json={"model_id": "m1"}, headers=auth())
@@ -118,6 +142,7 @@ class TestDriftHistory:
         client.post("/models", json={"model_id": "m1"}, headers=auth())
         rows = rows_from_columns(baseline_features)
         client.post("/models/m1/baseline", json={"samples": rows}, headers=auth())
+        live_traffic("m1", rows[:200])
         client.post("/models/m1/recompute", headers=auth())
 
         body = client.get("/models/m1/drift", headers=auth()).json()
@@ -130,14 +155,15 @@ class TestDriftHistory:
         rows = rows_from_columns(baseline_features)
         client.post("/models/m1/baseline", json={"samples": rows}, headers=auth())
 
+        live_traffic("m1", rows[:200])
         client.post("/models/m1/recompute", headers=auth())
         shifted = [{**r, "income": r["income"] + 40000} for r in rows]
-        client.post("/models/m1/baseline", json={"samples": rows}, headers=auth())
+        live_traffic("m1", shifted[:200])
         client.post("/models/m1/recompute", headers=auth())
 
         history = client.get("/models/m1/drift", headers=auth()).json()["history"]
-        assert len(history) >= 2
-        assert shifted  # the shifted batch is exercised in the worker tests
+        assert len(history) == 2
+        assert history[0]["severity"] < history[1]["severity"]
 
 
 class TestConfig:

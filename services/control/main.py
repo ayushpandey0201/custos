@@ -19,6 +19,7 @@ from services.control import (
     routes_audit,
     routes_config,
     routes_drift,
+    routes_healing,
     routes_models,
     routes_tenants,
 )
@@ -66,6 +67,7 @@ def create_app(demo: bool | None = None, demo_gateway_url: str | None = None) ->
     app.include_router(routes_drift.router)
     app.include_router(routes_config.router)
     app.include_router(routes_audit.router)
+    app.include_router(routes_healing.router)
 
     if demo:
         from services.control import routes_demo

@@ -76,6 +76,7 @@ def _alive(url: str) -> bool:
 
 def build_router(gateway_url: str, sizes: Sizes = Sizes()) -> APIRouter:
     from examples.fintech_demo import inject_drift
+    from examples.fintech_demo.agent import loan_bot
     from examples.fintech_demo.agent.loan_bot import MODEL_ID, LoanBot
     from examples.fintech_demo.run_demo import get, post, put
 
@@ -103,6 +104,9 @@ def build_router(gateway_url: str, sizes: Sizes = Sizes()) -> APIRouter:
             raise HTTPException(
                 409, f"Run step {missing[0]} first — the steps build on each other."
             )
+        # The SDK is configured process-wide; the self-healing demo may have
+        # pointed it at its own tenant since this run started.
+        loan_bot.custos.configure(base_url=gateway_url, api_key=run.api_key, timeout_ms=200)
         return run
 
     def tally(outcomes) -> dict[str, int]:
@@ -277,5 +281,192 @@ def build_router(gateway_url: str, sizes: Sizes = Sizes()) -> APIRouter:
             }
         finally:
             lock.release()
+
+    # --- self-healing story ---------------------------------------------------
+    #
+    #   start  a healthy lender: model registered, baselined, 200 good decisions
+    #   1      the credit-bureau feed dies; Custos diagnoses it and proposes a fix
+    #   2      a person approves the quarantine; decisions are held
+    #   3      the data team repairs the feed; Custos verifies and proposes release
+    #   4      a person approves the release; decisions flow again
+    #   5      the evidence: every step, who approved it, on the hash chain
+
+    heal: dict = {"run": None, "url": None}
+
+    def healing_run(step: int) -> _Run:
+        run = heal["run"]
+        if run is None:
+            raise HTTPException(409, "Start the self-healing demo first.")
+        missing = [s for s in range(1, step) if s not in run.done]
+        if missing:
+            raise HTTPException(
+                409, f"Run step {missing[0]} first — the steps build on each other."
+            )
+        # The SDK is configured process-wide; point it at this run's tenant in
+        # case the other demo was used in between.
+        loan_bot.custos.configure(base_url=gateway_url, api_key=run.api_key, timeout_ms=200)
+        return run
+
+    def incident_of(url: str, key: str) -> dict | None:
+        incidents = get(f"{url}/healing/incidents", key)
+        return incidents[0] if incidents else None
+
+    def pending(incident: dict, action: str) -> dict:
+        for r in incident["remediations"]:
+            if r["action"] == action and r["status"] == "proposed":
+                return r
+        raise HTTPException(409, f"There is no pending {action.replace('_', ' ')} to approve.")
+
+    def healing_step(step: int, body: dict | None = None) -> dict:
+        if not lock.acquire(blocking=False):
+            raise HTTPException(409, "A step is already running.")
+        try:
+            run = healing_run(step)
+            need_gateway()
+            try:
+                result = HEAL[step](run, body or {})
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode(errors="replace")
+                raise HTTPException(exc.code, f"Custos refused: {detail}") from exc
+            except urllib.error.URLError as exc:
+                raise HTTPException(502, f"Custos call failed: {exc}") from exc
+            run.done.add(step)
+            return {"step": step, **result}
+        finally:
+            lock.release()
+
+    @router.post("/healing/start")
+    def healing_start(request: Request) -> dict:
+        if not lock.acquire(blocking=False):
+            raise HTTPException(409, "A step is already running.")
+        try:
+            need_gateway()
+            url = control(request)
+            tenant_id = f"heal-{time.strftime('%H%M%S')}"
+            created = post(f"{url}/tenants", {"tenant_id": tenant_id, "name": "Demo Lender"})
+            key = created["api_key"]
+            bot = LoanBot(gateway_url=gateway_url, api_key=key)
+            post(f"{url}/models", {"model_id": MODEL_ID, "name": "Credit Risk v3"}, key)
+            post(
+                f"{url}/models/{MODEL_ID}/baseline",
+                {"samples": inject_drift.clean_batch(n=sizes.baseline, seed=1)},
+                key,
+            )
+            healthy = [
+                bot.decide(r, amount=200_000)
+                for r in inject_drift.clean_batch(n=sizes.healthy, seed=2)
+            ]
+            drift = post(f"{url}/models/{MODEL_ID}/recompute", {}, key)
+            application = inject_drift.clean_batch(n=1, seed=7)[0]
+            heal["run"] = _Run(
+                tenant_id=tenant_id,
+                api_key=key,
+                bot=bot,
+                application=application,
+                healthy_severity=drift.get("severity"),
+            )
+            heal["url"] = url
+            return {
+                "tenant_id": tenant_id,
+                "api_key": key,
+                "model_id": MODEL_ID,
+                "traffic": {"sent": len(healthy), "verdicts": tally(healthy)},
+                "severity": drift.get("severity"),
+                "decision": _outcome(bot.decide(application, amount=250_000)),
+            }
+        finally:
+            lock.release()
+
+    @router.post("/healing/step/{step}")
+    def healing_act(step: int, body: dict | None = None) -> dict:
+        if step not in HEAL:
+            raise HTTPException(404, "Steps are numbered 1 to 5.")
+        return healing_step(step, body)
+
+    def heal1(run, body):
+        url, key, bot = heal["url"], run.api_key, run.bot
+        broken = inject_drift.pipeline_break(n=sizes.healthy, seed=11)
+        traffic = [bot.decide(r, amount=200_000) for r in broken]
+        scan = post(f"{url}/models/{MODEL_ID}/recompute", {}, key)
+        return {
+            "stuck_value": broken[0]["bureau_score"],
+            "traffic": {"sent": len(traffic), "verdicts": tally(traffic)},
+            "healing": scan.get("healing"),
+            "incident": incident_of(url, key),
+        }
+
+    def heal2(run, body):
+        url, key, bot = heal["url"], run.api_key, run.bot
+        approver = str(body.get("approver", "")).strip()
+        if not approver:
+            raise HTTPException(422, "Type your name: every approval records who made it.")
+        quarantine = pending(incident_of(url, key), "quarantine_input")
+        incident = post(
+            f"{url}/healing/remediations/{quarantine['id']}/approve",
+            {"approver": approver, "note": "approved during the live demo"},
+            key,
+        )
+        return {
+            "incident": incident,
+            "decision": _outcome(bot.decide(run.application, amount=250_000)),
+        }
+
+    def heal3(run, body):
+        url, key, bot = heal["url"], run.api_key, run.bot
+        repaired = inject_drift.clean_batch(n=sizes.healthy, seed=12)
+        traffic = [bot.decide(r, amount=200_000) for r in repaired]
+        scan = post(f"{url}/models/{MODEL_ID}/recompute", {}, key)
+        return {
+            "traffic": {"sent": len(traffic), "verdicts": tally(traffic)},
+            "healing": scan.get("healing"),
+            "incident": incident_of(url, key),
+        }
+
+    def heal4(run, body):
+        url, key, bot = heal["url"], run.api_key, run.bot
+        approver = str(body.get("approver", "")).strip()
+        if not approver:
+            raise HTTPException(422, "Type your name: every approval records who made it.")
+        release = pending(incident_of(url, key), "release_input")
+        incident = post(
+            f"{url}/healing/remediations/{release['id']}/approve",
+            {"approver": approver, "note": "feed confirmed fixed during the live demo"},
+            key,
+        )
+        return {
+            "incident": incident,
+            "decision": _outcome(bot.decide(run.application, amount=250_000)),
+        }
+
+    def heal5(run, body):
+        url, key = heal["url"], run.api_key
+        entries = get(f"{url}/audit?limit=500", key)["entries"]
+        events = [
+            {
+                "seq": e["seq"],
+                "entry_hash": e["entry_hash"],
+                "event": e["payload"]["event"],
+                "action": e["payload"].get("action"),
+                "actor": e["payload"].get("actor"),
+                "created_at": e["payload"].get("created_at"),
+            }
+            for e in reversed(entries)
+            if e["payload"].get("type") == "healing"
+        ]
+        return {
+            "events": events,
+            "decisions_on_chain": sum(1 for e in entries if e["payload"].get("type") != "healing"),
+            "chain": get(f"{url}/audit/verify", key),
+        }
+
+    HEAL = {1: heal1, 2: heal2, 3: heal3, 4: heal4, 5: heal5}
+
+    @router.get("/healing/status")
+    def healing_status() -> dict:
+        run = heal["run"]
+        return {
+            "gateway": _alive(f"{gateway_url}/health"),
+            "run": None if run is None else {"tenant_id": run.tenant_id, "done": sorted(run.done)},
+        }
 
     return router

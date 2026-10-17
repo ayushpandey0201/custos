@@ -246,6 +246,15 @@ the worst wait is about limit × per-write time (Little's law). At 16, the 200 r
 69 ms; at 8 it was 28 ms (`results-after-admission.json` is the 16 run). This is a capacity
 setting: it changes how many requests wait, never what a verdict is.
 
+**Re-measured after self-healing (October).** Self-healing adds one lookup to every request —
+which inputs, if any, a person has quarantined. It runs concurrently with the engines and is
+answered from the in-process cache without a thread hop. First version (always a thread hop):
+p99 37 ms at 200 req/s. With the cache fast path: **31 ms** at 200 req/s, 25 ms at 100 req/s,
+budget still held. Raw: `results-after-healing.json`. The harness's provisioning also changed:
+the baseline's own rows no longer count as live traffic (ADR 0006), so it now feeds a 200-request
+live window before the first recompute — otherwise drift stays degraded and the harness, rightly,
+refuses to report.
+
 **What is still wrong.** At 400 req/s and above, p99 is still 12–43 s. The handler itself is
 fast (p99 57–63 ms), and the wait is *before* it: one Python process saturates at roughly
 300 req/s of total work, admitted plus shed, and requests queue in the socket where no in-app
