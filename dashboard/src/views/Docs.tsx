@@ -89,7 +89,8 @@ const SECTIONS: Section[] = [
           </tbody>
         </table>
         <p>
-          The fastest way to understand the system is the <a href="#/demo">live demo</a>: seven guided
+          The fastest way to understand the system is the <a href="#/demo">live demos</a> — lending, self-healing,
+          and an AI refund agent in a second domain. The first has seven guided
           steps, about four minutes, each with instructions on screen.
         </p>
       </>
@@ -450,7 +451,7 @@ export function Docs() {
 
   return (
     <div className="docs">
-      <aside className="docs-nav">
+      <aside className="docs-nav" data-tour="docs-nav">
         <div className="docs-nav-title">Documentation</div>
         {SECTIONS.map((s) => (
           <button

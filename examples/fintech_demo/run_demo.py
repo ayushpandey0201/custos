@@ -133,7 +133,13 @@ def main() -> int:
     args = parse_args()
 
     # A fresh database each run, so the demo always tells the same story.
-    db_path = ROOT / "custos-demo.db"
+    #
+    # The terminal walkthrough gets its own file. It used to share
+    # custos-demo.db with `--serve`, which ./app.sh runs — so running the
+    # walkthrough while the dashboard was up deleted the database out from
+    # under the live servers, and every dashboard step then failed with
+    # "attempt to write a readonly database" until a restart.
+    db_path = ROOT / ("custos-demo.db" if args.serve else "custos-demo-cli.db")
     db_path.unlink(missing_ok=True)
 
     import logging
