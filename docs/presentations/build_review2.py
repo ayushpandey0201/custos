@@ -224,6 +224,13 @@ def fill_all() -> None:
             bullet("Next: risk-ranked review · a second dataset · scale-out on PostgreSQL.",
                    1600, space_before=120),
             bullet("Now: a live demo — three scenarios, two domains.", 1600, space_before=120),
+            # The line the deck ends on, and the two lines that carry it.
+            plain("Models decide. Custos makes sure they still deserve to.", 2600,
+                  bold=True, align="ctr", space_before=600),
+            plain("“A model that is running is not a model that can be trusted.", 1600,
+                  italic=True, align="ctr", space_before=300),
+            plain("Custos checks the difference — every decision, every time.”", 1600,
+                  italic=True, align="ctr", space_before=0),
         ],
     )
 
@@ -234,7 +241,7 @@ def fill_all() -> None:
 TABLE_SLIDES = {
     "slide6.xml": (c2.REQUIREMENTS_SHORT, 2.30, 14.0),
     "slide8.xml": (c2.STATUS_SHORT, 2.30, 14.0),
-    "slide9.xml": (c2.CONTRIBUTIONS_SHORT, 3.60, 13.0),
+    "slide9.xml": (c2.CONTRIBUTIONS_SHORT, 4.6, 13.0),
 }
 
 FIGURE_SLIDES = {

@@ -119,7 +119,16 @@ beat random review?" *(Let them guess.)*
 ## Slide 15 — Conclusion and Work Plan
 > **Custos gates any model-driven action — it decides, explains, records and
 > heals.** Next: risk-ranked review, a second dataset, and scaling out. The team
-> split is on the slide. And now — the demo.
+> split is on the slide.
+>
+> *Pause, then read the big line — slowly:*
+> **"Models decide. Custos makes sure they still deserve to."**
+>
+> *If you want to land it harder, add the quote beneath it:* "A model that is
+> running is not a model that can be trusted. Custos checks the difference —
+> every decision, every time."
+>
+> And now — the demo.
 
 🎯 *During demo 2 (self-healing), step 2:* turn to the reviewer — "Ma'am / Sir,
 would you like to approve this repair?" Let them type their name in "Approving
