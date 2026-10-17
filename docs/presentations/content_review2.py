@@ -295,3 +295,56 @@ def contributions(test_count: int):
         for name, usn, text in rows
     ]
     return headers, updated, cols
+
+
+# --- Short deck (15 slides) ---------------------------------------------------
+# One line per cell. The detail lives on the dashboard's "Inside Custos" page
+# and in the detailed deck (build_review2_detailed.py).
+
+# Six of the eight verified papers: the two dropped (Lu et al. 2019, Breck et
+# al. 2019) make points the remaining drift and deployment papers already make.
+LITERATURE_SHORT = [
+    row
+    for row in LITERATURE
+    if not row[0].startswith(("Learning under Concept Drift", "Data Validation for Machine Learning"))
+]
+
+REQUIREMENTS_SHORT = (
+    ["Functional", "Non-functional"],
+    [
+        ["Register models and a reference baseline", "p99 decision latency ≤ 50 ms"],
+        ["Per-input drift: PSI and KS", "A Custos failure never fails the caller"],
+        ["Policy rules that can veto", "Overload is refused, never queued"],
+        ["Per-request risk: unusual amount, bursts", "Every query scoped by tenant"],
+        ["ALLOW / REVIEW / BLOCK, with reasons", "Keys hashed; rules parsed, never eval'd"],
+        ["Tamper-evident audit, with verification", "A new signal is a new file, not a refactor"],
+        ["Self-healing, applied only on human approval", "Python · FastAPI · PostgreSQL · Redis · React"],
+    ],
+    [0.5, 0.5],
+)
+
+STATUS_SHORT = (
+    ["Component", "What was built", "Status"],
+    [
+        ["Drift engine", "PSI · KS · offline worker · cached hot-path read", "Complete"],
+        ["Policy engine", "Rule grammar and parser · veto", "Complete"],
+        ["Risk engine", "Amount anomaly · per-customer velocity", "Complete · new"],
+        ["Gateway", "Fan-out · fusion · 8-rule cascade · admission control", "Complete"],
+        ["Audit chain", "SHA-256 hash chain · verify · export", "Complete"],
+        ["Self-healing", "Diagnose · shadow test · human approval · verify", "Complete · new"],
+        ["SDK + dashboard", "Python SDK · 3 live demos · console · page guides", "Complete"],
+        ["Field study", "Pre-registered · 589,186 Lending Club loans", "Complete · new"],
+        ["Versioning + retraining", "Model / data versions · retrain request", "Final review"],
+    ],
+    [0.24, 0.56, 0.20],
+)
+
+CONTRIBUTIONS_SHORT = (
+    ["Team member", "USN", "Modules owned (Review-1)"],
+    [
+        ["AYUSH PANDEY", "1BM23AD074", "Architecture · drift engine · trust fusion and decision logic"],
+        ["VIVEK BOORA", "1BM23AD073", "Gateway and control plane · policy engine · audit chain"],
+        ["NITIN", "1BM24AD404", "Python SDK · operator dashboard · demo · test suite"],
+    ],
+    [0.20, 0.16, 0.64],
+)

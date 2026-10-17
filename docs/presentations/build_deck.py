@@ -678,13 +678,15 @@ def finish(path: Path) -> None:
                 header_run.font.bold = True
 
     # -- generated tables --
-    for slide_file, (spec, top_in) in TABLE_SLIDES.items():
+    # An optional third element sets the font size; otherwise dense tables
+    # get 9.5 pt and the rest 11 pt.
+    for slide_file, (spec, top_in, *font) in TABLE_SLIDES.items():
         rows = len(spec[1])
         add_table(
             prs.slides[ORDER.index(slide_file)],
             spec,
             top_in,
-            font_pt=9.5 if rows >= 10 else 11.0,
+            font_pt=font[0] if font else (9.5 if rows >= 10 else 11.0),
         )
 
     # -- figures, centred on their own width --
