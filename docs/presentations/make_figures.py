@@ -153,10 +153,10 @@ def architecture(width_in: float = 11.0, height_in: float = 3.4) -> Path:
 
 # Values produced by an actual `python -m examples.fintech_demo.run_demo`.
 DEMO_FEATURES = [
-    ("utilisation", 0.500, "significant"),
-    ("income", 0.350, "significant"),
-    ("months_employed", 0.162, "moderate"),
-    ("bureau_score", 0.010, "stable"),
+    ("utilisation", 1.696, "significant"),
+    ("income", 1.218, "significant"),
+    ("months_employed", 0.588, "significant"),
+    ("bureau_score", 0.037, "stable"),
 ]
 BAND_COLOUR = {"stable": ALLOW, "moderate": REVIEW, "significant": BLOCK}
 
@@ -175,14 +175,14 @@ def drift_chart(width_in: float = 11.0, height_in: float = 3.15) -> Path:
     d.text((60, 40), "Per-feature PSI after the population shift", font=f_title, fill=INK)
     d.text(
         (60, 105),
-        "model severity 0.021 → 0.830   ·   verdict ALLOW → REVIEW",
+        "model severity 0.184 → 0.912   ·   verdict ALLOW → REVIEW",
         font=f_tiny,
         fill=MUTED,
     )
 
     left, right = 700, W - 420
     top, row_h = 210, 175
-    x_max = 0.55  # a little past the 0.50 saturation point
+    x_max = 1.85  # a little past the largest PSI in the run
 
     def x_of(psi: float) -> float:
         return left + (psi / x_max) * (right - left)
@@ -191,7 +191,9 @@ def drift_chart(width_in: float = 11.0, height_in: float = 3.15) -> Path:
     # rather than running to the floor — a rule extending past the data reads
     # as an axis the chart does not have.
     guide_bottom = top + row_h * (len(DEMO_FEATURES) - 1) + 96
-    for threshold, label in ((0.10, "0.10  stable"), (0.25, "0.25  significant")):
+    # The two thresholds sit close together at this scale; short labels keep
+    # them from colliding.
+    for threshold, label in ((0.10, "0.10"), (0.25, "0.25 significant")):
         x = x_of(threshold)
         d.line([(x, top - 30), (x, guide_bottom)], fill=LINE, width=3)
         d.text((x + 12, top - 62), label, font=f_tiny, fill=MUTED)
@@ -626,28 +628,29 @@ def gating_results(width_in: float = 11.0, height_in: float = 3.3) -> Path:
 # ---------------------------------------------------- governed self-healing
 
 HEALING_STAGES = [
-    # label, detail, status
-    ("Detect", "drift worker, PSI + KS", "built"),
-    ("Diagnose", "per-input drift scores", "partial"),
-    ("Propose fix", "retrain · roll back · quarantine", "next"),
-    ("Shadow test", "fix runs beside production", "next"),
-    ("Human approves", "REVIEW verdict; no queue yet", "partial"),
-    ("Apply", "promote the fix", "next"),
-    ("Verify + audit", "chain covers decisions today", "partial"),
+    # label, detail
+    ("Detect", "on every drift recompute"),
+    ("Diagnose", "stuck · missing · shift"),
+    ("Propose fix", "quarantine · rebaseline · retrain"),
+    ("Shadow test", "replays ≤ 500 real decisions"),
+    ("Human approves", "named; failed tests refused"),
+    ("Apply", "effective next request"),
+    ("Verify + audit", "fresh traffic; hash-chained"),
 ]
-HEALING_COLOUR = {"built": ALLOW, "partial": REVIEW, "next": ACCENT}
-HEALING_TAG = {"built": "built", "partial": "partly built", "next": "next phase"}
 
-DOMAINS = ["credit scoring", "fraud detection", "insurance claims", "medical triage",
-           "AI agents making payments"]
+# From a real run of the self-healing demo (dashboard → Self-healing), seeds fixed.
+HEALING_RUN = [
+    ("Feed dies", "200 of 200 still allowed"),
+    ("Diagnosed", "credit score stuck at 720"),
+    ("Shadow test", "351 of 401 would be held"),
+    ("Approved", "next applicant held"),
+    ("Fixed + verified", "release frees 201"),
+    ("Released", "ALLOW again · chain verifies"),
+]
 
 
-def self_healing_loop(width_in: float = 11.0, height_in: float = 2.35) -> Path:
-    """The roadmap: Custos's existing pieces arranged into a governed repair loop.
-
-    Status is drawn on every stage so the slide cannot overclaim: green is in the
-    repository today, amber is partial, blue is the next phase.
-    """
+def self_healing_loop(width_in: float = 11.0, height_in: float = 2.2) -> Path:
+    """Governed self-healing as built, and what one real run of it produced."""
     W, H = int(width_in * SCALE), int(height_in * SCALE)
     img = Image.new("RGB", (W, H), WHITE)
     d = ImageDraw.Draw(img)
@@ -656,50 +659,48 @@ def self_healing_loop(width_in: float = 11.0, height_in: float = 2.35) -> Path:
     f_box = font(27, bold=True)
     f_detail = font(20)
     f_tag = font(19, bold=True)
+    f_step = font(21, bold=True)
 
-    d.text((60, 28), "Next: governed self-healing — every repair needs a human and leaves evidence",
+    d.text((60, 28),
+           "Governed self-healing — built: every repair needs a human and leaves evidence",
            font=f_title, fill=INK)
 
     n = len(HEALING_STAGES)
     left, gap = 60, 34
     box_w = (W - 2 * left - gap * (n - 1)) // n
-    top, box_h = 130, 230
-    for i, (label, detail, status) in enumerate(HEALING_STAGES):
+    top, box_h = 120, 210
+    for i, (label, detail) in enumerate(HEALING_STAGES):
         x0 = left + i * (box_w + gap)
-        colour = HEALING_COLOUR[status]
         human = label == "Human approves"
-        box(d, (x0, top, x0 + box_w, top + box_h), fill=PANEL if not human else (255, 248, 230),
-            outline=colour, width=6 if human else 4)
-        centred(d, label, x0 + box_w // 2, top + 62, f_box, INK)
-        centred(d, detail, x0 + box_w // 2, top + 112, f_detail, MUTED)
-        tag = HEALING_TAG[status]
-        tw = d.textbbox((0, 0), tag, font=f_tag)[2] + 30
+        box(d, (x0, top, x0 + box_w, top + box_h), fill=(255, 248, 230) if human else PANEL,
+            outline=REVIEW if human else ALLOW, width=6 if human else 4)
+        centred(d, label, x0 + box_w // 2, top + 58, f_box, INK)
+        centred(d, detail, x0 + box_w // 2, top + 106, f_detail, MUTED)
         cx = x0 + box_w // 2
-        d.rounded_rectangle([(cx - tw // 2, top + 160), (cx + tw // 2, top + 200)],
-                            radius=18, fill=colour)
-        centred(d, tag, cx, top + 180, f_tag, WHITE)
+        tw = d.textbbox((0, 0), "built", font=f_tag)[2] + 30
+        d.rounded_rectangle([(cx - tw // 2, top + 145), (cx + tw // 2, top + 183)],
+                            radius=18, fill=ALLOW)
+        centred(d, "built", cx, top + 164, f_tag, WHITE)
         if i < n - 1:
             arrow(d, (x0 + box_w + 4, top + box_h // 2), (x0 + box_w + gap - 4, top + box_h // 2),
                   MUTED, width=4, head=12)
 
-    y = top + box_h + 52
-    d.text((60, y),
-           "Domain-agnostic: every decision is just a model, an action, inputs and context.",
-           font=f_sub, fill=INK)
-    x = 60
-    y2 = y + 50
-    for domain in DOMAINS:
-        tw = d.textbbox((0, 0), domain, font=f_detail)[2] + 36
-        d.rounded_rectangle([(x, y2), (x + tw, y2 + 44)], radius=22, outline=LINE, width=3,
-                            fill=WHITE)
-        centred(d, domain, x + tw // 2, y2 + 22, f_detail, INK)
-        x += tw + 16
-    d.text((x + 10, y2 + 8), "← lending is our test case, not the product",
-           font=f_detail, fill=MUTED)
+    y = top + box_h + 46
+    d.text((60, y), "One real run — a credit-score feed breaks:", font=f_sub, fill=INK)
+    m = len(HEALING_RUN)
+    chip_gap = 22
+    chip_w = (W - 2 * left - chip_gap * (m - 1)) // m
+    cy0 = y + 48
+    for i, (head, body) in enumerate(HEALING_RUN):
+        x0 = left + i * (chip_w + chip_gap)
+        d.rounded_rectangle([(x0, cy0), (x0 + chip_w, cy0 + 96)], radius=16, outline=LINE,
+                            width=3, fill=WHITE)
+        d.text((x0 + 18, cy0 + 12), f"{i + 1}  {head}", font=f_step, fill=ACCENT)
+        d.text((x0 + 18, cy0 + 52), body, font=f_detail, fill=INK)
 
     d.text((60, H - 62),
-           "Rauba et al. (NeurIPS 2024) propose autonomous self-healing. Our design adds a human "
-           "checkpoint and a tamper-evident record of every repair.",
+           "Rauba et al. (NeurIPS 2024) heal models autonomously. Custos repairs only its own "
+           "gating, never without a named approver, and records every step.",
            font=f_sub, fill=MUTED)
 
     path = OUT / "self_healing_loop.png"
@@ -832,13 +833,14 @@ def decision_flow(width_in: float = 11.0, height_in: float = 2.75) -> Path:
         (["trust < 0.30?"], "block threshold", BLOCK, "BLOCK"),
         (["model", "unregistered?"], "ADR 0005", REVIEW, "REVIEW"),
         (["all engines", "degraded?"], "no signal at all", REVIEW, "REVIEW"),
+        (["input", "quarantined?"], "approved hold", REVIEW, "REVIEW"),
         (["drift band", "significant?"], "drift floor", REVIEW, "REVIEW"),
         (["trust < 0.60?"], "review threshold", REVIEW, "REVIEW"),
     ]
 
     # Widths chosen so the trailing ALLOW terminal still lands inside the
-    # canvas: 70 + 5*(box_w + gap) + box_w + gap + 250 must stay under 3300.
-    x0, box_w, gap = 70, 420, 60
+    # canvas: 70 + 6*(box_w + gap) + box_w + gap + 250 must stay under 3300.
+    x0, box_w, gap = 70, 365, 55
     cy, cond_h = 230, 190
     verdict_y = 570
 
@@ -880,8 +882,8 @@ def decision_flow(width_in: float = 11.0, height_in: float = 2.75) -> Path:
 
     centred(
         d,
-        "Evaluated left to right; the order is the specification. The drift floor keeps a "
-        "significantly drifted model out of ALLOW however clean the other signals are.",
+        "Evaluated left to right; the order is the specification. A quarantine (approved by a "
+        "person) and the drift floor both keep a model out of ALLOW however clean the signals are.",
         W // 2,
         H - 55,
         f_small,
@@ -1194,9 +1196,9 @@ def demo_trajectory(width_in: float = 11.0, height_in: float = 3.4) -> Path:
 
     acts = [
         ("Act 1", "unregistered", 1.00, "REVIEW", REVIEW),
-        ("Act 2", "healthy traffic", 0.99, "ALLOW", ALLOW),
-        ("Act 3", "population shifts", None, "drift 0.02 -> 0.83", BLOCK),
-        ("Act 4", "same input, same code", 0.58, "REVIEW", REVIEW),
+        ("Act 2", "healthy traffic", 0.91, "ALLOW", ALLOW),
+        ("Act 3", "population shifts", None, "drift 0.18 -> 0.91", BLOCK),
+        ("Act 4", "same input, same code", 0.54, "REVIEW", REVIEW),
         ("Act 5", "policy veto", 0.00, "BLOCK", BLOCK),
     ]
 

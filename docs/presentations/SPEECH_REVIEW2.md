@@ -21,14 +21,15 @@ Every one of these is measured, and the source is in the repo.
 
 | What | Review-1 | Review-2 | Source |
 |---|---|---|---|
-| Tests passing | 274 | **342** | `pytest` |
+| Tests passing | 274 | **392** | `pytest` |
 | Load the 50 ms budget holds to | 100 req/s | **200 req/s** | `benchmarks/results-*.json` |
 | p99 latency at 100 req/s | 49 ms | **9 ms** | same |
-| p99 latency at 200 req/s | 94 ms ❌ | **28 ms** ✅ | same |
+| p99 latency at 200 req/s | 94 ms ❌ | **28 ms** ✅ (31 ms with self-healing's check) | same |
 | Verdicts flipped ALLOW→REVIEW under overload | up to **985 per run** | **0** | same |
 | Requests served at 400 req/s offered | 74/s | **204/s** | same |
 | Live trust signals | 2 of 3 (risk was a stub) | **3 of 3** | `engines/risk/engine.py` |
-| Demo Act 4 trust | 0.48 | **0.58** — still REVIEW, now held by the drift floor | `run_demo` |
+| Demo Act 4 trust | 0.48 | **0.54** — still REVIEW, now held by the drift floor | `run_demo` |
+| Self-healing demo | not built | feed dies → **200 of 200 still allowed** → diagnosed → shadow test: **351 of 401** would be held → approved → fixed → released | dashboard → Self-healing |
 | Lending Club study (589,186 real loans) | not run | **drift gating 126 vs random 140** per 1,000 reviews — worse than random | `experiments/gating/RESULTS_v1.md` |
 
 **The honest limits, also by heart:** at 400 req/s and above the budget is still
@@ -254,11 +255,15 @@ The hot path just *reads* the answer the worker prepared.
 2. Trust below 0.30 → **BLOCK**
 3. Model not registered → **REVIEW**
 4. Every engine has no answer → **REVIEW**
-5. **NEW — drift in the significant band → REVIEW**
-6. Trust below 0.60 → **REVIEW**
-7. Otherwise → **ALLOW**
+5. **NEW — an input is quarantined (a person approved a hold) → REVIEW**
+6. **NEW — drift in the significant band → REVIEW**
+7. Trust below 0.60 → **REVIEW**
+8. Otherwise → **ALLOW**
 
-### Why rule 5 exists — tell this story, it shows real engineering
+Rule 5 is the only rule a *person* switches on — it comes from self-healing
+(slide 22). Say: *"Rule 5 is where a human's approved repair enters the cascade."*
+
+### Why rule 6 exists — tell this story, it shows real engineering
 > When we made the risk engine live, we checked the maths — and found we'd broken
 > something.
 >
@@ -281,9 +286,9 @@ The hot path just *reads* the answer the worker prepared.
 
 ## Slide 13 — Implementation: Status
 
-> Ten of twelve components complete. The new ones are marked: the risk engine,
-> admission control, and the hardened replay harness. The Lending Club run is in
-> progress; versioning is for the final review.
+> Thirteen of fourteen components complete. The new ones are marked: the risk
+> engine, admission control, the Lending Club study and governed self-healing.
+> Versioning is for the final review.
 
 ---
 
@@ -380,14 +385,17 @@ serious part — **its answers changed**. Checks timed out, were dropped, and ab
 | Act | What happens | Verdict |
 |---|---|---|
 | 1 | A model nobody registered asks to disburse money | REVIEW — we don't guess |
-| 2 | Registered, baseline captured, healthy traffic | ALLOW — trust 0.99 |
-| 3 | Incomes fall, borrowing rises | drift 0.02 → 0.83 |
-| 4 | Same application, same code | **REVIEW — trust 0.58** |
+| 2 | Registered, baseline captured, healthy traffic | ALLOW — trust 0.91 |
+| 3 | Incomes fall, borrowing rises | drift 0.18 → 0.91 |
+| 4 | Same application, same code | **REVIEW — trust 0.54** |
 | 5 | Policy veto on a large disbursement | BLOCK, then tampering caught |
 
-### Why Act 4 changed from 0.48 to 0.58
-> Risk is now live and says the loan amount is normal, which adds a little trust.
-> The verdict is still REVIEW — and now the reason is the drift floor, stated in
+### Why the numbers differ from Review-1
+> Two reasons. Risk is now live and says the loan amount is normal, which adds a
+> little trust. And while building self-healing our tests caught that the drift
+> window was counting the baseline's own rows as live traffic — healthy drift
+> read 0.02 because the baseline was partly compared with itself; the honest
+> figure is 0.18, still "stable". The verdict is still REVIEW — and now the reason is the drift floor, stated in
 > plain words: *"model drift is in the significant band; a model this far from its
 > baseline is not auto-approved regardless of other signals."*
 
@@ -401,7 +409,8 @@ serious part — **its answers changed**. Checks timed out, were dropped, and ab
 ## Slide 17 — Results: Drift Attribution
 
 > One number tells you *something* moved. This tells you *what* moved:
-> utilisation most, then income — and credit score didn't move, and isn't blamed.
+> utilisation most (PSI 1.70), then income (1.22) — and credit score (0.04) didn't
+> move, and isn't blamed.
 >
 > **If everything moved, the world changed. If one thing moved, your data feed
 > probably broke. Those need opposite responses — this breakdown tells them
@@ -520,7 +529,7 @@ useless.
 
 ## Slide 21 — Engineering Rigour: Problems We Found in Our Own System ⭐
 
-### The six
+### The seven
 | # | Found by | Problem | Status |
 |---|---|---|---|
 | 1 | Load test (R1) | Our 0.5 ms figure measured the wrong timer — real was 49 ms | Fixed: now 9 ms at the same load |
@@ -529,58 +538,67 @@ useless.
 | 4 | Unit test (R2) | Replay tool sorted dates as text | Fixed + regression test |
 | 5 | Fusion maths (R2) | Live risk let a drifted model reach ALLOW | Fixed: explicit drift-floor rule |
 | 6 | **Pre-registered study (R2)** | **Drift gating worse than random on real loans** | **Not yet fixed — gating to be rebuilt** |
+| 7 | Self-healing tests (R2+) | Drift window scored the baseline's own rows as live traffic (healthy drift read 0.02; honestly 0.18) | Fixed + regression test |
 
 ### What to say
-> **Six problems, all found by our own tooling, none visible to a test that sends
-> one request at a time.** Five are fixed. The sixth is the largest — and it's the
-> one that sets our plan for the final review.
+> **Seven problems, all found by our own tooling, none visible to a test that sends
+> one request at a time.** Six are fixed. The study result is the largest — and
+> it's the one that sets our plan for the final review.
 
 ---
 
-## Slide 22 — Next Phase: From Gating to Governed Self-Healing ⭐
+## Slide 22 — Governed Self-Healing: Built ⭐⭐
 
-### Why this slide exists
-So nobody leaves thinking Custos is a "lending bot". The lending bot is a
-674-line demo in `examples/`. The core (about 4,400 lines) has no lending logic
-at all: every request is just a model, an action, inputs and context. Lending is
-our **test case** because it is the one domain with public, real outcome data
-to test against honestly.
+### Why this slide matters
+It answers two things at once. **Custos is not a lending bot**: the core has no
+lending logic — a request is a model, an action, inputs and context — and
+lending is our test case because it has public, real outcome data. And **the
+self-healing MLOps we promised is built and running**, not a roadmap.
 
-### Reading the figure — colours are honesty, not decoration
-| Stage | Status | What is actually there today |
-|---|---|---|
-| Detect | **green, built** | Drift worker: PSI + KS per input, offline |
-| Diagnose | amber, partly | Per-input drift scores say *which input moved*; telling a broken feed from a real shift is not built |
-| Propose fix | blue, next | Retrain on a recent window, roll back, or quarantine one input |
-| Shadow test | blue, next | The fix runs beside production without acting |
-| Human approves | amber, partly | Custos returns REVIEW today; an approval queue is not built |
-| Apply | blue, next | Promote the fix |
-| Verify + audit | amber, partly | The hash chain covers decisions today; repairs will go on it too |
+### The loop, top row — all seven stages are built
+| Stage | What it does |
+|---|---|
+| Detect | Runs on every drift recompute |
+| Diagnose | **Broken feed** (an input stuck on one value in ≥ 90% of recent requests, or missing in ≥ 50%) vs **population shift** |
+| Propose | Broken feed → **quarantine** the input. Shift → **re-baseline** (undoable) or a **retrain request** to the owner |
+| Shadow test | Replays up to 500 of the model's real recorded decisions through the real decision logic with the repair applied |
+| Human approves | A **named** person. A repair that failed its shadow test cannot be approved |
+| Apply | Effective on the next request |
+| Verify + audit | Checked only on traffic that arrived *after* the repair; every step on the hash chain |
 
-**Do not say self-healing is built. It isn't.** One stage is built and three
-are partly there. Say "the next phase", and point at the colours.
+### The bottom row — one real run, numbers from the live system
+1. The credit-score feed dies; **200 of 200 applications are still allowed** — the model keeps working on garbage.
+2. Custos diagnoses it: credit score stuck at 720 in 100% of requests.
+3. Shadow test: **351 of the last 401 decisions** would have been held. (Careful — that's *recent* decisions, healthy ones included, not "351 made on the dead feed".)
+4. A named person approves; the next applicant is held, with the input and incident named in the reason.
+5. The feed is fixed; Custos verifies it on fresh traffic and proposes a release — freeing 201 held decisions.
+6. Released by a person: ALLOW again, and the audit chain verifies.
 
 ### What to say
-> One thing we want to be clear about: **Custos is not a lending product.** It's
-> domain-agnostic MLOps infrastructure — it gates any model whose output triggers
-> an action: credit, fraud, insurance claims, triage, or an AI agent that spends
-> money. We test on lending because that's where real outcome data exists to test
-> honestly.
+> Custos is domain-agnostic MLOps infrastructure: it gates any model whose
+> output triggers an action. Our field study told us drift is a poor per-decision
+> gate but a strong alarm — so Custos now **acts on the alarm**.
 >
-> And the field study told us something useful: drift is a poor *per-decision*
-> gate, but a good *alarm*. So the next phase turns that alarm into a repair loop —
-> **governed self-healing**. Detect, diagnose, propose a fix, test it in shadow,
-> and apply it **only with human approval**, with every repair on the same
-> tamper-evident chain as every decision.
+> The hard part is diagnosis. A credit-score feed stuck at one value and a real
+> recession both look like "drift" — but they need opposite repairs. So Custos
+> tells them apart, proposes a repair it can actually make, tests it on real
+> decisions, and applies it **only when a named person approves**.
 >
-> The colours are honest: green is in the repository today, amber is partly
-> there, blue is what we build next. Rauba et al. at NeurIPS 2024 propose
-> autonomous self-healing; what we add is the human checkpoint and the evidence.
+> It also knows what *not* to do. It will never re-learn "normal" from a broken
+> feed, and it never claims to retrain a model it doesn't own — that's a recorded
+> request to the owner.
+>
+> Rauba et al. at NeurIPS 2024 heal models autonomously. We add the human
+> checkpoint and the evidence.
 
-### If they ask "what will you show at the final review?"
-> The first working piece: Custos notices one input has gone dead — a broken data
-> feed — and proposes rolling back, tested in shadow, waiting for a person to
-> approve it, with the whole thing on the audit chain.
+### Show it live (about 3 minutes)
+Dashboard → **Self-healing** → five buttons. Type your name before steps 2 and 4.
+
+### If they push
+- **"So it's autonomous?"** No — by design. It proposes and tests; a person approves.
+- **"What can't it detect?"** A feed that's wrong but still varies — a unit change, an offset. That reads as a population shift; the reviewer sees the per-input evidence. It's in our limitations.
+- **"How do you know who approved?"** The name is on the hash chain and can't be changed afterwards. It isn't authenticated yet — Custos has company keys, not user accounts. Per-user sign-in is on the work plan.
+- **"Does it slow the hot path?"** One cached lookup per request: p99 at 200 req/s went from 28 to 31 ms, budget 50.
 
 ---
 
@@ -589,18 +607,17 @@ are partly there. Say "the next phase", and point at the colours.
 > First, rebuild the gating around what the data says works: review queues ranked
 > by the model's own risk, with drift kept as a monitoring signal. Second,
 > replicate the study on a second credit dataset — one dataset can't support a
-> general claim. Then the first two steps of self-healing: catching a broken data
-> feed and proposing a rollback in shadow, then the human approval queue with
-> every repair on the audit chain. Then scaling out to multiple gateway workers,
-> measuring on Postgres, and the final report.
+> general claim. Then extending self-healing: more fault signatures — a unit
+> change, a partial outage — and per-user sign-in for approvers. Then scaling out
+> to multiple gateway workers, measuring on Postgres, and the final report.
 
 ---
 
 ## Slide 24 — Conclusion
 
-> **342 tests passing. The latency budget holds to 200 requests a second, double
+> **392 tests passing. The latency budget holds to 200 requests a second, double
 > Review-1. Overload no longer changes our verdicts. All three trust signals are
-> live.**
+> live. And governed self-healing is built.**
 >
 > **And the hardest result: on 589,186 real loans, gating on drift did worse than
 > random review. We pre-registered it, reported it as measured, and it now decides
@@ -642,9 +659,9 @@ are partly there. Say "the next phase", and point at the colours.
 > same rule as drift applies: we won't tune them on the data we evaluate them on.
 > Per-tenant overrides are the obvious next step.
 
-**"Doesn't risk lower your Act 4 margin — 0.58 is close to 0.60?"**
+**"Doesn't risk lower your Act 4 margin — 0.54 is close to 0.60?"**
 > Yes, and that's exactly why we added the drift floor. Act 4's REVIEW no longer
-> depends on 0.58 being below 0.60 — it's held by an explicit rule that a
+> depends on 0.54 being below 0.60 — it's held by an explicit rule that a
 > significantly drifted model is never auto-approved.
 
 **"Is the risk engine's memory shared between servers?"**
@@ -680,7 +697,7 @@ are partly there. Say "the next phase", and point at the colours.
 > repair happens *after* degradation, and it acts on the model. While the model is
 > unreliable, decisions are still being made — Custos is what protects those, and
 > it leaves the decision to fix the model with a human, with evidence. That's
-> exactly our next phase on slide 22: governed self-healing.
+> exactly what slide 22 shows: governed self-healing, built.
 
 **"Isn't this just a lending bot?"**
 > No. The lending bot is a small demo in `examples/`. The core has no lending
@@ -690,8 +707,9 @@ are partly there. Say "the next phase", and point at the colours.
 
 **"Is this MLOps?"**
 > Yes — the runtime half of it: monitoring, governance and control of models in
-> production. Training pipelines are the other half; our next phase connects to
-> them through governed repair.
+> production — and now governed repair: it diagnoses broken feeds and population
+> shifts and applies tested repairs once a person approves. Retraining stays with
+> the model's owner; Custos records the request with the evidence.
 
 **"Is the 400+ req/s latency a failure?"**
 > It's a known limit of one process, and we say so on the slide. The improvement
@@ -709,7 +727,7 @@ are partly there. Say "the next phase", and point at the colours.
       21 and 23 — the tables. Google Slides resizes to 10×5.6 in, which squeezed the
       tables last time.
 - [ ] **Contributions table (slide 24):** it shows Review-1 ownership. The new
-      work — risk engine, admission control, the field study — isn't assigned to
+      work — risk engine, admission control, the field study, self-healing — isn't assigned to
       anyone, because who did what is yours to state. Add it if you want credit
       attributed.
 - [ ] `./app.sh` the morning of, so the demo is warm. The API key is in
@@ -717,5 +735,7 @@ are partly there. Say "the next phase", and point at the colours.
 - [ ] **For the live demo, open http://localhost:5173 → “Live demo”.** Check the
       light is green, then click through the seven steps. Every step tells you
       what to click, what to say and what to point at — no key to paste.
+- [ ] **For self-healing (slide 22), open “Self-healing”** and click through the
+      five steps. Type your name in “Approving as” before steps 2 and 4.
 - [ ] Do one full practice run tonight. Use “Run the demo again” at the end to
       reset; each run starts from a clean slate.

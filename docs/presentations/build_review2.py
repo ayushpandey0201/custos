@@ -86,7 +86,7 @@ def fill_all() -> None:
             bullet("System design — architecture and decision logic", 1700),
             bullet("Implementation — new: risk engine and admission control", 1700),
             bullet("Results and validation", 1700),
-            bullet("Engineering rigour, next phase (self-healing), work plan, conclusion", 1700),
+            bullet("Engineering rigour, governed self-healing, work plan, conclusion", 1700),
         ],
     )
 
@@ -174,8 +174,8 @@ def fill_all() -> None:
             bullet("O5  Stay correct under overload — refuse, never queue or change answers  (new)", 1300, space_before=80),
             plain("Scope", 1600, bold=True, space_before=260),
             bullet(
-                "Custos does not train, serve or retrain models. It decides and records; "
-                "humans act.",
+                "Custos does not train, serve or retrain models. It decides, records and "
+                "proposes repairs to its own gating; humans approve.",
                 1300, space_before=120,
             ),
             plain("SDGs", 1600, bold=True, space_before=260),
@@ -385,23 +385,23 @@ def fill_all() -> None:
         [heading("Engineering Rigour — Problems We Found in Our Own System")],
         [
             plain(
-                "Six problems, found by our own tooling. The last is the largest: real data "
-                "contradicted the assumption the gating was built on.",
+                "Seven problems, found by our own tooling. The largest: real data contradicted "
+                "the assumption the gating was built on.",
                 1300, space_before=0,
             ),
         ],
     )
 
-    # ------------------------------------------ 22 next phase: self-healing
+    # ------------------------------------------------- 22 self-healing
     bd.write_slide(
         "slide24.xml",
-        [heading("Next Phase — From Gating to Governed Self-Healing")],
+        [heading("Governed Self-Healing — Built")],
         [
             plain(
-                "Custos is domain-agnostic MLOps infrastructure: it gates any model whose output "
-                "triggers an action. Our field study showed drift is a poor per-decision gate but "
-                "a strong alarm — so next it triggers a repair, tested in shadow and applied only "
-                "with human approval.",
+                "Drift is a poor per-decision gate but a strong alarm, so Custos now acts on it: "
+                "it tells a broken data feed from a real population shift, proposes a repair, "
+                "shadow-tests it on real decisions, and applies it only when a named person "
+                "approves. Domain-agnostic — any model whose output triggers an action.",
                 1300, space_before=0,
             ),
         ],
@@ -421,7 +421,8 @@ def fill_all() -> None:
         [
             plain(
                 f"{TESTS} tests passing · latency budget holds to 200 req/s, double Review-1 · "
-                "overload no longer changes verdicts · all three trust signals live.",
+                "overload no longer changes verdicts · all three trust signals live · "
+                "governed self-healing built.",
                 1400, bold=True, space_before=0,
             ),
             plain(
@@ -457,7 +458,7 @@ FIGURE_SLIDES = {
     "slide18.xml": ("drift_attribution.png", 2.90, 11.0),
     "slide19.xml": ("calibration_curve.png", 2.75, 11.0),
     "slide23.xml": ("gating_results.png", 2.75, 11.0),
-    "slide24.xml": ("self_healing_loop.png", 2.95, 11.0),
+    "slide24.xml": ("self_healing_loop.png", 2.85, 11.0),
 }
 
 ORDER = [
@@ -482,7 +483,7 @@ ORDER = [
     "slide20.xml",  # 19 field study: how it was run
     "slide23.xml",  # 20 field result                   [figure]
     "slide21.xml",  # 21 problems found                 [table]
-    "slide24.xml",  # 22 next phase: self-healing       [figure]
+    "slide24.xml",  # 22 governed self-healing          [figure]
     "slide22.xml",  # 23 work plan                      [table]
     "slide9.xml",   # 24 conclusion + contributions     [table]
 ]
