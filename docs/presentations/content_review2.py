@@ -247,6 +247,26 @@ DEFECTS = (
 )
 
 
+# --- Beyond lending ----------------------------------------------------------
+
+# Two rows are demonstrated on the running system; the rest are stated as
+# applicable by configuration and are not claimed as built. "EU AI Act
+# high-risk" is noted only where Annex III names the use: creditworthiness,
+# recruitment, and emergency healthcare patient triage.
+DOMAINS = (
+    ["Domain", "Action Custos gates", "What it catches", "Status"],
+    [
+        ["Lending", "Approve or disburse a loan", "Population drift, unusual amounts, policy limits", "Demonstrated · field study on 589,186 loans · EU AI Act high-risk"],
+        ["AI agents (refunds)", "Any tool action — here, issuing a refund", "Runaway loops, manipulated requests, a fraud ring", "Demonstrated · live demo 3, no code change"],
+        ["Dynamic pricing", "Publish a price", "A price far outside its normal range; never below cost", "Applies by configuration"],
+        ["Medical triage", "Route a patient as low priority", "A stuck device feed; red-flag symptoms always to a human", "Applies by configuration · EU AI Act high-risk"],
+        ["Hiring and screening", "Auto-reject a candidate", "Applicant-pool shift; rule: REVIEW only, never auto-reject", "Applies by configuration · EU AI Act high-risk"],
+        ["Insurance claims", "Auto-pay a claim", "Claim-mix shift after a disaster; bursts per policy", "Applies by configuration"],
+    ],
+    [0.17, 0.25, 0.32, 0.26],
+)
+
+
 # --- Work plan to the final review --------------------------------------------
 
 WORK_PLAN = (

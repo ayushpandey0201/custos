@@ -86,7 +86,7 @@ def fill_all() -> None:
             bullet("System design — architecture and decision logic", 1700),
             bullet("Implementation — new: risk engine and admission control", 1700),
             bullet("Results and validation", 1700),
-            bullet("Engineering rigour, governed self-healing, work plan, conclusion", 1700),
+            bullet("Engineering rigour, self-healing, other domains, work plan, conclusion", 1700),
         ],
     )
 
@@ -407,7 +407,21 @@ def fill_all() -> None:
         ],
     )
 
-    # ----------------------------------------------------- 23 work plan
+    # ------------------------------------------------- 23 beyond lending
+    bd.write_slide(
+        "slide25.xml",
+        [heading("Beyond Lending — Where Custos Applies")],
+        [
+            plain(
+                "Custos gates any model whose output triggers an action that can be allowed, "
+                "held for a person, or blocked. A new domain is configuration — inputs, context, "
+                "rules, weights — not code. Two are demonstrated; the rest are stated, not claimed.",
+                1300, space_before=0,
+            ),
+        ],
+    )
+
+    # ----------------------------------------------------- 24 work plan
     bd.write_slide(
         "slide22.xml",
         [heading("Work Plan to the Final Review")],
@@ -444,6 +458,7 @@ TABLE_SLIDES = {
     "slide15.xml": (c2.RISK_COMPONENTS, 2.75),
     "slide21.xml": (c2.DEFECTS, 2.55),
     "slide22.xml": (c2.WORK_PLAN, 2.40),
+    "slide25.xml": (c2.DOMAINS, 2.55),
     "slide9.xml": (c2.contributions(TESTS), 3.10),
 }
 
@@ -484,8 +499,9 @@ ORDER = [
     "slide23.xml",  # 20 field result                   [figure]
     "slide21.xml",  # 21 problems found                 [table]
     "slide24.xml",  # 22 governed self-healing          [figure]
-    "slide22.xml",  # 23 work plan                      [table]
-    "slide9.xml",   # 24 conclusion + contributions     [table]
+    "slide25.xml",  # 23 beyond lending: domains        [table]
+    "slide22.xml",  # 24 work plan                      [table]
+    "slide9.xml",   # 25 conclusion + contributions     [table]
 ]
 
 
