@@ -176,6 +176,43 @@ export const TOURS: Record<string, TourStep[]> = {
     },
     SAY,
   ],
+  design: [
+    {
+      target: "design-hero",
+      title: "The whole design, on one page",
+      body: "Architecture, the flow of a request, the data, the maths, and the defence of each choice — the page to walk a reviewer through.",
+    },
+    {
+      target: "design-stats",
+      title: "The numbers first",
+      body: "Every figure is measured in this repository. Note the last one: no learned parameters in the decision path — the “Is Custos AI?” section explains why that is deliberate.",
+    },
+    {
+      target: "design-nav",
+      title: "Fifteen sections",
+      body: "Jump to any part: the high-level design, the life of one decision, the decision logic and its maths, the low-level design, data model, self-healing, how Custos differs, the AI question, onboarding, and limits.",
+    },
+    {
+      target: "#hld",
+      title: "High-level design",
+      body: "Two planes. The gateway answers every request inside 50 ms; everything slow — statistics, verification, repairs — lives on the control plane or a schedule and reaches the gateway as a cached number.",
+    },
+    {
+      target: "#flow",
+      title: "The life of one decision",
+      body: "Eight steps from the SDK call to the verdict. The three engines run at the same time, so the cost is the slowest engine, not the sum.",
+    },
+    {
+      target: "#ai",
+      title: "Is Custos AI?",
+      body: "Custos guards AI; its own decision path is statistics, rules and cryptography — so it can't drift itself, and every verdict can be explained and tested. The table shows each layer.",
+    },
+    {
+      target: "#onboard",
+      title: "Onboarding a client",
+      body: "About a week: connect, encode the business rules, integrate five lines, watch and tune, then operate. Below it, the go-to-market plan and its honest risks.",
+    },
+  ],
   docs: [
     {
       target: "docs-nav",

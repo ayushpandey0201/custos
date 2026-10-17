@@ -1,6 +1,6 @@
 # Review-2 Speech — Custos
 
-> **Deck:** `Custos_Phase2_Review2.pptx` — 24 slides, 17 October 2026.
+> **Deck:** `Custos_Phase2_Review2.pptx` — 25 slides, 17 October 2026.
 > **Time:** about 14–16 minutes at a normal pace.
 >
 > **The story of Review-2 in one line:** *at Review-1 we told you where our
@@ -602,7 +602,42 @@ Dashboard → **Self-healing** → five buttons. Type your name before steps 2 a
 
 ---
 
-## Slide 23 — Work Plan to the Final Review
+## Slide 23 — Beyond Lending: Where Custos Applies ⭐
+
+### The rule, in one sentence
+Custos fits wherever **a model's output triggers an action that can be allowed,
+held for a person, or blocked**. Adding a domain means supplying inputs (for
+drift), context (for risk and rules), a few rules, and the weights — no code.
+
+### Reading the table — the Status column is the honest part
+- **Two rows are demonstrated** on the running system: lending (with the
+  589,186-loan study) and the AI refund agent (live demo 3, no code change).
+- **Four rows say "applies by configuration"** — that's a design claim, not a
+  result. Say so; don't let it sound built.
+- **"EU AI Act high-risk"** appears only where the Act's Annex III names the use:
+  credit scoring, recruitment, and emergency medical triage. High-risk systems
+  must have human oversight and automatic record-keeping — Custos's REVIEW
+  verdict, named approvals and hash-chained audit trail.
+
+### What to say
+> Lending and refunds are where we *demonstrated* it. The same engine applies
+> wherever a model triggers an action: publishing a price, triaging a patient,
+> screening a candidate, paying a claim. In hiring, for example, a company can
+> set a rule that the model may never auto-reject anyone — only send them to a
+> human. In triage, a stuck sensor feed is exactly the broken-feed case our
+> self-healing diagnoses.
+>
+> Three of these — credit, hiring, triage — are high-risk under the EU AI Act,
+> which requires human oversight and record-keeping. That's the core of what
+> Custos does.
+
+### Where it does *not* fit — say it before they ask
+Microsecond trading (our budget is 50 ms), filtering generated text (that's the
+guardrail category), and anything with no discrete action to hold.
+
+---
+
+## Slide 24 — Work Plan to the Final Review
 
 > First, rebuild the gating around what the data says works: review queues ranked
 > by the model's own risk, with drift kept as a monitoring signal. Second,
@@ -613,7 +648,7 @@ Dashboard → **Self-healing** → five buttons. Type your name before steps 2 a
 
 ---
 
-## Slide 24 — Conclusion
+## Slide 25 — Conclusion
 
 > **397 tests passing. The latency budget holds to 200 requests a second, double
 > Review-1. Overload no longer changes our verdicts. All three trust signals are
@@ -701,9 +736,25 @@ Dashboard → **Self-healing** → five buttons. Type your name before steps 2 a
 
 **"Isn't this just a lending bot?"**
 > No. The lending bot is a small demo in `examples/`. The core has no lending
-> logic — a request is a model, an action, inputs and context, so it gates fraud,
-> claims, triage or an AI agent's payments the same way. We test on lending
-> because that's where public, real outcome data exists.
+> logic — a request is a model, an action, inputs and context. Live demo 3 runs
+> an AI refund agent with no code change, and slide 23 shows where else it
+> applies. We test on lending because that's where public, real outcome data exists.
+
+**"Lending, fraud and insurance are crowded — and so is model monitoring. How would this ever survive in the market?"**
+> We agree those are crowded — as *models* and as *dashboards*. Custos is
+> neither. It doesn't score fraud and it doesn't just chart drift; our own study
+> shows drift alone is a weak signal. It's the layer that decides at the moment
+> an automated action happens, puts a person in the loop, and keeps evidence a
+> regulator would accept. Two things make that space open: regulation — the EU
+> AI Act requires human oversight and record-keeping for high-risk uses like
+> credit, hiring and triage — and AI agents, which are being given tools that
+> move money with very little between "decided" and "done". Our buyer isn't the
+> fraud team; it's whoever owns risk for *every* automated decision.
+>
+> *If pushed on risks:* larger platforms could add a guardrail feature. Our
+> defence is owning the approval workflow and the evidence — once a company's
+> decision history lives in Custos, it's hard to move — and validating the
+> first market with risk and compliance teams before building further.
 
 **"Is this MLOps?"**
 > Yes — the runtime half of it: monitoring, governance and control of models in
@@ -753,9 +804,9 @@ for a person."*
 - [ ] Open `Custos_Phase2_Review2.pptx` and flip through once. I checked layout
       by calculation, not by rendering (no LibreOffice on this machine).
 - [ ] If presenting from Google Slides: upload it, then check slides 4, 8, 10, 13,
-      21 and 23 — the tables. Google Slides resizes to 10×5.6 in, which squeezed the
+      21, 23 and 24 — the tables. Google Slides resizes to 10×5.6 in, which squeezed the
       tables last time.
-- [ ] **Contributions table (slide 24):** it shows Review-1 ownership. The new
+- [ ] **Contributions table (slide 25):** it shows Review-1 ownership. The new
       work — risk engine, admission control, the field study, self-healing — isn't assigned to
       anyone, because who did what is yours to state. Add it if you want credit
       attributed.
