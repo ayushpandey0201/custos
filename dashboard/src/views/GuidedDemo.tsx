@@ -504,6 +504,19 @@ export function GuidedDemo({ controlUrl, onKey }: {
               <b>The gateway is down.</b> Run <code>./app.sh</code> in a terminal, then wait a few seconds.
             </span>
           )}
+          {systemOk && !done.has(0) && (
+            <button
+              className="btn btn-primary syscheck-go"
+              disabled={running !== null}
+              onClick={() => {
+                setViewing(0);
+                void run(0);
+                cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            >
+              {running === 0 ? "Starting…" : "Start the demo →"}
+            </button>
+          )}
         </div>
       </section>
 
@@ -514,7 +527,15 @@ export function GuidedDemo({ controlUrl, onKey }: {
             <button
               key={s.id}
               className={`stepper-item is-${state} ${viewing === s.id ? "is-viewing" : ""}`}
-              onClick={() => (state !== "locked" ? setViewing(s.id) : undefined)}
+              onClick={() => {
+                if (state === "locked") return;
+                setViewing(s.id);
+                // The tabs only select a step; the button that runs it is in
+                // the card below, often off-screen. Take the presenter there.
+                requestAnimationFrame(() =>
+                  cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                );
+              }}
               disabled={state === "locked"}
               title={state === "locked" ? "Finish the earlier steps first" : s.title}
             >

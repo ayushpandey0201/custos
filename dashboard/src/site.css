@@ -2232,3 +2232,11 @@ code {
     gap: 2px;
   }
 }
+
+/* The start button beside the ready light: the step card's own button is
+   usually below the fold on a projector, so the first action lives here too. */
+.syscheck-go {
+  margin-left: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
