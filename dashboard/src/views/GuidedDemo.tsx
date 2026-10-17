@@ -9,6 +9,7 @@ import {
   type DemoStart,
   type DemoStatus,
   type DemoStep,
+  type Traffic,
 } from "../api/demo";
 
 /* -----------------------------------------------------------------------------
@@ -62,7 +63,7 @@ const STEPS: StepDef[] = [
       "We register the model, show Custos 600 normal applicants as its baseline, add a business rule (lend only in India and Singapore), then send 200 normal applications through it.",
     say:
       "Now Custos knows the model and what normal looks like. On healthy traffic it stays out of the way: high trust, automatic approval.",
-    look: "Drift is low. The same applicant is now ALLOWED, with trust close to 1.0.",
+    look: "Drift is low. The same applicant is now ALLOWED, with a high trust score.",
     button: "Run step 2",
     running: "Sending 200 normal loan applications through Custos…",
   },
@@ -144,7 +145,9 @@ function rupees(amount: number): string {
 
 /* --- small pieces ----------------------------------------------------------- */
 
-function Icon({ name }: { name: "mic" | "eye" | "check" | "lock" | "alert" | "spark" | "info" }) {
+export type IconName = "mic" | "eye" | "check" | "lock" | "alert" | "spark" | "info" | "wrench" | "user" | "flask";
+
+export function Icon({ name }: { name: IconName }) {
   const paths: Record<string, ReactNode> = {
     mic: (
       <>
@@ -172,6 +175,14 @@ function Icon({ name }: { name: "mic" | "eye" | "check" | "lock" | "alert" | "sp
       </>
     ),
     spark: <path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3" />,
+    wrench: <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4 2.6-2.6Z" />,
+    user: (
+      <>
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21a8 8 0 0 1 16 0" />
+      </>
+    ),
+    flask: <path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7 15h10" />,
     info: (
       <>
         <circle cx="12" cy="12" r="9" />
@@ -210,7 +221,7 @@ export function TrustGauge({ value }: { value: number | null }) {
   );
 }
 
-function VerdictPill({ decision, big = false }: { decision: DecisionValue; big?: boolean }) {
+export function VerdictPill({ decision, big = false }: { decision: DecisionValue; big?: boolean }) {
   return <span className={`pill pill-${decision.toLowerCase()} ${big ? "pill-big" : ""}`}>{decision}</span>;
 }
 
@@ -219,7 +230,7 @@ function scoreZone(score: number | null): DecisionValue | null {
   return score >= 0.6 ? "ALLOW" : score >= 0.3 ? "REVIEW" : "BLOCK";
 }
 
-function DecisionResult({ d, amount }: { d: DemoDecision; amount?: number }) {
+export function DecisionResult({ d, amount }: { d: DemoDecision; amount?: number }) {
   // When a rule decides rather than the score (an unregistered model, a veto,
   // the drift floor), the needle and the verdict disagree. Say so on screen,
   // before anyone in the room has to ask.
@@ -252,7 +263,7 @@ function DecisionResult({ d, amount }: { d: DemoDecision; amount?: number }) {
   );
 }
 
-function ChainResult({ chain, tampered }: { chain: ChainCheck; tampered?: DemoStep }) {
+export function ChainResult({ chain, tampered }: { chain: ChainCheck; tampered?: DemoStep }) {
   return (
     <div className={`chain ${chain.valid ? "chain-ok" : "chain-broken"}`}>
       <Icon name={chain.valid ? "lock" : "alert"} />
@@ -273,7 +284,7 @@ function ChainResult({ chain, tampered }: { chain: ChainCheck; tampered?: DemoSt
   );
 }
 
-function TrafficSummary({ step }: { step: DemoStep }) {
+export function TrafficSummary({ step }: { step: { traffic?: Traffic } }) {
   if (!step.traffic) return null;
   const v = step.traffic.verdicts;
   return (

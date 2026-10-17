@@ -11,9 +11,10 @@ tested row by row in tests/unit/test_decision_table.py.
     2  trust < block threshold            BLOCK      fused evidence is damning
     3  model_id not registered            REVIEW     ADR 0005
     4  every engine degraded              REVIEW     Custos has no signal at all
-    5  drift in the significant band      REVIEW     drift floor (below)
-    6  trust < review threshold           REVIEW     ambiguous
-    7  otherwise                          ALLOW
+    5  an input is quarantined            REVIEW     a human approved a hold (below)
+    6  drift in the significant band      REVIEW     drift floor (below)
+    7  trust < review threshold           REVIEW     ambiguous
+    8  otherwise                          ALLOW
 
 Rule 2 precedes rule 3 deliberately: an unregistered model whose signals are
 *already* damning should be blocked, not merely flagged.
@@ -27,6 +28,13 @@ risk were both clean. That property is too important to depend on the weights,
 so it is stated here instead: a model that far from its baseline is never
 auto-approved, however reassuring the other signals are. It can still be
 BLOCKed by rules 1-2; it is only kept out of ALLOW.
+
+Rule 5 is the only rule a person switches on. When self-healing diagnoses a
+broken input feed (services/healing), it proposes quarantining that input, and
+once someone approves, every decision for that model is held for review until
+the feed is repaired and the release is approved too. A model scoring on a
+dead input is not making the decision it was validated to make, however normal
+its trust score looks. Like the drift floor, it never softens a BLOCK.
 """
 
 from __future__ import annotations
@@ -50,10 +58,11 @@ def decide(
     model_known: bool = True,
     all_degraded: bool = False,
     drift_significant: bool = False,
+    quarantined: dict[str, str] | None = None,
 ) -> Decision:
     """Apply the decision matrix. See :func:`decide_with_reasons` for the why."""
     return decide_with_reasons(
-        trust_score, thresholds, vetoed, model_known, all_degraded, drift_significant
+        trust_score, thresholds, vetoed, model_known, all_degraded, drift_significant, quarantined
     ).decision
 
 
@@ -64,8 +73,11 @@ def decide_with_reasons(
     model_known: bool = True,
     all_degraded: bool = False,
     drift_significant: bool = False,
+    quarantined: dict[str, str] | None = None,
 ) -> DecisionOutcome:
     """The decision plus the ordered reasons behind it.
+
+    ``quarantined`` maps each held input to the reason it is held.
 
     Reasons are part of the product, not debug output: a BLOCK a caller cannot
     explain to a customer is a BLOCK they will switch off.
@@ -90,6 +102,15 @@ def decide_with_reasons(
     if all_degraded:
         return DecisionOutcome(
             Decision.REVIEW, ["no engine produced a confident signal; trust is unestablished"]
+        )
+
+    if quarantined:
+        return DecisionOutcome(
+            Decision.REVIEW,
+            [
+                f"input {name!r} is quarantined: {why}"
+                for name, why in sorted(quarantined.items())
+            ],
         )
 
     if drift_significant:
@@ -117,6 +138,7 @@ def evaluate_decision(
     thresholds: dict[str, float],
     model_known: bool = True,
     drift_significant: bool = False,
+    quarantined: dict[str, str] | None = None,
 ) -> DecisionOutcome:
     """Decide from an :class:`AggregateResult`, enriching the reasons with evidence."""
     outcome = decide_with_reasons(
@@ -126,6 +148,7 @@ def evaluate_decision(
         model_known=model_known,
         all_degraded=result.all_degraded,
         drift_significant=drift_significant,
+        quarantined=quarantined,
     )
 
     reasons = list(outcome.reasons)

@@ -87,8 +87,14 @@ def recompute_drift(
     tenant_id: str,
     model_id: str,
     window_hours: int = DEFAULT_WINDOW_HOURS,
+    latest: int | None = None,
 ) -> dict | None:
     """Score the recent live window against the baseline and persist a snapshot.
+
+    Args:
+        latest: score only the most recent ``latest`` samples inside the
+            window. Used after a self-healing repair, where the question is
+            what traffic looks like *now*, not averaged over the whole day.
 
     Returns the snapshot dict, or None when there is nothing to score (no
     baseline, or too few samples). Returning None rather than a zero-severity
@@ -104,16 +110,22 @@ def recompute_drift(
             return None
 
         since = datetime.now(UTC) - timedelta(hours=window_hours)
-        live_rows = [
-            r.features
-            for r in db.execute(
-                select(FeatureSample).where(
-                    FeatureSample.tenant_id == tenant_id,
-                    FeatureSample.model_id == model_id,
-                    FeatureSample.created_at >= since,
-                )
-            ).scalars()
-        ]
+        # Traffic from before the current baseline was set is not live traffic
+        # against it. Without this, the baseline's own rows (stored as samples
+        # when it is supplied) were scored as live traffic and diluted every
+        # reading, and after a re-baseline the old population would be scored
+        # against the new reference.
+        for floor in (model.baseline_at, _repaired_since(db, tenant_id, model_id)):
+            if floor is not None:
+                since = max(since, floor if floor.tzinfo else floor.replace(tzinfo=UTC))
+        stmt = select(FeatureSample).where(
+            FeatureSample.tenant_id == tenant_id,
+            FeatureSample.model_id == model_id,
+            FeatureSample.created_at >= since,
+        )
+        if latest is not None:
+            stmt = stmt.order_by(FeatureSample.id.desc()).limit(latest)
+        live_rows = [r.features for r in db.execute(stmt).scalars()]
 
         if len(live_rows) < MIN_SAMPLES:
             log.info(
@@ -123,7 +135,7 @@ def recompute_drift(
             return None
 
         live = _columnar(live_rows)
-        per_feature = _score_features(model.baseline, live)
+        per_feature = score_features(model.baseline, live)
 
         if not per_feature:
             log.info("drift_skipped", extra={"model_id": model_id, "reason": "no_common_features"})
@@ -155,7 +167,31 @@ def recompute_drift(
     return {"severity": severity, "per_feature": per_feature, "sample_size": len(live_rows)}
 
 
-def _score_features(
+def _repaired_since(db, tenant_id: str, model_id: str) -> datetime | None:
+    """Start of the verified-healthy traffic after the latest repaired feed.
+
+    Requests scored while an input feed was broken are not evidence about the
+    population — they are garbage that happened to be recorded. Once a person
+    has approved releasing a quarantine (services/healing), drift is measured
+    from the first request of the window that verified the repair. Without
+    this the drift floor would keep holding decisions for a day after the
+    feed was fixed, on the strength of data everyone agrees was broken.
+    """
+    from shared.db.models import Remediation
+
+    rows = db.execute(
+        select(Remediation.params).where(
+            Remediation.tenant_id == tenant_id,
+            Remediation.model_id == model_id,
+            Remediation.action == "release_input",
+            Remediation.status == "applied",
+        )
+    ).scalars()
+    stamps = [datetime.fromisoformat(p["healthy_since"]) for p in rows if p.get("healthy_since")]
+    return max(stamps, default=None)
+
+
+def score_features(
     baseline: dict[str, list[float]], live: dict[str, list[float]]
 ) -> dict[str, dict]:
     """PSI, KS and severity for every feature present in both distributions.
@@ -210,7 +246,16 @@ else:
 
     @shared_task(name="custos.recompute_drift")
     def recompute_drift_task(tenant_id: str, model_id: str, window_hours: int = 24) -> dict | None:
-        return recompute_drift(tenant_id, model_id, window_hours)
+        result = recompute_drift(tenant_id, model_id, window_hours)
+        # Detection runs on the same schedule as drift (services/healing).
+        # Imported here: engines must not depend on services at import time.
+        from services.healing import service
+
+        try:
+            service.scan(tenant_id, model_id)
+        except Exception as exc:
+            log.error("healing_scan_failed", extra={"model_id": model_id, "error": str(exc)})
+        return result
 
     @shared_task(name="custos.build_baseline")
     def build_baseline_task(tenant_id: str, model_id: str) -> int:

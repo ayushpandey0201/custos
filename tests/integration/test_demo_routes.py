@@ -53,3 +53,31 @@ def test_a_stopped_gateway_gives_an_instruction_not_a_fake_verdict():
 def test_unknown_step_numbers_are_rejected():
     with TestClient(create_app(demo=True, demo_gateway_url=DEAD_GATEWAY)) as client:
         assert client.post("/demo/act/9").status_code == 404
+
+
+class TestSelfHealingDemo:
+    def test_off_by_default(self, monkeypatch):
+        monkeypatch.delenv("CUSTOS_DEMO_MODE", raising=False)
+        with TestClient(create_app()) as client:
+            assert client.post("/demo/healing/start").status_code == 404
+
+    def test_steps_refuse_to_run_before_start(self):
+        with TestClient(create_app(demo=True, demo_gateway_url=DEAD_GATEWAY)) as client:
+            response = client.post("/demo/healing/step/1", json={})
+        assert response.status_code == 409
+        assert "Start the self-healing demo first" in response.json()["detail"]
+
+    def test_a_stopped_gateway_gives_an_instruction(self):
+        with TestClient(create_app(demo=True, demo_gateway_url=DEAD_GATEWAY)) as client:
+            response = client.post("/demo/healing/start")
+        assert response.status_code == 503
+        assert "./app.sh" in response.json()["detail"]
+
+    def test_unknown_steps_are_rejected(self):
+        with TestClient(create_app(demo=True, demo_gateway_url=DEAD_GATEWAY)) as client:
+            assert client.post("/demo/healing/step/9", json={}).status_code == 404
+
+    def test_status_reports_no_run(self):
+        with TestClient(create_app(demo=True, demo_gateway_url=DEAD_GATEWAY)) as client:
+            body = client.get("/demo/healing/status").json()
+        assert body == {"gateway": False, "run": None}

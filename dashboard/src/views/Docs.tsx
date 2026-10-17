@@ -141,13 +141,14 @@ const SECTIONS: Section[] = [
             <tr><td>2</td><td>trust score is below 0.30</td><td><span className="pill pill-block">BLOCK</span></td></tr>
             <tr><td>3</td><td>the model was never registered</td><td><span className="pill pill-review">REVIEW</span></td></tr>
             <tr><td>4</td><td>every engine is degraded</td><td><span className="pill pill-review">REVIEW</span></td></tr>
-            <tr><td>5</td><td>drift is in the significant band (the drift floor)</td><td><span className="pill pill-review">REVIEW</span></td></tr>
-            <tr><td>6</td><td>trust score is below 0.60</td><td><span className="pill pill-review">REVIEW</span></td></tr>
-            <tr><td>7</td><td>otherwise</td><td><span className="pill pill-allow">ALLOW</span></td></tr>
+            <tr><td>5</td><td>an input is quarantined — a person approved a hold (self-healing)</td><td><span className="pill pill-review">REVIEW</span></td></tr>
+            <tr><td>6</td><td>drift is in the significant band (the drift floor)</td><td><span className="pill pill-review">REVIEW</span></td></tr>
+            <tr><td>7</td><td>trust score is below 0.60</td><td><span className="pill pill-review">REVIEW</span></td></tr>
+            <tr><td>8</td><td>otherwise</td><td><span className="pill pill-allow">ALLOW</span></td></tr>
           </tbody>
         </table>
         <p className="doc-callout">
-          <b>Note on rule 5.</b> In our pre-registered study on real loans, drift-based gating did not
+          <b>Note on rule 6.</b> In our pre-registered study on real loans, drift-based gating did not
           beat random review, and the drift floor would have escalated 92% of decisions. It stays as a
           safety rule today; the gate is being rebuilt around risk-ranked review. See{" "}
           <a href="#validation" onClick={(e) => { e.preventDefault(); document.getElementById("validation")?.scrollIntoView({ behavior: "smooth" }); }}>Validation</a>.
@@ -189,6 +190,54 @@ region not in ["IN", "SG"]                     → veto`}</Code>
     ),
   },
   {
+    id: "healing",
+    title: "Governed self-healing",
+    body: (
+      <>
+        <p>
+          When something goes wrong with a model's inputs, Custos proposes a repair, tests it, and applies
+          it only after a named person approves. It runs every time drift is recomputed.
+        </p>
+        <ol className="doc-flow">
+          <li><b>Detect.</b> Each recompute inspects the model's most recent 200 requests (since its current baseline).</li>
+          <li><b>Diagnose.</b> Is an input <i>missing</i> (absent or null in ≥ 50% of requests) or <i>stuck</i> (one value in ≥ 90%, far more than in the baseline)? That is a broken feed. Otherwise, significant drift is a population shift.</li>
+          <li><b>Propose</b> a repair Custos can actually make — and record what it refuses to propose, and why.</li>
+          <li><b>Shadow-test</b> it: replay the model's last 500 real decisions through the same decision logic with the repair applied, and report how many verdicts would change.</li>
+          <li><b>Approve.</b> A named person approves or rejects. A repair that failed its shadow test cannot be approved.</li>
+          <li><b>Apply</b> — effective on the next request.</li>
+          <li><b>Verify</b> on traffic that arrived <i>after</i> the repair, then propose the next step: release, rollback, or resolve.</li>
+        </ol>
+        <h4>The playbook</h4>
+        <table className="doc-table">
+          <thead><tr><th>Diagnosis</th><th>Proposed repair</th><th>Refused</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Broken feed</td>
+              <td><b>Quarantine the input</b>: hold every decision for review until the feed is fixed; then <b>release</b>, also approved by a person.</td>
+              <td>Re-baselining — a reference learned from broken data makes broken data look normal.</td>
+            </tr>
+            <tr>
+              <td>Population shift</td>
+              <td><b>Re-baseline</b> on recent traffic (undoable via <b>rollback</b>), or a <b>retrain request</b> recorded for the model's owner.</td>
+              <td>Re-baselining while the population is still moving: a hold-out test (newer half of the window against the older half) must pass.</td>
+            </tr>
+          </tbody>
+        </table>
+        <ul>
+          <li><b>Custos never retrains your model.</b> It doesn't own it; a retrain is a recorded request, never a claim.</li>
+          <li><b>Every step is on the audit chain</b> — diagnosis, proposal, shadow result, who approved, what changed, verification.</li>
+          <li><b>After a feed is repaired</b>, drift is measured from the verified-healthy traffic, so the broken period doesn't keep holding decisions.</li>
+          <li><b>After a re-baseline</b>, the last drift reading stays in force until fresh traffic is measured against the new reference — erring toward REVIEW.</li>
+        </ul>
+        <p className="doc-callout">
+          <b>Identity.</b> Custos has tenant API keys, not user accounts, so the approver's name is attested by
+          whoever holds the key rather than verified. The chain makes it impossible to change afterwards, not
+          impossible to misstate at the time. Per-user sign-in is future work.
+        </p>
+      </>
+    ),
+  },
+  {
     id: "architecture",
     title: "Architecture",
     body: (
@@ -201,6 +250,7 @@ region not in ["IN", "SG"]                     → veto`}</Code>
             <tr><td>Engines</td><td>Policy, drift and risk. They never import each other — adding a fourth is a new file, not a refactor.</td></tr>
             <tr><td>Control plane</td><td>Tenants, model registration, baselines, rules, configuration, drift history, audit retrieval.</td></tr>
             <tr><td>Drift worker</td><td>Computes PSI and KS offline on a schedule. No statistics on the request path.</td></tr>
+            <tr><td>Self-healing</td><td>Diagnoses broken feeds vs population shifts after each recompute; proposes, shadow-tests and — once a person approves — applies repairs.</td></tr>
             <tr><td>Storage</td><td>SQLite on one machine, PostgreSQL + Redis in production. Every table carries the tenant id.</td></tr>
             <tr><td>Python SDK</td><td>The integration: a decorator or a context manager. Standard library only.</td></tr>
             <tr><td>Dashboard</td><td>This app: guided demo, documentation and the operator console.</td></tr>
@@ -271,8 +321,14 @@ def disburse(*, application):
             <tr><td>GET</td><td>/audit, /audit/decisions</td><td>Audit records and recent decisions</td></tr>
             <tr><td>GET</td><td>/audit/verify</td><td>Recompute the hash chain; report the first broken record</td></tr>
             <tr><td>GET</td><td>/audit/export</td><td>Download the evidence</td></tr>
+            <tr><td>POST</td><td>/healing/scan/{"{model}"}</td><td>Detect and diagnose now (also runs on every recompute)</td></tr>
+            <tr><td>GET</td><td>/healing/incidents[/{"{id}"}]</td><td>The incident queue, with proposals and shadow results</td></tr>
+            <tr><td>POST</td><td>/healing/remediations/{"{id}"}/approve · reject</td><td>A named person decides (<code>{"{approver, note}"}</code>)</td></tr>
+            <tr><td>POST</td><td>/healing/remediations/{"{id}"}/retest</td><td>Re-run the shadow test on current traffic</td></tr>
+            <tr><td>POST</td><td>/healing/incidents/{"{id}"}/verify · close</td><td>Check a repair on fresh traffic; close without a repair</td></tr>
             <tr className="api-group"><td colSpan={3}>Demo mode only (./app.sh)</td></tr>
             <tr><td>GET · POST</td><td>/demo/status, /demo/start, /demo/act/{"{1-5}"}, /demo/tamper</td><td>Drive the guided demo</td></tr>
+            <tr><td>GET · POST</td><td>/demo/healing/status, /start, /step/{"{1-5}"}</td><td>Drive the self-healing demo</td></tr>
           </tbody>
         </table>
         <p className="muted small">Interactive docs: <code>http://localhost:8000/docs</code> and <code>http://localhost:8001/docs</code>.</p>
@@ -287,7 +343,8 @@ def disburse(*, application):
         <li><b>Models</b> — registered models, whether each has a baseline, and a button to recompute drift.</li>
         <li><b>Drift monitor</b> — the selected model's severity over time and which inputs moved.</li>
         <li><b>Decisions</b> — every recent verdict, with its trust score and reasons.</li>
-        <li><b>Audit log</b> — the hash-chained record; <i>Verify chain</i> recomputes it and reports any tampering.</li>
+        <li><b>Audit log</b> — the hash-chained record; <i>Verify chain</i> recomputes it and reports any tampering. Self-healing records appear here too.</li>
+        <li><b>Incident queue</b> — open self-healing incidents: the diagnosis, each proposed repair with its shadow test, and approve / reject buttons that record your name.</li>
         <li>The <b>Explanations</b> switch adds a plain-English description to every panel.</li>
       </ul>
     ),
@@ -307,8 +364,9 @@ def disburse(*, application):
         <h4>Load — is it fast and safe?</h4>
         <p>
           An open-loop load test (it can't flatter the result by slowing down when the server does)
-          shows the 50 ms p99 budget holding to 200 requests/s per instance — p99 28 ms — and zero
-          verdicts changed by overload.
+          shows the 50 ms p99 budget holding to 200 requests/s per instance — p99 28 ms, re-measured at
+          31 ms with self-healing's quarantine check on the request path — and zero verdicts changed by
+          overload.
         </p>
         <h4>Field study — does gating on drift actually help?</h4>
         <p>
@@ -346,6 +404,7 @@ def disburse(*, application):
         <li>Input drift only: Custos does not measure concept drift, because real outcomes arrive months later.</li>
         <li>Load measured on one machine with SQLite; past ~300 requests/s one process saturates. Scaling out is planned.</li>
         <li>Risk-engine history is per process; a shared store is the multi-server step.</li>
+        <li>Self-healing diagnoses two fault signatures (missing, stuck). Subtler breaks — a unit change, a feed that is wrong but still varies — read as a population shift. Approvers are named, not authenticated.</li>
       </ul>
     ),
   },
@@ -362,6 +421,8 @@ def disburse(*, application):
         <dd>Something else holds the port. Run <code>./stop.sh</code>, or find it with <code>lsof -i tcp:8000</code>.</dd>
         <dt>Why three verdicts instead of two?</dt>
         <dd>Full automation is too risky and full manual review too expensive; REVIEW is what makes the system usable.</dd>
+        <dt>Does Custos fix models by itself?</dt>
+        <dd>No. It proposes and tests repairs it can make to its own gating — quarantine an input, change the reference — and a named person approves each one. Retraining is a request to the model's owner.</dd>
         <dt>Isn't this just monitoring?</dt>
         <dd>Monitoring reports after the fact. Custos runs before the action and can stop it.</dd>
       </dl>

@@ -1,0 +1,109 @@
+{
+  "database_url": "sqlite:////Users/ayushpandey/Developer/ayush_projects/custos/custos-bench.db",
+  "workers": 1,
+  "budget_ms": 50.0,
+  "connections": 256,
+  "duration_s": 15.0,
+  "phases": [
+    {
+      "rps_offered": 100.0,
+      "rps_achieved": 100.02,
+      "duration_s": 15.0,
+      "requests": 1500,
+      "ok": 1500,
+      "shed": 0,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 1500
+      },
+      "load_induced_degradations": {},
+      "connections": 256,
+      "peak_in_flight": 8,
+      "response_time": {
+        "p50_ms": 5.813,
+        "p95_ms": 6.661,
+        "p99_ms": 25.403,
+        "max_ms": 78.963,
+        "mean_ms": 6.407,
+        "count": 1500
+      },
+      "service_time": {
+        "p50_ms": 4.733,
+        "p95_ms": 5.626,
+        "p99_ms": 22.955,
+        "max_ms": 78.906,
+        "mean_ms": 5.256,
+        "count": 1500
+      },
+      "server_handler": {
+        "p50_ms": 3.26,
+        "p95_ms": 3.92,
+        "p99_ms": 15.78,
+        "max_ms": 76.73,
+        "mean_ms": 3.708,
+        "count": 1500
+      },
+      "trust_engine": {
+        "p50_ms": 0.412,
+        "p95_ms": 0.489,
+        "p99_ms": 0.765,
+        "max_ms": 3.908,
+        "mean_ms": 0.431,
+        "count": 1500
+      },
+      "budget_ms": 50.0,
+      "passed": true
+    },
+    {
+      "rps_offered": 200.0,
+      "rps_achieved": 199.33,
+      "duration_s": 15.0,
+      "requests": 3000,
+      "ok": 2995,
+      "shed": 5,
+      "failed": 0,
+      "errors": {},
+      "decisions": {
+        "ALLOW": 2995
+      },
+      "load_induced_degradations": {},
+      "connections": 256,
+      "peak_in_flight": 10,
+      "response_time": {
+        "p50_ms": 4.316,
+        "p95_ms": 7.093,
+        "p99_ms": 31.219,
+        "max_ms": 55.292,
+        "mean_ms": 5.193,
+        "count": 2995
+      },
+      "service_time": {
+        "p50_ms": 4.121,
+        "p95_ms": 6.669,
+        "p99_ms": 30.594,
+        "max_ms": 54.848,
+        "mean_ms": 4.963,
+        "count": 2995
+      },
+      "server_handler": {
+        "p50_ms": 2.86,
+        "p95_ms": 4.45,
+        "p99_ms": 28.46,
+        "max_ms": 53.54,
+        "mean_ms": 3.636,
+        "count": 2995
+      },
+      "trust_engine": {
+        "p50_ms": 0.42,
+        "p95_ms": 0.51,
+        "p99_ms": 0.994,
+        "max_ms": 2.194,
+        "mean_ms": 0.441,
+        "count": 2995
+      },
+      "budget_ms": 50.0,
+      "passed": true
+    }
+  ]
+}

@@ -403,10 +403,19 @@ def provision(control_url: str) -> str:
 
         client.post("/models", json={"model_id": MODEL_ID, "name": "Credit Risk v3"}, headers=auth)
 
-        # The baseline rows are also stored as feature samples, which is what
-        # the recompute below scores against.
         baseline = inject_drift.clean_batch(n=600, seed=1)
         client.post(f"/models/{MODEL_ID}/baseline", json={"samples": baseline}, headers=auth)
+
+        # A live window for the recompute below to score. The baseline's own
+        # rows are not live traffic against it (engines/drift/worker.py), so
+        # without this the recompute has nothing to score and drift stays
+        # degraded — which verify_engines_live then refuses to benchmark.
+        from shared.db.models import FeatureSample
+        from shared.db.session import session_scope
+
+        with session_scope() as db:
+            for row in inject_drift.clean_batch(n=200, seed=2):
+                db.add(FeatureSample(tenant_id=TENANT_ID, model_id=MODEL_ID, features=row))
 
         client.put(
             "/config/rules",

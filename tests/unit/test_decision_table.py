@@ -84,8 +84,44 @@ class TestPrecedence:
         assert "confident signal" in outcome.reasons[0]
 
 
+class TestQuarantine:
+    """Rule 5: an input a person has quarantined holds every decision for review."""
+
+    HELD = {"bureau_score": "stuck at 720 in 100% of recent requests (incident #1)"}
+
+    def test_a_quarantine_holds_an_otherwise_perfect_decision(self):
+        outcome = decide_with_reasons(1.0, THRESHOLDS, quarantined=self.HELD)
+        assert outcome.decision is Decision.REVIEW
+        assert "bureau_score" in outcome.reasons[0]
+        assert "incident #1" in outcome.reasons[0]
+
+    def test_a_quarantine_never_softens_a_block(self):
+        assert decide(0.1, THRESHOLDS, quarantined=self.HELD) is Decision.BLOCK
+        assert decide(1.0, THRESHOLDS, vetoed=True, quarantined=self.HELD) is Decision.BLOCK
+
+    def test_an_unknown_model_is_reported_as_unknown_first(self):
+        outcome = decide_with_reasons(1.0, THRESHOLDS, model_known=False, quarantined=self.HELD)
+        assert "not registered" in outcome.reasons[0]
+
+    def test_quarantine_is_named_ahead_of_drift(self):
+        """The precise cause beats the symptom: the dead feed is *why* it drifted."""
+        outcome = decide_with_reasons(
+            0.9, THRESHOLDS, drift_significant=True, quarantined=self.HELD
+        )
+        assert "quarantined" in outcome.reasons[0]
+
+    def test_every_held_input_is_named(self):
+        held = {"a": "missing", "b": "stuck"}
+        reasons = decide_with_reasons(1.0, THRESHOLDS, quarantined=held).reasons
+        assert len(reasons) == 2
+
+    def test_no_quarantine_changes_nothing(self):
+        assert decide(0.95, THRESHOLDS, quarantined={}) is Decision.ALLOW
+        assert decide(0.95, THRESHOLDS, quarantined=None) is Decision.ALLOW
+
+
 class TestDriftFloor:
-    """Rule 5: a significantly drifted model is never auto-approved.
+    """Rule 6: a significantly drifted model is never auto-approved.
 
     This used to hold only because the stub risk engine was always excluded,
     which happened to leave drift enough weight. These tests pin it as a rule.

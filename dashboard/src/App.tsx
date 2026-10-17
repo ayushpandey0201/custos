@@ -2,16 +2,18 @@ import { useEffect, useState } from "react";
 import { Console } from "./views/Console";
 import { Docs } from "./views/Docs";
 import { GuidedDemo } from "./views/GuidedDemo";
+import { Healing } from "./views/Healing";
 import { Home } from "./views/Home";
 
 const CONTROL_URL = import.meta.env.VITE_CONTROL_URL ?? "http://localhost:8001";
 const STORAGE_KEY = "custos.apiKey";
 
-type Route = "home" | "demo" | "docs" | "console";
+type Route = "home" | "demo" | "healing" | "docs" | "console";
 
 const NAV: { route: Route; label: string }[] = [
   { route: "home", label: "Why Custos" },
   { route: "demo", label: "Live demo" },
+  { route: "healing", label: "Self-healing" },
   { route: "docs", label: "Documentation" },
   { route: "console", label: "Console" },
 ];
@@ -77,6 +79,7 @@ export function App() {
       <main className="site-main">
         {route === "home" && <Home />}
         {route === "demo" && <GuidedDemo controlUrl={CONTROL_URL} onKey={setApiKey} />}
+        {route === "healing" && <Healing controlUrl={CONTROL_URL} apiKey={apiKey} onKey={setApiKey} />}
         {route === "docs" && <Docs />}
         {route === "console" && <Console controlUrl={CONTROL_URL} apiKey={apiKey} setApiKey={setApiKey} />}
       </main>

@@ -149,6 +149,57 @@ class FeatureSample(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
+class Incident(Base):
+    """Something is wrong with a model's inputs, diagnosed (services/healing).
+
+    At most one open incident per model: a second scan while one is open
+    verifies the existing incident instead of opening a duplicate.
+    """
+
+    __tablename__ = "incidents"
+    __table_args__ = (Index("ix_incidents_tenant_model", "tenant_id", "model_id", "status"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    model_id: Mapped[str] = mapped_column(String(128), index=True)
+    # "pipeline_break" | "population_shift"
+    kind: Mapped[str] = mapped_column(String(32))
+    # "open" | "resolved"
+    status: Mapped[str] = mapped_column(String(16), default="open")
+    summary: Mapped[str] = mapped_column(Text, default="")
+    diagnosis: Mapped[dict] = mapped_column(JSON, default=dict)
+    opened_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Remediation(Base):
+    """One proposed repair for an incident, and everything that happened to it.
+
+    Nothing here changes how Custos gates decisions until a named person has
+    approved it — see services/healing/service.py for the state machine.
+    """
+
+    __tablename__ = "remediations"
+    __table_args__ = (Index("ix_remediations_incident", "incident_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    incident_id: Mapped[int] = mapped_column(Integer, ForeignKey("incidents.id"))
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    model_id: Mapped[str] = mapped_column(String(128), index=True)
+    action: Mapped[str] = mapped_column(String(32))
+    params: Mapped[dict] = mapped_column(JSON, default=dict)
+    rationale: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(24), default="proposed")
+    shadow: Mapped[dict] = mapped_column(JSON, default=dict)
+    # State the repair replaced, kept so that applying it can be undone.
+    undo: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    decided_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    decision_note: Mapped[str] = mapped_column(Text, default="")
+    proposed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class PolicyRule(Base):
     """A tenant-authored policy rule, evaluated by the policy engine."""
 
