@@ -93,6 +93,42 @@ export interface HealingStatus {
   run: { tenant_id: string; done: number[] } | null;
 }
 
+export interface AgentDecision {
+  custos: DecisionValue;
+  trust_score: number;
+  reason: string;
+  agent: string;
+  amount: number;
+  customer: string;
+  requests_last_minute: number | null;
+}
+
+export interface AgentStart {
+  tenant_id: string;
+  api_key: string;
+  model_id: string;
+  weights: Record<string, number>;
+  rules: { rule_id: string; condition: string; description: string }[];
+  traffic: Traffic;
+  severity: number | null;
+}
+
+export interface AgentStep {
+  step: number;
+  decision?: AgentDecision;
+  order_value?: number;
+  attempts?: AgentDecision[];
+  verdicts?: Partial<Record<DecisionValue, number>>;
+  traffic?: Traffic;
+  checks?: { after: number; severity: number | null; incident: number | null }[];
+  severity_after?: number | null;
+  band_after?: DriftBand | null;
+  features?: { feature: string; psi: number; band: DriftBand; severity: number }[];
+  healing?: { incident_id: number | null; kind: string | null; new: boolean } | null;
+  incidents_open?: number;
+  chain?: ChainCheck;
+}
+
 export class DemoUnavailable extends Error {}
 
 export class DemoClient {
@@ -138,6 +174,18 @@ export class DemoClient {
 
   tamper() {
     return this.call<DemoStep>("/demo/tamper", "POST");
+  }
+
+  agentStatus() {
+    return this.call<HealingStatus>("/demo/agent/status");
+  }
+
+  agentStart() {
+    return this.call<AgentStart>("/demo/agent/start", "POST");
+  }
+
+  agentStep(step: number) {
+    return this.call<AgentStep>(`/demo/agent/step/${step}`, "POST");
   }
 
   healingStatus() {

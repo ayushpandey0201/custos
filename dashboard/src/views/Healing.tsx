@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ControlApiClient } from "../api/client";
 import { DemoClient, DemoUnavailable, type HealingStart, type HealingStatus, type HealingStep } from "../api/demo";
 import { ChainResult, DecisionResult, Icon, TrafficSummary } from "./GuidedDemo";
+import { DemoSwitcher, NextDemo } from "./DemoSwitcher";
 import { ApproverField, IncidentCard, IncidentQueue, useApprover } from "./IncidentQueue";
 
 /* -----------------------------------------------------------------------------
@@ -284,8 +285,9 @@ export function Healing({ controlUrl, apiKey, onKey }: {
 
   return (
     <div className="demo healing">
-      <section className="demo-hero">
-        <div className="eyebrow">Governed self-healing</div>
+      <DemoSwitcher current="healing" />
+      <section className="demo-hero" data-tour="hero">
+        <div className="eyebrow">Live demo 2 · governed self-healing</div>
         <h1>
           When a model's data breaks, Custos proposes the fix. <span className="grad">A person decides.</span>
         </h1>
@@ -297,7 +299,7 @@ export function Healing({ controlUrl, apiKey, onKey }: {
         </p>
       </section>
 
-      <section className="loop card" aria-label="The self-healing loop">
+      <section className="loop card" aria-label="The self-healing loop" data-tour="loop">
         {LOOP.map((stage, i) => (
           <div key={stage.name} className={`loop-stage ${stage.name === "Human approves" ? "is-human" : ""}`}>
             <div className="loop-num">{i + 1}</div>
@@ -307,7 +309,7 @@ export function Healing({ controlUrl, apiKey, onKey }: {
         ))}
       </section>
 
-      <section className="playbook">
+      <section className="playbook" data-tour="playbook">
         {PLAYBOOK.map((p) => (
           <div className="card play" key={p.diagnosis}>
             <div className="play-diag">
@@ -342,7 +344,7 @@ export function Healing({ controlUrl, apiKey, onKey }: {
       </div>
 
       <section className="howto card">
-        <div className="syscheck">
+        <div className="syscheck" data-tour="syscheck">
           <span className={`light ${systemOk ? "light-ok" : unavailable || status ? "light-bad" : "light-wait"}`} />
           {unavailable ? (
             <span>
@@ -371,7 +373,7 @@ export function Healing({ controlUrl, apiKey, onKey }: {
         </div>
       </section>
 
-      <nav className="stepper" aria-label="Self-healing steps">
+      <nav className="stepper" aria-label="Self-healing steps" data-tour="stepper">
         {STEPS.map((s) => {
           const state = done.has(s.id) ? "done" : s.id === next ? "current" : "locked";
           return (
@@ -397,7 +399,7 @@ export function Healing({ controlUrl, apiKey, onKey }: {
       </nav>
 
       <div className="heal-stage" ref={cardRef}>
-        <article className={`step-card card ${isLocked ? "is-locked" : ""}`}>
+        <article className={`step-card card ${isLocked ? "is-locked" : ""}`} data-tour="step-card">
           <div className="step-eyebrow">
             {step.id === 0 ? "Getting started" : `Step ${step.id} of ${STEPS.length - 1}`}
             {isDone && <span className="done-tag"><Icon name="check" /> Done</span>}
@@ -405,7 +407,7 @@ export function Healing({ controlUrl, apiKey, onKey }: {
           <h2 className="step-title">{step.title}</h2>
           <p className="step-what">{step.what}</p>
 
-          <div className="say">
+          <div className="say" data-tour="say">
             <div className="say-head"><Icon name="mic" /> Say this to the audience</div>
             <p>“{step.say}”</p>
           </div>
@@ -461,6 +463,7 @@ export function Healing({ controlUrl, apiKey, onKey }: {
                       The incident is in the queue below, resolved, with every decision and who made it.
                     </p>
                     <div className="finish-actions">
+                      <NextDemo current="healing" />
                       <button className="btn" onClick={restart}>Run it again</button>
                     </div>
                   </div>
@@ -475,7 +478,9 @@ export function Healing({ controlUrl, apiKey, onKey }: {
         <div className="eyebrow">Live approval queue</div>
         <h2>Incidents for {queueClient ? "the connected account" : "your account"}.</h2>
       </div>
-      <IncidentQueue client={queueClient} refreshSignal={signal} approver={approverState} />
+      <div data-tour="queue">
+        <IncidentQueue client={queueClient} refreshSignal={signal} approver={approverState} />
+      </div>
     </div>
   );
 }

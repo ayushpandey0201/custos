@@ -21,7 +21,7 @@ Every one of these is measured, and the source is in the repo.
 
 | What | Review-1 | Review-2 | Source |
 |---|---|---|---|
-| Tests passing | 274 | **392** | `pytest` |
+| Tests passing | 274 | **397** | `pytest` |
 | Load the 50 ms budget holds to | 100 req/s | **200 req/s** | `benchmarks/results-*.json` |
 | p99 latency at 100 req/s | 49 ms | **9 ms** | same |
 | p99 latency at 200 req/s | 94 ms ❌ | **28 ms** ✅ (31 ms with self-healing's check) | same |
@@ -615,7 +615,7 @@ Dashboard → **Self-healing** → five buttons. Type your name before steps 2 a
 
 ## Slide 24 — Conclusion
 
-> **392 tests passing. The latency budget holds to 200 requests a second, double
+> **397 tests passing. The latency budget holds to 200 requests a second, double
 > Review-1. Overload no longer changes our verdicts. All three trust signals are
 > live. And governed self-healing is built.**
 >
@@ -719,6 +719,35 @@ Dashboard → **Self-healing** → five buttons. Type your name before steps 2 a
 
 ---
 
+# Live demo — running order (about ten minutes)
+
+Open **http://localhost:5173 → Live demos**. The three demos are linked: each ends
+with a "Next demo" button. Press **Guide me** (bottom right) on any page if you
+want the screen explained element by element.
+
+| # | Demo | What it proves | The line to land |
+|---|---|---|---|
+| 1 | **The trust gate** (lending, 7 steps) | Custos stops trusting a drifted model, blocks a rule breach, and catches an edited audit log | "Same applicant, same code — a different answer, because the world changed." |
+| 2 | **Self-healing** (lending, 5 steps) | A dead data feed is diagnosed, quarantined with a person's approval, verified and released | "Custos proposes and tests the fix. A person decides — and their name is on the record." |
+| 3 | **AI agent guardrail** (e-commerce, 5 steps) | A second domain with **zero code changes**: a refund agent loops, is talked into a bad refund, meets a fraud ring | "We didn't change one line of Custos for this — only configuration." |
+
+**Demo 3 — what you'll see** (numbers from a real run):
+- **Loop:** the same customer refunded 12 times in seconds → trust falls 0.97 → 0.17: six ALLOW, two REVIEW, four BLOCK. Nobody wrote a rule for loops; the risk engine saw the burst.
+- **Talked into it:** ₹19,000 refund on a ₹9,500 order → BLOCK, by the rule "an agent may never refund more than the order was worth". *"You can talk an AI agent into almost anything. You can't talk your way past a rule — rules are parsed, not prompted."*
+- **Fraud ring:** 300 requests from days-old accounts; drift is checked every 50. The alarm fires at the first check — **about 40 got through before it, about 260 were held**. Say the lag out loud; it's honest and it's why drift is an alarm, not a gate.
+- Self-healing opens an incident and proposes re-baselining. **Say: "A reviewer should reject this — the shift is fraud, not a new normal. That's exactly why a person approves."**
+
+**Why the weights differ** (if asked): the refund agent weighs risk 0.8, drift 0.1,
+policy 0.1; lending uses drift 0.5, policy 0.3, risk 0.2. An agent acting on its own
+at machine speed is judged mostly on what it's doing right now. Weights are
+per-company configuration.
+
+**Finish in the Console:** *"Everything you just saw happened for real — here it is
+as an operator sees it: every decision, the audit chain, and the incident waiting
+for a person."*
+
+---
+
 # Before you present — checklist
 
 - [ ] Open `Custos_Phase2_Review2.pptx` and flip through once. I checked layout
@@ -735,7 +764,7 @@ Dashboard → **Self-healing** → five buttons. Type your name before steps 2 a
 - [ ] **For the live demo, open http://localhost:5173 → “Live demo”.** Check the
       light is green, then click through the seven steps. Every step tells you
       what to click, what to say and what to point at — no key to paste.
-- [ ] **For self-healing (slide 22), open “Self-healing”** and click through the
-      five steps. Type your name in “Approving as” before steps 2 and 4.
+- [ ] **Run all three demos once** (Live demos → 1, 2, 3). In demo 2, type your
+      name in “Approving as” before steps 2 and 4.
 - [ ] Do one full practice run tonight. Use “Run the demo again” at the end to
       reset; each run starts from a clean slate.

@@ -11,6 +11,7 @@ import {
   type DemoStep,
   type Traffic,
 } from "../api/demo";
+import { DemoSwitcher, NextDemo } from "./DemoSwitcher";
 
 /* -----------------------------------------------------------------------------
  * The guided demo. Built for someone presenting Custos for the first time, in
@@ -284,14 +285,14 @@ export function ChainResult({ chain, tampered }: { chain: ChainCheck; tampered?:
   );
 }
 
-export function TrafficSummary({ step }: { step: { traffic?: Traffic } }) {
+export function TrafficSummary({ step, noun = "applications sent" }: { step: { traffic?: Traffic }; noun?: string }) {
   if (!step.traffic) return null;
   const v = step.traffic.verdicts;
   return (
     <div className="mini-stats">
       <div>
         <span className="mini-value">{step.traffic.sent}</span>
-        <span className="mini-label">applications sent</span>
+        <span className="mini-label">{noun}</span>
       </div>
       {(["ALLOW", "REVIEW", "BLOCK"] as DecisionValue[]).map((k) => (
         <div key={k}>
@@ -467,8 +468,9 @@ export function GuidedDemo({ controlUrl, onKey }: {
 
   return (
     <div className="demo">
-      <section className="demo-hero">
-        <div className="eyebrow">Live demo</div>
+      <DemoSwitcher current="demo" />
+      <section className="demo-hero" data-tour="hero">
+        <div className="eyebrow">Live demo 1 · lending</div>
         <h1>
           Watch Custos stop a model <span className="grad">the moment it can no longer be trusted.</span>
         </h1>
@@ -478,7 +480,7 @@ export function GuidedDemo({ controlUrl, onKey }: {
         </p>
       </section>
 
-      <section className="howto card">
+      <section className="howto card" data-tour="howto">
         <div className="howto-title">
           <Icon name="info" /> First time here? Here's how to use this screen
         </div>
@@ -488,7 +490,7 @@ export function GuidedDemo({ controlUrl, onKey }: {
           <li><b>While it runs, read the “Say this” box aloud</b> to the audience.</li>
           <li><b>When the result appears, point at what “Point at this” describes</b>, then press <b>Next step</b>.</li>
         </ol>
-        <div className="syscheck">
+        <div className="syscheck" data-tour="syscheck">
           <span className={`light ${systemOk ? "light-ok" : unavailable || status ? "light-bad" : "light-wait"}`} />
           {unavailable ? (
             <span>
@@ -520,7 +522,7 @@ export function GuidedDemo({ controlUrl, onKey }: {
         </div>
       </section>
 
-      <nav className="stepper" aria-label="Demo steps">
+      <nav className="stepper" aria-label="Demo steps" data-tour="stepper">
         {STEPS.map((s) => {
           const state = done.has(s.id) ? "done" : s.id === next ? "current" : "locked";
           return (
@@ -547,7 +549,7 @@ export function GuidedDemo({ controlUrl, onKey }: {
       </nav>
 
       <div className="demo-grid" ref={cardRef}>
-        <article className={`step-card card ${isLocked ? "is-locked" : ""}`}>
+        <article className={`step-card card ${isLocked ? "is-locked" : ""}`} data-tour="step-card">
           <div className="step-eyebrow">
             {step.id === 0 ? "Getting started" : `Step ${step.id} of ${STEPS.length - 1}`}
             {isDone && <span className="done-tag"><Icon name="check" /> Done</span>}
@@ -555,7 +557,7 @@ export function GuidedDemo({ controlUrl, onKey }: {
           <h2 className="step-title">{step.title}</h2>
           <p className="step-what">{step.what}</p>
 
-          <div className="say">
+          <div className="say" data-tour="say">
             <div className="say-head"><Icon name="mic" /> Say this to the audience</div>
             <p>“{step.say}”</p>
           </div>
@@ -613,7 +615,8 @@ export function GuidedDemo({ controlUrl, onKey }: {
                       or run the demo again from a clean slate.
                     </p>
                     <div className="finish-actions">
-                      <a className="btn btn-primary" href="#/console">Open the operator console</a>
+                      <NextDemo current="demo" />
+                      <a className="btn" href="#/console">Open the operator console</a>
                       <button className="btn" onClick={restart}>Run the demo again</button>
                     </div>
                   </div>
@@ -623,7 +626,7 @@ export function GuidedDemo({ controlUrl, onKey }: {
           )}
         </article>
 
-        <aside className="demo-side">
+        <aside className="demo-side" data-tour="side">
           <div className="card side-card">
             <div className="side-title">The applicant</div>
             {start ? (

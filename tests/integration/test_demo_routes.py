@@ -81,3 +81,38 @@ class TestSelfHealingDemo:
         with TestClient(create_app(demo=True, demo_gateway_url=DEAD_GATEWAY)) as client:
             body = client.get("/demo/healing/status").json()
         assert body == {"gateway": False, "run": None}
+
+
+class TestAgentDemo:
+    """The second-domain demo: same guarantees as the other two."""
+
+    def test_off_by_default(self, monkeypatch):
+        monkeypatch.delenv("CUSTOS_DEMO_MODE", raising=False)
+        with TestClient(create_app()) as client:
+            assert client.post("/demo/agent/start").status_code == 404
+
+    def test_steps_refuse_to_run_before_start(self):
+        with TestClient(create_app(demo=True, demo_gateway_url=DEAD_GATEWAY)) as client:
+            response = client.post("/demo/agent/step/1")
+        assert response.status_code == 409
+        assert "Start the AI-agent demo first" in response.json()["detail"]
+
+    def test_a_stopped_gateway_gives_an_instruction(self):
+        with TestClient(create_app(demo=True, demo_gateway_url=DEAD_GATEWAY)) as client:
+            response = client.post("/demo/agent/start")
+        assert response.status_code == 503
+        assert "./app.sh" in response.json()["detail"]
+
+    def test_unknown_steps_are_rejected(self):
+        with TestClient(create_app(demo=True, demo_gateway_url=DEAD_GATEWAY)) as client:
+            assert client.post("/demo/agent/step/9").status_code == 404
+
+
+def test_agent_rules_are_valid_policy():
+    """The refund agent's rules go through the real parser, so a typo fails here."""
+    from engines.policy.rules import Rule
+    from services.control.routes_demo import AGENT_RULES, AGENT_WEIGHTS
+
+    for rule in AGENT_RULES:
+        Rule(rule_id=rule["rule_id"], condition=rule["condition"], action=rule["action"])
+    assert abs(sum(AGENT_WEIGHTS.values()) - 1.0) < 1e-9

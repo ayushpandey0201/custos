@@ -82,7 +82,7 @@ export function Console({ controlUrl, apiKey, setApiKey }: {
 
   if (!apiKey) {
     return (
-      <div className="console-gate card">
+      <div className="console-gate card" data-tour="console-gate">
         <div className="eyebrow">Operator console</div>
         <h2>Connect a tenant</h2>
         <p className="muted">
@@ -111,7 +111,7 @@ export function Console({ controlUrl, apiKey, setApiKey }: {
 
   return (
     <div className="console">
-      <header className="console-head">
+      <header className="console-head" data-tour="console-head">
         <div>
           <div className="eyebrow">Operator console</div>
           <h2>{config ? config.tenant_id : "…"}</h2>
@@ -139,7 +139,7 @@ export function Console({ controlUrl, apiKey, setApiKey }: {
       {error && <div className="verdict verdict-bad">{error}</div>}
 
       <ExplainContext.Provider value={explain}>
-        <main className="console-grid">
+        <main className="console-grid" data-tour="console-grid">
           <Models
             client={client}
             models={models}
@@ -151,7 +151,7 @@ export function Console({ controlUrl, apiKey, setApiKey }: {
           <Decisions decisions={decisions} />
           <AuditLog client={client} entries={audit} filter={auditFilter} onFilter={setAuditFilter} />
         </main>
-        <section className="console-healing">
+        <section className="console-healing" data-tour="console-healing">
           <div className="section-head">
             <div className="eyebrow">Self-healing</div>
             <h2>Incident queue</h2>

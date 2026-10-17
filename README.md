@@ -65,15 +65,25 @@ left behind them.
 
 Logs and the API key are written to `.run/`.
 
-Then open **http://localhost:5173**. The dashboard has five sections:
+Then open **http://localhost:5173**:
 
 - **Why Custos** — what it is, how it differs from monitoring and guardrails, and the evidence.
-- **Live demo** — a seven-step guided walkthrough with presenter instructions on every step. It
-  drives the real system and connects the console automatically, so no API key is needed.
-- **Self-healing** — a data feed breaks live: Custos diagnoses it, proposes a tested repair, and
-  applies it once you approve. Plus the live approval queue.
-- **Documentation** — setup, concepts, the decision rules, the API, validation results and limits.
-- **Console** — the operator view of models, drift, decisions, the audit chain and the incident queue.
+- **Live demos** — three guided demos on the real system, run in sequence (about ten minutes).
+  Each drives the real gateway, gives presenter instructions on every step, and connects the
+  console automatically, so no API key is needed:
+  1. **The trust gate** (lending) — a model drifts and Custos stops trusting it; someone edits the
+     audit log and the chain catches it.
+  2. **Self-healing** (lending) — a data feed breaks; Custos diagnoses it, proposes a tested repair,
+     and applies it once you approve.
+  3. **AI agent guardrail** (e-commerce) — a retailer's refund agent loops, is talked into a bad
+     refund and meets a fraud ring. A second domain with **no change to Custos** — only
+     configuration: the model, its inputs, two rules and the signal weights.
+- **Documentation** — setup, concepts, the decision rules, self-healing, the API, results and limits.
+- **Console** — the operator view of a real account: models, drift, decisions, the audit chain and
+  the self-healing incident queue.
+
+Every page has a **Guide me** button (bottom right) that walks through the screen one element at a
+time — for a first-time user, or for explaining the screen to someone else.
 
 ### Or by hand
 
@@ -97,7 +107,7 @@ waits on them.
 pytest
 ```
 
-392 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
+397 tests: golden-value detector tests, the monotonicity invariant, every row of the decision
 matrix, the risk engine, admission control, hash-chain tamper detection and chain integrity
 under concurrent writers, SDK fail-open behaviour, self-healing diagnosis and the full
 approve-apply-verify loop, and a full lifecycle end to end.

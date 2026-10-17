@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { Tour, TourButton } from "./components/Tour";
+import { TOURS } from "./components/tours";
+import { AgentDemo } from "./views/AgentDemo";
 import { Console } from "./views/Console";
 import { Docs } from "./views/Docs";
 import { GuidedDemo } from "./views/GuidedDemo";
@@ -8,20 +11,32 @@ import { Home } from "./views/Home";
 const CONTROL_URL = import.meta.env.VITE_CONTROL_URL ?? "http://localhost:8001";
 const STORAGE_KEY = "custos.apiKey";
 
-type Route = "home" | "demo" | "healing" | "docs" | "console";
+type Route = "home" | "demo" | "healing" | "agent" | "docs" | "console";
+
+const ROUTES: Route[] = ["home", "demo", "healing", "agent", "docs", "console"];
+const DEMO_ROUTES: Route[] = ["demo", "healing", "agent"];
 
 const NAV: { route: Route; label: string }[] = [
   { route: "home", label: "Why Custos" },
-  { route: "demo", label: "Live demo" },
-  { route: "healing", label: "Self-healing" },
+  { route: "demo", label: "Live demos" },
   { route: "docs", label: "Documentation" },
   { route: "console", label: "Console" },
 ];
 
+const TOUR_SEEN_KEY = "custos.toursSeen";
+
 /** Hash routing: no router dependency, and a refresh keeps you where you were. */
 function readRoute(): Route {
   const hash = window.location.hash.replace(/^#\/?/, "");
-  return (NAV.find((n) => n.route === hash)?.route ?? "home") as Route;
+  return (ROUTES.find((r) => r === hash) ?? "home") as Route;
+}
+
+function readSeen(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(TOUR_SEEN_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
 }
 
 function Logo() {
@@ -42,9 +57,12 @@ function Logo() {
 export function App() {
   const [route, setRoute] = useState<Route>(readRoute);
   const [apiKey, setApiKeyState] = useState(() => localStorage.getItem(STORAGE_KEY) ?? "");
+  const [touring, setTouring] = useState(false);
+  const [seen, setSeen] = useState<string[]>(readSeen);
 
   useEffect(() => {
     const onHash = () => {
+      setTouring(false);
       setRoute(readRoute());
       window.scrollTo({ top: 0 });
     };
@@ -68,21 +86,39 @@ export function App() {
         </a>
         <nav className="nav-links">
           {NAV.map((n) => (
-            <a key={n.route} href={`#/${n.route}`} className={`nav-link ${route === n.route ? "is-active" : ""}`}>
+            <a
+              key={n.route}
+              href={`#/${n.route}`}
+              className={`nav-link ${route === n.route || (n.route === "demo" && DEMO_ROUTES.includes(route)) ? "is-active" : ""}`}
+            >
               {n.label}
             </a>
           ))}
         </nav>
-        <a className="btn btn-primary nav-cta" href="#/demo">Start demo</a>
+        <a className="btn btn-primary nav-cta" href="#/demo">Start demos</a>
       </header>
 
       <main className="site-main">
         {route === "home" && <Home />}
         {route === "demo" && <GuidedDemo controlUrl={CONTROL_URL} onKey={setApiKey} />}
         {route === "healing" && <Healing controlUrl={CONTROL_URL} apiKey={apiKey} onKey={setApiKey} />}
+        {route === "agent" && <AgentDemo controlUrl={CONTROL_URL} onKey={setApiKey} />}
         {route === "docs" && <Docs />}
         {route === "console" && <Console controlUrl={CONTROL_URL} apiKey={apiKey} setApiKey={setApiKey} />}
       </main>
+
+      <TourButton
+        seen={seen.includes(route)}
+        onClick={() => {
+          setTouring(true);
+          if (!seen.includes(route)) {
+            const next = [...seen, route];
+            setSeen(next);
+            localStorage.setItem(TOUR_SEEN_KEY, JSON.stringify(next));
+          }
+        }}
+      />
+      {touring && <Tour key={route} steps={TOURS[route] ?? []} onClose={() => setTouring(false)} />}
 
       <footer className="footer">
         <span>

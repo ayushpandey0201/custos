@@ -8,7 +8,7 @@
 const STATS = [
   { value: "≤ 50 ms", label: "p99 decision latency up to 200 requests/s, on one CPU core" },
   { value: "0", label: "verdicts changed by overload (was up to 985 per run)" },
-  { value: "392", label: "automated tests, from statistics to tamper detection" },
+  { value: "397", label: "automated tests, from statistics to tamper detection" },
   { value: "589,186", label: "real loans in our pre-registered field study" },
 ];
 
@@ -77,7 +77,7 @@ const PILLARS = [
 export function Home() {
   return (
     <div className="home">
-      <section className="hero">
+      <section className="hero" data-tour="hero">
         <div className="hero-glow" aria-hidden="true" />
         <div className="eyebrow">Runtime trust layer for machine-learning decisions</div>
         <h1 className="hero-title">
@@ -94,7 +94,7 @@ export function Home() {
           <a className="btn btn-primary btn-xl" href="#/demo">Watch the live demo →</a>
           <a className="btn btn-ghost btn-xl" href="#/docs">Read the documentation</a>
         </div>
-        <div className="stats">
+        <div className="stats" data-tour="stats">
           {STATS.map((s) => (
             <div className="stat" key={s.label}>
               <div className="stat-big">{s.value}</div>
@@ -109,7 +109,7 @@ export function Home() {
           <div className="eyebrow">The problem</div>
           <h2>Models don't crash. They go quietly wrong.</h2>
         </div>
-        <div className="problem">
+        <div className="problem" data-tour="problem">
           <div className="problem-text">
             <p>
               A credit model is tested before launch and then left alone. The world keeps moving —
@@ -150,7 +150,7 @@ export function Home() {
           <div className="eyebrow">How we are different</div>
           <h2>Monitoring reports. Guardrails filter content. Custos decides.</h2>
         </div>
-        <div className="compare card">
+        <div className="compare card" data-tour="compare">
           <table>
             <thead>
               <tr>
@@ -183,7 +183,7 @@ export function Home() {
           <div className="eyebrow">What we bring</div>
           <h2>Four guarantees, each one tested.</h2>
         </div>
-        <div className="pillars">
+        <div className="pillars" data-tour="pillars">
           {PILLARS.map((p, i) => (
             <div className="pillar card" key={p.title}>
               <div className="pillar-num">0{i + 1}</div>
@@ -199,7 +199,7 @@ export function Home() {
           <div className="eyebrow">Governed self-healing</div>
           <h2>When a data feed breaks, Custos proposes the fix. A person decides.</h2>
         </div>
-        <div className="pillars">
+        <div className="pillars" data-tour="healing">
           <div className="pillar card">
             <div className="pillar-num">Diagnose</div>
             <h3>Broken pipe or changed world?</h3>
@@ -243,7 +243,7 @@ export function Home() {
           <div className="eyebrow">What changes</div>
           <h2>Before and after Custos.</h2>
         </div>
-        <div className="beforeafter">
+        <div className="beforeafter" data-tour="beforeafter">
           <div className="ba card ba-before">
             <h3>Without Custos</h3>
             <ul>
@@ -272,7 +272,7 @@ export function Home() {
           <div className="eyebrow">Proof, not promises</div>
           <h2>We test our own claims — and publish when they fail.</h2>
         </div>
-        <div className="proof">
+        <div className="proof" data-tour="proof">
           <div className="proof-card card">
             <div className="proof-tag tag-ok">Calibrated</div>
             <h3>The detector measures correctly</h3>
@@ -309,7 +309,7 @@ export function Home() {
           <div className="eyebrow">Integration</div>
           <h2>Five lines in the service you already have.</h2>
         </div>
-        <div className="integrate">
+        <div className="integrate" data-tour="integrate">
           <pre className="code card">
 {`import custos
 custos.configure(base_url="http://localhost:8000", api_key=KEY)
@@ -328,10 +328,13 @@ def disburse(*, application):
         </div>
       </section>
 
-      <section className="cta-band card">
+      <section className="cta-band card" data-tour="cta">
         <div>
           <h2>See it decide, live.</h2>
-          <p className="muted">Seven guided steps, about four minutes, on the real system.</p>
+          <p className="muted">
+            Three guided demos on the real system, about ten minutes: a lending model that drifts, a data feed that
+            breaks and gets repaired, and an AI agent issuing refunds — a second domain, with no code changed.
+          </p>
         </div>
         <a className="btn btn-primary btn-xl" href="#/demo">Start the live demo →</a>
       </section>
