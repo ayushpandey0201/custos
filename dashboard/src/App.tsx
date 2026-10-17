@@ -7,18 +7,20 @@ import { Docs } from "./views/Docs";
 import { GuidedDemo } from "./views/GuidedDemo";
 import { Healing } from "./views/Healing";
 import { Home } from "./views/Home";
+import { SystemDesign } from "./views/SystemDesign";
 
 const CONTROL_URL = import.meta.env.VITE_CONTROL_URL ?? "http://localhost:8001";
 const STORAGE_KEY = "custos.apiKey";
 
-type Route = "home" | "demo" | "healing" | "agent" | "docs" | "console";
+type Route = "home" | "demo" | "healing" | "agent" | "design" | "docs" | "console";
 
-const ROUTES: Route[] = ["home", "demo", "healing", "agent", "docs", "console"];
+const ROUTES: Route[] = ["home", "demo", "healing", "agent", "design", "docs", "console"];
 const DEMO_ROUTES: Route[] = ["demo", "healing", "agent"];
 
 const NAV: { route: Route; label: string }[] = [
   { route: "home", label: "Why Custos" },
   { route: "demo", label: "Live demos" },
+  { route: "design", label: "Inside Custos" },
   { route: "docs", label: "Documentation" },
   { route: "console", label: "Console" },
 ];
@@ -77,7 +79,7 @@ export function App() {
   };
 
   return (
-    <div className="site">
+    <div className={`site ${route === "design" ? "site-light" : ""}`}>
       <header className="nav">
         <a className="brand" href="#/home">
           <Logo />
@@ -103,6 +105,7 @@ export function App() {
         {route === "demo" && <GuidedDemo controlUrl={CONTROL_URL} onKey={setApiKey} />}
         {route === "healing" && <Healing controlUrl={CONTROL_URL} apiKey={apiKey} onKey={setApiKey} />}
         {route === "agent" && <AgentDemo controlUrl={CONTROL_URL} onKey={setApiKey} />}
+        {route === "design" && <SystemDesign />}
         {route === "docs" && <Docs />}
         {route === "console" && <Console controlUrl={CONTROL_URL} apiKey={apiKey} setApiKey={setApiKey} />}
       </main>
