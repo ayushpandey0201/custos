@@ -78,4 +78,5 @@ ignore = [
 "docs/presentations/build_deck.py" = ["E501"]
 "docs/presentations/content.py" = ["E501"]
 "docs/presentations/build_review2.py" = ["E501"]
+"docs/presentations/build_review2_detailed.py" = ["E501"]
 "docs/presentations/content_review2.py" = ["E501"]

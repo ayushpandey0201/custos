@@ -1,15 +1,17 @@
-"""Build the Phase-2 Review-2 deck from the department template.
+"""Build the Phase-2 Review-2 deck — 15 slides — from the department template.
 
     python docs/presentations/make_figures.py
     python docs/presentations/build_review2.py
 
-Reuses build_deck.py's template machinery — unpack, clone, reorder, fill,
-repack, place tables and figures — and supplies only the Review-2 slides. The
-Review-1 builder is untouched, so that deck stays reproducible as presented.
+Short by design: bullets, at most one line of explanation, a figure wherever a
+figure says it better. The full design is on the dashboard's "Inside Custos"
+page, and the 25-slide version is kept reproducible in
+build_review2_detailed.py for questions that go deeper.
 
-The narrative is progressive: what we committed to at Review-1, what happened
-to each commitment, what is new, and what it measured — including what did not
-get done.
+Covers every section the template requires — title, contents, abstract,
+introduction (overview, motivation, objectives, scope, SDGs, existing vs
+proposed, work plan), literature survey with gap mapping, requirements, design,
+implementation and conclusion.
 """
 
 from __future__ import annotations
@@ -27,6 +29,10 @@ from build_deck import bullet, heading, plain
 HERE = Path(__file__).parent
 ROOT = HERE.parents[1]
 
+# One size for every bullet, large enough for the back of a room.
+B = 1700
+LINE = 1500  # the single explanatory line under a heading
+
 
 def _test_count() -> int:
     """Read the number off the suite rather than hand-typing it."""
@@ -41,6 +47,11 @@ def _test_count() -> int:
 
 
 TESTS = _test_count()
+
+
+def line(text: str) -> str:
+    """The one line of explanation a slide is allowed."""
+    return plain(text, LINE, italic=True, space_before=0)
 
 
 def fill_all() -> None:
@@ -63,6 +74,8 @@ def fill_all() -> None:
             plain("CUSTOS", 3200, bold=True, align="ctr", space_before=350),
             plain("Runtime Drift Enforcement for Production ML Models",
                   1800, align="ctr", space_before=120),
+            plain("Decide  ·  Explain  ·  Record  ·  Heal", 1500, italic=True,
+                  align="ctr", space_before=120),
         ],
         [
             plain("Presented by", 1300, italic=True, align="ctr", space_before=0),
@@ -78,15 +91,14 @@ def fill_all() -> None:
         "slide2.xml",
         [heading("Table of Contents")],
         [
-            bullet("Abstract", 1700),
-            bullet("Progress since Review-1", 1700),
-            bullet("Introduction — motivation, existing vs proposed system, objectives", 1700),
-            bullet("Literature survey and research gap", 1700),
-            bullet("Requirement analysis and specification", 1700),
-            bullet("System design — architecture and decision logic", 1700),
-            bullet("Implementation — new: risk engine and admission control", 1700),
-            bullet("Results and validation", 1700),
-            bullet("Engineering rigour, self-healing, other domains, work plan, conclusion", 1700),
+            bullet("Abstract", B, space_before=0),
+            bullet("Introduction — motivation, existing vs proposed, objectives", B),
+            bullet("Literature survey and research gap", B),
+            bullet("Requirement analysis and specification", B),
+            bullet("System design — architecture and decision logic", B),
+            bullet("Implementation and results", B),
+            bullet("Governed self-healing and other domains", B),
+            bullet("Conclusion and work plan  ·  then a live demo", B),
         ],
     )
 
@@ -95,413 +107,162 @@ def fill_all() -> None:
         "slide3.xml",
         [heading("Abstract")],
         [
-            plain(
-                "Machine-learning models are validated once and then trusted indefinitely, "
-                "yet the data they see keeps changing. A drifted model fails quietly: it stays "
-                "up, answers confidently, and is wrong.",
-                1500, space_before=0,
-            ),
-            plain(
-                "Custos is a runtime trust layer between a model and the consequential action "
-                "taken on its output. On every request it fuses three signals — population "
-                "drift (PSI and KS against a fixed baseline), business policy, and per-request "
-                "risk — into a trust score and an ALLOW, REVIEW or BLOCK verdict within a 50 ms "
-                "budget, and appends each verdict to a tamper-evident hash chain. Drift is "
-                "computed offline so the request path stays fast.",
-                1500, space_before=300,
-            ),
-            plain(
-                "The detector is validated by calibration against shifts of known size, the "
-                "gateway by open-loop load testing, and the gating idea itself by a "
-                "pre-registered study on 589,186 real loans. That study found that gating on "
-                "population drift catches fewer bad loans than random review. We report it as "
-                "measured, and it now decides what we build next.",
-                1500, space_before=300,
-            ),
+            bullet("Models are validated once, then trusted forever — and fail quietly.", B,
+                   space_before=0),
+            bullet("Custos checks every model-driven action before it runs: "
+                   "ALLOW, REVIEW or BLOCK.", B),
+            bullet("It fuses policy rules, request risk and model drift — in under 50 ms.", B),
+            bullet("Every verdict is explained, and hash-chained so it can't be quietly edited.",
+                   B),
+            bullet("It repairs a broken data feed — only after a person approves.", B),
+            bullet(f"Validated: {TESTS} tests, load-tested, a pre-registered study on "
+                   "589,186 real loans.", B),
         ],
     )
 
-    # ------------------------------------------------- 4 progress since R1
-    bd.write_slide(
-        "slide10.xml",
-        [heading("Progress since Review-1")],
-        [
-            plain(
-                "Every commitment from the Review-1 closing slide, and what happened to it — "
-                "including what did not get done.",
-                1400, space_before=0,
-            ),
-        ],
-    )
-
-    # ------------------------------------------- 5 introduction: motivation
+    # -------------------------------------------- 4 overview and motivation
     bd.write_slide(
         "slide4.xml",
         [heading("Introduction — Overview and Motivation")],
-        [
-            plain(
-                "A model is validated once, deployed, and then trusted indefinitely. Drift is "
-                "checked on a quarterly report — but decisions are made every second.",
-                1400, space_before=0,
-            ),
-        ],
+        [line("Models don't crash. They go quietly wrong — Zillow wrote off $304M in one "
+              "quarter.")],
     )
 
-    # --------------------------------------- 6 existing vs proposed system
+    # ---------------------------------------------- 5 existing vs proposed
+    bd.write_slide(
+        "slide10.xml",
+        [heading("Existing System vs Proposed System")],
+        [line("Monitoring reports after the fact. Custos decides before the action.")],
+    )
+
+    # ------------------------------------- 6 objectives, scope and SDGs
     bd.write_slide(
         "slide11.xml",
-        [heading("Existing System vs Proposed System")],
-        [
-            plain(
-                "Monitoring tools sit beside the request path and report afterwards. Guardrails "
-                "block in real time, but only on content. Custos gates the decision itself on "
-                "whether the model still fits its traffic.",
-                1400, space_before=0,
-            ),
-        ],
-    )
-
-    # ------------------------------------- 7 objectives, scope and SDGs
-    bd.write_slide(
-        "slide12.xml",
         [heading("Objectives, Scope and SDGs")],
         [
-            plain("Objectives", 1600, bold=True, space_before=0),
-            bullet("O1  Put drift on the live request path, inside a 50 ms budget", 1300, space_before=120),
-            bullet("O2  Attribute drift to the individual inputs that moved", 1300, space_before=80),
-            bullet("O3  Fuse drift, policy and risk into one explainable verdict", 1300, space_before=80),
-            bullet("O4  Record every verdict in a tamper-evident chain", 1300, space_before=80),
-            bullet("O5  Stay correct under overload — refuse, never queue or change answers  (new)", 1300, space_before=80),
-            plain("Scope", 1600, bold=True, space_before=260),
-            bullet(
-                "Custos does not train, serve or retrain models. It decides, records and "
-                "proposes repairs to its own gating; humans approve.",
-                1300, space_before=120,
-            ),
-            plain("SDGs", 1600, bold=True, space_before=260),
-            bullet(
-                "9 — auditable infrastructure  ·  10 — limits systematically unfair credit "
-                "decisions  ·  16 — verifiable records for regulators",
-                1300, space_before=120,
-            ),
+            plain("Objectives", 1700, bold=True, space_before=0),
+            bullet("Check drift on the live request path, within 50 ms", 1500, space_before=100),
+            bullet("Name the inputs that moved", 1500, space_before=60),
+            bullet("One explainable verdict from policy, risk and drift", 1500, space_before=60),
+            bullet("A tamper-evident record of every verdict", 1500, space_before=60),
+            bullet("Correct under overload; repairs only with human approval", 1500,
+                   space_before=60),
+            plain("Scope", 1700, bold=True, space_before=240),
+            bullet("Gates any model-driven action. Never trains or retrains models.", 1500,
+                   space_before=100),
+            plain("SDGs", 1700, bold=True, space_before=240),
+            bullet("9 Industry & innovation  ·  10 Fairer credit  ·  16 Accountable "
+                   "institutions", 1500, space_before=100),
         ],
     )
 
-    # --------------------------------------------------- 8 literature survey
+    # ---------------------------------------------------- 7 literature survey
     bd.write_slide(
         "slide5.xml",
         [heading("Literature Survey")],
-        [
-            plain(
-                "Eight works, each checked against its published venue. New since Review-1: "
-                "Paleyes et al. (2022) and Rauba et al. (NeurIPS 2024).",
-                1300, space_before=0,
-            ),
-        ],
+        [line("Every paper detects or diagnoses. None acts on the decision in flight.")],
     )
 
-    # -------------------------------------------------- 9 gap -> objectives
+    # ------------------------------------------------------- 8 research gap
     bd.write_slide(
-        "slide13.xml",
-        [heading("Research Gap and Objectives")],
-        [
-            plain(
-                "Every work stops at detection or repairs the model afterwards. None gates the "
-                "decision in flight on whether the model still fits its traffic.",
-                1400, space_before=0,
-            ),
-        ],
+        "slide12.xml",
+        [heading("Research Gap → Objectives")],
+        [line("Each gap the survey found maps to one objective.")],
     )
 
-    # --------------------------------------------------- 10 requirements
+    # ------------------------------------------------------- 9 requirements
     bd.write_slide(
         "slide6.xml",
         [heading("Requirement Analysis and Specification")],
-        [
-            plain(
-                "Review-1's requirements plus three new ones (marked). NFR7 is what the "
-                "load test forced: overload must be refused, never queued.",
-                1300, space_before=0,
-            ),
-        ],
+        [line("What Custos must do — and the guarantees it must keep while doing it.")],
     )
 
-    # ------------------------------------------------- 11 architecture
+    # ------------------------------------------------------ 10 architecture
     bd.write_slide(
         "slide7.xml",
         [heading("System Design — Architecture")],
-        [
-            plain(
-                "Two planes: the request path does the minimum, statistics run offline. "
-                "New: all three engines are live — risk is no longer a stub.",
-                1400, space_before=0,
-            ),
-        ],
+        [line("The hot path answers every request; slow work runs offline. Full design: "
+              "“Inside Custos”.")],
     )
 
-    # ------------------------------------------------- 12 decision logic
+    # ---------------------------------------------------- 11 decision logic
     bd.write_slide(
-        "slide14.xml",
+        "slide13.xml",
         [heading("System Design — Decision Logic")],
-        [
-            plain(
-                "Seven rules, evaluated in order. New: the drift floor — a significantly "
-                "drifted model is never auto-approved. Slide 20 tests it on real data.",
-                1400, space_before=0,
-            ),
-        ],
+        [line("Rules before score: a veto always wins; a drifted model never auto-approves.")],
     )
 
-    # ------------------------------------------- 13 implementation status
+    # ---------------------------------------------------- 12 implementation
     bd.write_slide(
         "slide8.xml",
-        [heading("Implementation — Status")],
-        [
-            plain(
-                "Eleven of twelve components complete. New since Review-1 are marked.",
-                1300, space_before=0,
-            ),
-        ],
+        [heading("Implementation")],
+        [line(f"{TESTS} tests  ·  p99 31 ms at 200 req/s  ·  0 verdicts changed by overload")],
     )
 
-    # ------------------------------------------------------ 14 risk engine
+    # ------------------------------------------------------- 13 field result
+    bd.write_slide(
+        "slide14.xml",
+        [heading("Results — Field Study on Real Loans")],
+        [line("Pre-registered. Drift gating lost to random review — so the next gate ranks "
+              "by risk.")],
+    )
+
+    # --------------------------------------- 14 self-healing and domains
     bd.write_slide(
         "slide15.xml",
-        [heading("Implementation — Risk Engine (new)")],
-        [
-            plain(
-                "Drift asks whether the model still fits. Policy asks whether the action is "
-                "allowed. Risk asks whether this one request is unusual — and abstains rather "
-                "than guess when it cannot tell.",
-                1400, space_before=0,
-            ),
-        ],
+        [heading("Governed Self-Healing — and Beyond Lending")],
+        [line("Same engine, any domain: AI agents · pricing · triage · hiring · claims.")],
     )
 
-    # ----------------------------------------------- 15 admission control
-    bd.write_slide(
-        "slide16.xml",
-        [heading("Implementation — Admission Control (new)")],
-        [
-            plain(
-                "At Review-1, overload made the gateway queue, collapse and change its "
-                "answers. It now refuses what it cannot serve, and under overload zero "
-                "verdicts change (was up to 985 per phase).",
-                1400, space_before=0,
-            ),
-        ],
-    )
-
-    # --------------------------------------------------- 16 live demo
-    bd.write_slide(
-        "slide17.xml",
-        [heading("Results — Live Demonstration")],
-        [
-            plain(
-                "Same five acts as Review-1, all three signals live. Act 4 is now held by the "
-                "drift floor, with the reason stated in plain language.",
-                1400, space_before=0,
-            ),
-        ],
-    )
-
-    # --------------------------------------------------- 17 attribution
-    bd.write_slide(
-        "slide18.xml",
-        [heading("Results — Drift Attribution")],
-        [
-            plain(
-                "Severity says the model moved; attribution says which input moved — the "
-                "difference between a population shift and a broken upstream feed.",
-                1400, space_before=0,
-            ),
-        ],
-    )
-
-    # --------------------------------------------------- 18 calibration
-    bd.write_slide(
-        "slide19.xml",
-        [heading("Validation — Calibration")],
-        [
-            plain(
-                "Custos is a measuring instrument, so it is validated like one: shifts of a "
-                "known size in, readings checked against the known answer.",
-                1400, space_before=0,
-            ),
-        ],
-    )
-
-    # ------------------------------------------------- 19 field validation
-    bd.write_slide(
-        "slide20.xml",
-        [heading("Validation — Field Study: How It Was Run")],
-        [
-            plain(
-                "Calibration proves the detector is correct. A field study tests whether gating "
-                "on drift actually helps: 2.26 million real Lending Club loans, of which 589,186 "
-                "matured loans from 2012–2015 were evaluated against a model trained on 2007–2011.",
-                1400, space_before=0,
-            ),
-            bullet(
-                "Pre-registered — hypotheses, metrics and what each outcome would mean were "
-                "committed and pushed before the dataset was even downloaded.",
-                1300, space_before=300,
-            ),
-            bullet(
-                "Leakage and censoring enforced in code — only fields known when the loan was "
-                "made, and only loans whose term had ended, so outcomes are real.",
-                1300, space_before=160,
-            ),
-            bullet(
-                "Seven review strategies compared at the same review budget, from random review "
-                "to the model's own risk score to Custos's drift gating.",
-                1300, space_before=160,
-            ),
-            bullet(
-                "Two bugs caught before the real run — dates sorted as text, and a harm measure "
-                "that could not see miscalibration. Both fixed, both recorded.",
-                1300, space_before=160,
-            ),
-        ],
-    )
-
-    # -------------------------------------------------- 20 field result
-    bd.write_slide(
-        "slide23.xml",
-        [heading("Field Result — Our Core Assumption Failed")],
-        [
-            plain(
-                "Asked to pick 5% of 589,186 real loans for human review, gating on population "
-                "drift — how Custos works today — caught fewer defaults than picking at random. "
-                "The model's own risk score caught 2.1× random.",
-                1400, space_before=0,
-            ),
-        ],
-    )
-
-    # ------------------------------------------------------ 21 defects
-    bd.write_slide(
-        "slide21.xml",
-        [heading("Engineering Rigour — Problems We Found in Our Own System")],
-        [
-            plain(
-                "Seven problems, found by our own tooling. The largest: real data contradicted "
-                "the assumption the gating was built on.",
-                1300, space_before=0,
-            ),
-        ],
-    )
-
-    # ------------------------------------------------- 22 self-healing
-    bd.write_slide(
-        "slide24.xml",
-        [heading("Governed Self-Healing — Built")],
-        [
-            plain(
-                "Drift is a poor per-decision gate but a strong alarm, so Custos now acts on it: "
-                "it tells a broken data feed from a real population shift, proposes a repair, "
-                "shadow-tests it on real decisions, and applies it only when a named person "
-                "approves. Domain-agnostic — any model whose output triggers an action.",
-                1300, space_before=0,
-            ),
-        ],
-    )
-
-    # ------------------------------------------------- 23 beyond lending
-    bd.write_slide(
-        "slide25.xml",
-        [heading("Beyond Lending — Where Custos Applies")],
-        [
-            plain(
-                "Custos gates any model whose output triggers an action that can be allowed, "
-                "held for a person, or blocked. A new domain is configuration — inputs, context, "
-                "rules, weights — not code. Two are demonstrated; the rest are stated, not claimed.",
-                1300, space_before=0,
-            ),
-        ],
-    )
-
-    # ----------------------------------------------------- 24 work plan
-    bd.write_slide(
-        "slide22.xml",
-        [heading("Work Plan to the Final Review")],
-        [plain("What remains, and what each item depends on.", 1400, space_before=0)],
-    )
-
-    # ------------------------------------------------- 22 conclusion
+    # ------------------------------------------------------- 15 conclusion
     bd.write_slide(
         "slide9.xml",
-        [heading("Conclusion")],
+        [heading("Conclusion and Work Plan")],
         [
-            plain(
-                f"{TESTS} tests passing · latency budget holds to 200 req/s, double Review-1 · "
-                "overload no longer changes verdicts · all three trust signals live · "
-                "governed self-healing built.",
-                1400, bold=True, space_before=0,
-            ),
-            plain(
-                "And the hardest result: on 589,186 real loans, gating on drift did worse than "
-                "random review. Pre-registered, reported as measured — and it now decides what "
-                "we build next.",
-                1300, space_before=200,
-            ),
+            bullet("Custos gates any model-driven action — decides, explains, records, heals.",
+                   1600, space_before=0),
+            bullet("Next: risk-ranked review · a second dataset · scale-out on PostgreSQL.",
+                   1600, space_before=120),
+            bullet("Now: a live demo — three scenarios, two domains.", 1600, space_before=120),
         ],
     )
 
 
 # --- tables and figures ------------------------------------------------------
 
+# (spec, top in inches, font in points)
 TABLE_SLIDES = {
-    "slide10.xml": (c2.PROGRESS, 2.55),
-    "slide6.xml": (c2.REQUIREMENTS, 2.55),
-    "slide8.xml": (c2.MODULE_STATUS, 2.45),
-    "slide15.xml": (c2.RISK_COMPONENTS, 2.75),
-    "slide21.xml": (c2.DEFECTS, 2.55),
-    "slide22.xml": (c2.WORK_PLAN, 2.40),
-    "slide25.xml": (c2.DOMAINS, 2.55),
-    "slide9.xml": (c2.contributions(TESTS), 3.10),
+    "slide6.xml": (c2.REQUIREMENTS_SHORT, 2.30, 14.0),
+    "slide8.xml": (c2.STATUS_SHORT, 2.30, 14.0),
+    "slide9.xml": (c2.CONTRIBUTIONS_SHORT, 3.60, 13.0),
 }
 
 FIGURE_SLIDES = {
-    "slide4.xml": ("problem_timeline.png", 2.85, 11.0),
-    "slide11.xml": ("on_path.png", 2.75, 10.6),
-    "slide13.xml": ("gap_map.png", 2.85, 11.0),
-    "slide7.xml": ("architecture.png", 2.95, 11.0),
-    "slide14.xml": ("decision_flow.png", 3.00, 11.0),
-    "slide16.xml": ("load_before_after.png", 2.75, 11.0),
-    "slide17.xml": ("demo_trajectory.png", 2.80, 11.0),
-    "slide18.xml": ("drift_attribution.png", 2.90, 11.0),
-    "slide19.xml": ("calibration_curve.png", 2.75, 11.0),
-    "slide23.xml": ("gating_results.png", 2.75, 11.0),
-    "slide24.xml": ("self_healing_loop.png", 2.85, 11.0),
+    "slide4.xml": ("problem_timeline.png", 2.45, 11.0),
+    "slide10.xml": ("on_path.png", 2.40, 10.6),
+    "slide12.xml": ("gap_map.png", 2.45, 11.0),
+    "slide7.xml": ("architecture.png", 2.45, 11.0),
+    "slide13.xml": ("decision_flow.png", 2.60, 11.0),
+    "slide14.xml": ("gating_results.png", 2.40, 11.0),
+    "slide15.xml": ("self_healing_loop.png", 2.80, 11.0),
 }
 
 ORDER = [
     "slide1.xml",   #  1 title
     "slide2.xml",   #  2 contents
     "slide3.xml",   #  3 abstract
-    "slide10.xml",  #  4 progress since Review-1        [table]
-    "slide4.xml",   #  5 introduction — motivation       [figure]
-    "slide11.xml",  #  6 existing vs proposed           [figure]
-    "slide12.xml",  #  7 objectives, scope, SDGs
-    "slide5.xml",   #  8 literature survey              [template table]
-    "slide13.xml",  #  9 research gap -> objectives     [figure]
-    "slide6.xml",   # 10 requirements                   [table]
-    "slide7.xml",   # 11 architecture                   [figure]
-    "slide14.xml",  # 12 decision logic                 [figure]
-    "slide8.xml",   # 13 implementation status          [table]
-    "slide15.xml",  # 14 risk engine                    [table]
-    "slide16.xml",  # 15 admission control              [figure]
-    "slide17.xml",  # 16 live demo                      [figure]
-    "slide18.xml",  # 17 drift attribution              [figure]
-    "slide19.xml",  # 18 calibration                    [figure]
-    "slide20.xml",  # 19 field study: how it was run
-    "slide23.xml",  # 20 field result                   [figure]
-    "slide21.xml",  # 21 problems found                 [table]
-    "slide24.xml",  # 22 governed self-healing          [figure]
-    "slide25.xml",  # 23 beyond lending: domains        [table]
-    "slide22.xml",  # 24 work plan                      [table]
-    "slide9.xml",   # 25 conclusion + contributions     [table]
+    "slide4.xml",   #  4 overview and motivation        [figure]
+    "slide10.xml",  #  5 existing vs proposed           [figure]
+    "slide11.xml",  #  6 objectives, scope, SDGs
+    "slide5.xml",   #  7 literature survey              [template table]
+    "slide12.xml",  #  8 research gap -> objectives     [figure]
+    "slide6.xml",   #  9 requirements                   [table]
+    "slide7.xml",   # 10 architecture                   [figure]
+    "slide13.xml",  # 11 decision logic                 [figure]
+    "slide8.xml",   # 12 implementation status          [table]
+    "slide14.xml",  # 13 field study result             [figure]
+    "slide15.xml",  # 14 self-healing + domains         [figure]
+    "slide9.xml",   # 15 conclusion, work plan, team    [table]
 ]
 
 
@@ -515,7 +276,7 @@ def main() -> None:
     bd.fill_all = fill_all
     # The template's own literature table is filled by build_deck.finish().
     bd.content = SimpleNamespace(
-        LITERATURE=c2.LITERATURE, LITERATURE_COLUMNS=c2.LITERATURE_COLUMNS
+        LITERATURE=c2.LITERATURE_SHORT, LITERATURE_COLUMNS=c2.LITERATURE_COLUMNS
     )
     bd.main()
     print(f"test count on slides: {TESTS}")
